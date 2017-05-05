@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Debate Timer</string>
+    <string name="reset">Reset</string>
+    <string name="start">Start</string>
+    <string name="pause">Pause</string>
+    <string name="resume">Resume</string>
+    <string name="timer_at_start_m" translatable="false">0</string>
+    <string name="timer_at_start_s" translatable="false">00</string>
+    <string name="timer_display_count_up">elapsed (tap for remaining)</string>
+    <string name="timer_display_count_down">remaining (tap for elapsed)</string>
+    <string name="starting_text">Select a time to begin</string>
+    <string name="exit_question">Are you sure you want to exit?</string>
+    <string name="poi_bell" formatted="false">Bell at %s</string>
+    <string name="poi_bells" formatted="false">Bells at %s</string>
+    <string name="debate_bell_on_off">Debate Bell On/Off</string>
+</resources>
