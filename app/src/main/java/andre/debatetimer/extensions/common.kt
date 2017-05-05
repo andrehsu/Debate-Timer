@@ -11,7 +11,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.os.AsyncTask
 import android.support.design.widget.Snackbar
-import android.util.Log
 import android.view.View
 import android.view.ViewPropertyAnimator
 import android.widget.EditText
@@ -20,8 +19,6 @@ import java.util.*
 /**
  * Created by Andre on 3/25/2017.
  */
-private var clipboard: ClipboardManager? = null
-
 object EnvVars {
 	var shortAnimTime: Long = -1
 		private set
@@ -47,15 +44,11 @@ object EnvVars {
 	}
 }
 
+private var clipboard: ClipboardManager? = null
 
 fun copyText(view: View, label: String, textToCopy: String, textToShow: String? = null): Boolean {
-	val clipboard = clipboard
-	if (clipboard != null) {
-		clipboard.primaryClip = ClipData.newPlainText(label, textToCopy)
-		Snackbar.make(view, (textToShow ?: textToCopy) + " copied", Snackbar.LENGTH_SHORT).show()
-	} else {
-		Log.d("copyText()", "Clipboard manager not initialized")
-	}
+	clipboard!!.primaryClip = ClipData.newPlainText(label, textToCopy)
+	Snackbar.make(view, (textToShow ?: textToCopy) + " copied", Snackbar.LENGTH_SHORT).show()
 	return true
 }
 
