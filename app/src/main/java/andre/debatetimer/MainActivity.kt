@@ -22,10 +22,6 @@ import kotlin.properties.Delegates
 
 
 class MainActivity : AppCompatActivity(), DebugLogger {
-	companion object {
-		private val LOG_TAG = MainActivity::class.java.simpleName
-	}
-	
 	interface HasTimerOption {
 		val timerOption: TimerOption
 	}
