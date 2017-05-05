@@ -34,11 +34,10 @@ object EnvVars {
 		applicationContext = activity.applicationContext
 		with(applicationContext) {
 			clipboard = getSystemService(android.content.Context.CLIPBOARD_SERVICE) as ClipboardManager
-			kotlin.with(resources) {
+			with(resources) {
 				shortAnimTime = getInteger(android.R.integer.config_shortAnimTime).toLong()
 				mediumAnimTime = getInteger(android.R.integer.config_mediumAnimTime).toLong()
 				longAnimTime = getInteger(android.R.integer.config_longAnimTime).toLong()
-				
 			}
 		}
 	}
