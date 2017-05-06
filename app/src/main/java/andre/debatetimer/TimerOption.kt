@@ -5,7 +5,6 @@ import andre.debatetimer.extensions.DebateBell.ONCE
 import andre.debatetimer.extensions.invoke
 import andre.debatetimer.extensions.secondsToString
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.debug
 
 /**
  * Created by Andre on 5/5/2017.
@@ -32,8 +31,7 @@ enum class TimerOption(val seconds: Int, vararg bellsSinceStart: Pair<Int, Debat
 				"420" -> SEVEN_MINUTES
 				"480" -> EIGHT_MINUTES
 				else -> {
-					debug { "Invalid key ($tag) passed to parseKey" }
-					SEVEN_MINUTES
+					error { "Invalid key ($tag) passed to parseKey" }
 				}
 			}
 		}
