@@ -16,10 +16,12 @@ import android.view.MenuItem
 import android.widget.Button
 import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.debug
 import kotlin.properties.Delegates
 
 
-class MainActivity : AppCompatActivity(), DebugLogger {
+class MainActivity : AppCompatActivity(), AnkoLogger {
 	//<editor-fold desc="Stete classes">
 	interface State
 	
