@@ -1,6 +1,10 @@
 package andre.debatetimer
 
-import andre.debatetimer.extensions.*
+import andre.debatetimer.extensions.DebateBell
+import andre.debatetimer.extensions.invoke
+import andre.debatetimer.extensions.secondsToString
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.debug
 
 /**
  * Created by Andre on 5/5/2017.
@@ -16,7 +20,7 @@ enum class TimerOption(val seconds: Int, vararg bellsSinceStart: Pair<Int, Debat
 	
 	val bellsSinceStart = bellsSinceStart.toMap()
 	
-	companion object : DebugLogger {
+	companion object : AnkoLogger {
 		fun parseKey(tag: String): TimerOption {
 			return when (tag) {
 				"3" -> THREE_SECONDS
