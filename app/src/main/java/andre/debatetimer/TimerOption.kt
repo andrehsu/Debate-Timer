@@ -1,9 +1,6 @@
 package andre.debatetimer
 
-import andre.debatetimer.extensions.DebateBell
-import andre.debatetimer.extensions.DebugLogger
-import andre.debatetimer.extensions.invoke
-import andre.debatetimer.extensions.secondsToString
+import andre.debatetimer.extensions.*
 
 /**
  * Created by Andre on 5/5/2017.

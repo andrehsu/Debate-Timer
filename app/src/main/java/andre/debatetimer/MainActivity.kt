@@ -1,7 +1,5 @@
 package andre.debatetimer
 
-import andre.debatetimer.MainActivity.TimerDisplayMode.COUNT_DOWN
-import andre.debatetimer.MainActivity.TimerDisplayMode.COUNT_UP
 import andre.debatetimer.extensions.*
 import andre.debatetimer.extensions.EnvVars.init
 import andre.debatetimer.extensions.EnvVars.longAnimTime
@@ -22,34 +20,26 @@ import kotlin.properties.Delegates
 
 
 class MainActivity : AppCompatActivity(), DebugLogger {
-	interface HasTimerOption {
+	//<editor-fold desc="Stete classes">
+	interface State
+	
+	interface HasTimerOption : State {
 		val timerOption: TimerOption
 	}
 	
-	interface State
 	object WaitingToBegin : State
+	
 	data class WaitingToStart(override val timerOption: TimerOption) : State, HasTimerOption
+	
 	data class TimerStarted(override val timerOption: TimerOption, val timer: DebateTimer, val running: Boolean = false) : State, HasTimerOption
+	//</editor-fold>
 	
-	enum class TimerDisplayMode {
-		COUNT_DOWN, COUNT_UP
-	}
-	
-	class ExitDialogFragment : DialogFragment() {
-		override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-			return AlertDialog.Builder(activity)
-					.setTitle(R.string.exit_question)
-					.setPositiveButton(android.R.string.yes, { _, _ -> activity.finish() })
-					.setNegativeButton(android.R.string.no, { _, _ -> dialog.cancel() })
-					.create()
-		}
-	}
-	
+	//<editor-fold desc="Fields">
 	private lateinit var vibrator: Vibrator
 	private lateinit var buttons: List<Button>
 	private lateinit var timerTexts: List<TextView>
 	private lateinit var action_debateBell: MenuItem
-	
+	private var timerDisplayCountUp = false
 	private var state: State by Delegates.observable(WaitingToBegin as State) { _, oldValue, newValue ->
 		require(newValue !is WaitingToBegin)
 		
@@ -64,30 +54,34 @@ class MainActivity : AppCompatActivity(), DebugLogger {
 			oldValue.timer.stop()
 		}
 	}
-	private var timerDisplayMode = COUNT_DOWN
+	//</editor-fold>
 	
+	//<editor-fold desc="Activity callbacks">
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_main)
 		
+		//<editor-fold desc="Field initialization">
 		init(this)
-		
-		if (BuildConfig.DEBUG) {
-			bt_3sec.setVisible()
-		}
 		
 		vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 		buttons = listOf(bt_3sec, bt_2min, bt_3min, bt_4min, bt_5min, bt_7min, bt_8min)
 		timerTexts = listOf(tv_timerNegative, tv_timer_m, tv_timer_s, tv_timer_colon)
+		//</editor-fold>
 		
+		//<editor-fold desc="Show 3 second button if debugging">
+		if (BuildConfig.DEBUG) {
+			bt_3sec.setVisible()
+		}
+		//</editor-fold>
+		
+		//<editor-fold desc="StartPause button onClick">
 		bt_startPause.setOnClickListener {
 			bt_startPause crossfadeTo bt_startPause withDuration longAnimTime
 			val state = state
 			when (state) {
 				is WaitingToStart -> {
 					if (state is HasTimerOption) {
-						onTap()
-						
 						val timer = object : DebateTimer(state.timerOption) {
 							override fun onSecond() = refreshTimer()
 						}
@@ -111,7 +105,9 @@ class MainActivity : AppCompatActivity(), DebugLogger {
 				}
 			}
 		}
+		//</editor-fold>
 		
+		//<editor-fold desc="Time buttons onClick">
 		clearButtonsSelection()
 		buttons.forEach {
 			it.setOnClickListener { view ->
@@ -136,16 +132,29 @@ class MainActivity : AppCompatActivity(), DebugLogger {
 				}
 			}
 		}
+		//</editor-fold>
 		
+		//<editor-fold desc="Set on toggle for elapsed/ remaining">
 		cl_timer.setOnClickListener {
-			timerDisplayMode = if (timerDisplayMode == COUNT_UP) COUNT_DOWN else COUNT_UP
-			if (timerDisplayMode == COUNT_UP) {
+			timerDisplayCountUp = !timerDisplayCountUp
+			if (timerDisplayCountUp) {
 				tv_timerDisplayMode.text = getString(R.string.timer_display_count_up)
 			} else {
 				tv_timerDisplayMode.text = getString(R.string.timer_display_count_down)
 			}
 			refreshTimer()
 			refreshBellLabel()
+		}
+		//</editor-fold>
+	}
+	
+	class ExitDialogFragment : DialogFragment() {
+		override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+			return AlertDialog.Builder(activity)
+					.setTitle(R.string.exit_question)
+					.setPositiveButton(android.R.string.yes, { _, _ -> activity.finish() })
+					.setNegativeButton(android.R.string.no, { _, _ -> dialog.cancel() })
+					.create()
 		}
 	}
 	
@@ -178,7 +187,9 @@ class MainActivity : AppCompatActivity(), DebugLogger {
 			else -> super.onOptionsItemSelected(item)
 		}
 	}
+	//</editor-fold>
 	
+	//<editor-fold desc="UI fields">
 	private var ui_minutes: Int by Delegates.observable(0) { _, oldValue, minutes ->
 		if (oldValue != minutes) {
 			tv_timer_m.text = minutes.toString()
@@ -209,12 +220,14 @@ class MainActivity : AppCompatActivity(), DebugLogger {
 			}
 		}
 	}
+	//</editor-fold>
 	
+	//<editor-fold desc="UI functions">
 	private fun refreshTimer() {
 		debug { "refreshTimer()" }
 		val state = state
 		if (state is WaitingToStart) {
-			if (timerDisplayMode == COUNT_UP) {
+			if (timerDisplayCountUp) {
 				ui_minutes = 0
 				ui_seconds = 0
 			} else {
@@ -225,7 +238,7 @@ class MainActivity : AppCompatActivity(), DebugLogger {
 			ui_isOvertime = false
 		} else if (state is TimerStarted) {
 			val timer = state.timer
-			if (timerDisplayMode == COUNT_UP) {
+			if (timerDisplayCountUp) {
 				ui_minutes = timer.minutesSinceStart
 				ui_seconds = timer.secondsSinceStart
 				ui_isNegative = false
@@ -241,31 +254,29 @@ class MainActivity : AppCompatActivity(), DebugLogger {
 	
 	private fun refreshBellLabel() {
 		val state = state
-		if (state is HasTimerOption) {
+		if (debateBellEnabled && state is HasTimerOption) {
 			val timerOption = state.timerOption
-			if (debateBellEnabled) {
-				if (timerOption.countUpPoiString.isEmpty()) {
-					tv_bellsAt.setInvisible()
-				} else {
-					tv_bellsAt.setVisible()
-					
-					val format = if (timerOption.bellsSinceStart.count() == 1) {
-						getString(R.string.poi_bell)
-					} else {
-						getString(R.string.poi_bells)
-					}
-					
-					val string = if (timerDisplayMode == COUNT_UP) {
-						timerOption.countUpPoiString
-					} else {
-						timerOption.countDownPoiString
-					}
-					
-					tv_bellsAt.text = format.format(string)
-				}
-			} else {
+			if (timerOption.countUpPoiString.isEmpty()) {
 				tv_bellsAt.setInvisible()
+			} else {
+				tv_bellsAt.setVisible()
+				
+				val format = if (timerOption.bellsSinceStart.count() == 1) {
+					getString(R.string.poi_bell)
+				} else {
+					getString(R.string.poi_bells)
+				}
+				
+				val string = if (timerDisplayCountUp) {
+					timerOption.countUpPoiString
+				} else {
+					timerOption.countDownPoiString
+				}
+				
+				tv_bellsAt.text = format.format(string)
 			}
+		} else {
+			tv_bellsAt.setInvisible()
 		}
 	}
 	
@@ -279,4 +290,5 @@ class MainActivity : AppCompatActivity(), DebugLogger {
 			it.setTextColor(getColor(R.color.buttonUnselected))
 		}
 	}
+	//</editor-fold>
 }
