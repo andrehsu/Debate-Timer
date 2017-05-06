@@ -8,7 +8,7 @@ import android.util.Log
  */
 interface DebugLogger
 
-inline val DebugLogger.LOG_TAG: String
+inline private val DebugLogger.LOG_TAG: String
 	get() = this::class.java.simpleName
 
 fun DebugLogger.debug(msg: () -> String) {
