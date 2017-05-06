@@ -6,10 +6,10 @@ import android.util.Log
 /**
  * Created by Andre on 5/6/2017.
  */
-interface DebugLogger {
-	val LOG_TAG: String
-		get() = this::class.java.simpleName
-}
+interface DebugLogger
+
+inline val DebugLogger.LOG_TAG: String
+	get() = this::class.java.simpleName
 
 fun DebugLogger.debug(msg: () -> String) {
 	if (BuildConfig.DEBUG) {
