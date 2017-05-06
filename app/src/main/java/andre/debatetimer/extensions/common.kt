@@ -9,7 +9,6 @@ import android.animation.AnimatorListenerAdapter
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.os.AsyncTask
 import android.support.design.widget.Snackbar
 import android.view.View
 import android.view.ViewPropertyAnimator
@@ -86,8 +85,6 @@ inline fun <K, V> SortedMap<K, V>.unmodifiable(): SortedMap<K, V> = Collections.
 operator fun String.invoke(start: Int = 0, end: Int = length): String = substring(start, if (end >= 0) end else end + length)
 
 operator fun String.invoke(start: Int = 0, end: Int = length, step: Int): String = slice(start..(if (end >= 0) end else end + length) step step)
-
-typealias AsyncTask = AsyncTask<Unit, Unit, Unit>
 
 fun ViewPropertyAnimator.setOnEnd(onEnd: (Animator?) -> Unit): ViewPropertyAnimator {
 	setListener(object : AnimatorListenerAdapter() {
