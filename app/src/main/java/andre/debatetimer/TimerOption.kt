@@ -1,6 +1,7 @@
 package andre.debatetimer
 
 import andre.debatetimer.extensions.DebateBell
+import andre.debatetimer.extensions.DebateBell.ONCE
 import andre.debatetimer.extensions.invoke
 import andre.debatetimer.extensions.secondsToString
 import org.jetbrains.anko.AnkoLogger
@@ -10,13 +11,13 @@ import org.jetbrains.anko.debug
  * Created by Andre on 5/5/2017.
  */
 enum class TimerOption(val seconds: Int, vararg bellsSinceStart: Pair<Int, DebateBell>) {
-	THREE_SECONDS(3, 1 to DebateBell.ONCE),
+	THREE_SECONDS(3, 1 to ONCE),
 	TWO_MINUTES(120),
 	THREE_MINUTES(180),
 	FOUR_MINUTES(240),
-	FIVE_MINUTES(300, 60 to DebateBell.ONCE, 240 to DebateBell.ONCE),
-	SEVEN_MINUTES(420, 60 to DebateBell.ONCE, 360 to DebateBell.ONCE),
-	EIGHT_MINUTES(480, 60 to DebateBell.ONCE, 420 to DebateBell.ONCE);
+	FIVE_MINUTES(300, 60 to ONCE, 240 to ONCE),
+	SEVEN_MINUTES(420, 60 to ONCE, 360 to ONCE),
+	EIGHT_MINUTES(480, 60 to ONCE, 420 to ONCE);
 	
 	val bellsSinceStart = bellsSinceStart.toMap()
 	
@@ -38,8 +39,8 @@ enum class TimerOption(val seconds: Int, vararg bellsSinceStart: Pair<Int, Debat
 		}
 	}
 	
-	val countUpPoiString = bellsSinceStart.filter { it.second == DebateBell.ONCE }.map { secondsToString(it.first) }.toString()(1, -1)
-	val countDownPoiString = bellsSinceStart.filter { it.second == DebateBell.ONCE }.map { secondsToString(seconds - it.first) }.toString()(1, -1)
+	val countUpPoiString = bellsSinceStart.filter { it.second == ONCE }.map { secondsToString(it.first) }.toString()(1, -1)
+	val countDownPoiString = bellsSinceStart.filter { it.second == ONCE }.map { secondsToString(seconds - it.first) }.toString()(1, -1)
 	
 	val secondsOnly = seconds % 60
 	val minutesOnly = seconds / 60
