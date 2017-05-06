@@ -173,7 +173,7 @@ class MainActivity : AppCompatActivity(), DebugLogger {
 	}
 	
 	override fun onOptionsItemSelected(item: MenuItem): Boolean {
-		return when (item.itemId) {
+		when (item.itemId) {
 			R.id.action_debate_bell -> {
 				debateBellEnabled = !debateBellEnabled
 				if (debateBellEnabled) {
@@ -182,10 +182,10 @@ class MainActivity : AppCompatActivity(), DebugLogger {
 					action_debateBell.icon = getDrawable(R.drawable.ic_notifications_off_white_24dp)
 				}
 				refreshBellLabel()
-				true
 			}
-			else -> super.onOptionsItemSelected(item)
+			else -> return super.onOptionsItemSelected(item)
 		}
+		return true
 	}
 	//</editor-fold>
 	
