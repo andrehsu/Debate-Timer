@@ -108,14 +108,16 @@ class MainActivity : AppCompatActivity() {
 		//</editor-fold>
 		
 		//<editor-fold desc="Time buttons onClick">
-		clearButtonsSelection()
 		buttons.forEach {
 			it.setOnClickListener { view ->
 				val state = state
 				if (state !is TimerStarted || state is TimerStarted && !state.running) {
 					onTap()
 					
-					clearButtonsSelection()
+					buttons.forEach {
+						it.alpha = 0.54f
+						it.setTextColor(getColor(R.color.buttonUnselected))
+					}
 					
 					view as Button
 					view.alpha = 1.0f
@@ -281,13 +283,6 @@ class MainActivity : AppCompatActivity() {
 	
 	private fun onTap() {
 		vibrator.vibrate(30)
-	}
-	
-	private fun clearButtonsSelection() {
-		buttons.forEach {
-			it.alpha = 0.54f
-			it.setTextColor(getColor(R.color.buttonUnselected))
-		}
 	}
 	//</editor-fold>
 }
