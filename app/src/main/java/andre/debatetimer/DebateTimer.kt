@@ -2,19 +2,16 @@ package andre.debatetimer
 
 import andre.debatetimer.extensions.DebateBell
 import andre.debatetimer.extensions.abs
-import android.os.CountDownTimer
 
 /**
  * Created by Andre on 5/4/2017.
  */
 abstract class DebateTimer(timerOption: TimerOption) {
-	private val countDownTimer: CountDownTimer
+	private val timer: Timer
 	
 	init {
-		countDownTimer = object : CountDownTimer(Long.MAX_VALUE - 1, 1000) {
-			override fun onFinish() {}
-			
-			override fun onTick(millisUntilFinished: Long) {
+		timer = object : Timer(1000) {
+			override fun onTick() {
 				if (!paused) {
 					countUpSeconds++
 					countDownSeconds--
@@ -57,7 +54,7 @@ abstract class DebateTimer(timerOption: TimerOption) {
 	
 	fun stop() {
 		pause()
-		countDownTimer.cancel()
+		timer.cancel()
 	}
 	
 	val bellsSinceStart = timerOption.bellsSinceStart
