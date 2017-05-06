@@ -16,12 +16,10 @@ import android.view.MenuItem
 import android.widget.Button
 import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.debug
 import kotlin.properties.Delegates
 
 
-class MainActivity : AppCompatActivity(), AnkoLogger {
+class MainActivity : AppCompatActivity() {
 	//<editor-fold desc="Stete classes">
 	interface State
 	
@@ -226,7 +224,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 	
 	//<editor-fold desc="UI functions">
 	private fun refreshTimer() {
-		debug { "refreshTimer()" }
 		val state = state
 		if (state is WaitingToStart) {
 			if (timerDisplayCountUp) {
