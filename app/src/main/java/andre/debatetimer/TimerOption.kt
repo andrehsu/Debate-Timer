@@ -2,44 +2,42 @@ package andre.debatetimer
 
 import andre.debatetimer.extensions.DebateBell
 import andre.debatetimer.extensions.DebateBell.ONCE
-import andre.debatetimer.extensions.invoke
 import andre.debatetimer.extensions.secondsToString
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.debug
 
 /**
  * Created by Andre on 5/5/2017.
  */
-enum class TimerOption(val seconds: Int, vararg bellsSinceStart: Pair<Int, DebateBell>) {
-	THREE_SECONDS(3, 1 to ONCE),
-	TWO_MINUTES(120),
-	THREE_MINUTES(180),
-	FOUR_MINUTES(240),
-	FIVE_MINUTES(300, 60 to ONCE, 240 to ONCE),
-	SEVEN_MINUTES(420, 60 to ONCE, 360 to ONCE),
-	EIGHT_MINUTES(480, 60 to ONCE, 420 to ONCE);
-	
-	val bellsSinceStart = bellsSinceStart.toMap()
-	
+class TimerOption(val seconds: Int, val bellsSinceStart: Map<Int, DebateBell>) {
 	companion object : AnkoLogger {
-		fun parseKey(tag: String): TimerOption {
-			return when (tag) {
-				"3" -> THREE_SECONDS
-				"120" -> TWO_MINUTES
-				"180" -> THREE_MINUTES
-				"240" -> FOUR_MINUTES
-				"300" -> FIVE_MINUTES
-				"420" -> SEVEN_MINUTES
-				"480" -> EIGHT_MINUTES
-				else -> {
-					error { "Invalid key ($tag) passed to parseKey" }
+		private val DEFAULT = TimerOption(420, mapOf(60 to ONCE, 360 to ONCE))
+		
+		fun parseTag(tag: String): TimerOption {
+			val noSpace = tag.filterNot { it == ' ' }
+			val tokens = noSpace.split(';')
+			
+			return try {
+				val seconds = tokens[0].toInt()
+				
+				val bells = if (tokens[1].isEmpty()) {
+					mapOf()
+				} else {
+					val bellTokens = tokens[1].split(',')
+					bellTokens.map { it.toInt() to ONCE }.toMap()
 				}
+				
+				TimerOption(seconds, bells)
+			} catch(e: RuntimeException) {
+				debug { "Error occurred while parsing \"$tag\" for TimerOption" }
+				DEFAULT
 			}
 		}
 	}
 	
-	val countUpPoiString = bellsSinceStart.filter { it.second == ONCE }.map { secondsToString(it.first) }.toString()(1, -1)
-	val countDownPoiString = bellsSinceStart.filter { it.second == ONCE }.map { secondsToString(seconds - it.first) }.toString()(1, -1)
+	val countUpString = bellsSinceStart.filter { (_, v) -> v == ONCE }.map { secondsToString(it.key) }.joinToString()
+	val countDownString = bellsSinceStart.filter { (_, v) -> v == ONCE }.map { secondsToString(seconds - it.key) }.joinToString()
 	
-	val secondsOnly = seconds % 60
 	val minutesOnly = seconds / 60
+	val secondsOnly = seconds % 60
 }

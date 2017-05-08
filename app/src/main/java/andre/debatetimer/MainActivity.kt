@@ -20,7 +20,7 @@ import kotlin.properties.Delegates
 
 
 class MainActivity : AppCompatActivity() {
-	//<editor-fold desc="Stete classes">
+	//<editor-fold desc="State classes">
 	interface State
 	
 	interface HasTimerOption : State {
@@ -65,8 +65,8 @@ class MainActivity : AppCompatActivity() {
 		init(this)
 		
 		vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-		buttons = listOf(bt_3sec, bt_time1, bt_time2, bt_time3, bt_time4, bt_time5, bt_time6)
 		timerTexts = listOf(tv_timerNegative, tv_timer_m, tv_timer_s, tv_timer_colon)
+		buttons = ll_timeButtons.let { ll -> (0 until ll.childCount).map { ll.getChildAt(it) as Button } }
 		//</editor-fold>
 		
 		//<editor-fold desc="Show 3 second button if debugging">
@@ -123,7 +123,7 @@ class MainActivity : AppCompatActivity() {
 					
 					bt_startPause.text = getString(R.string.start)
 					
-					val timerOption = TimerOption.parseKey(view.tag as String)
+					val timerOption = TimerOption.parseTag(view.tag as String)
 					
 					this.state = WaitingToStart(timerOption)
 					
@@ -255,7 +255,7 @@ class MainActivity : AppCompatActivity() {
 		val state = state
 		if (debateBellEnabled && state is HasTimerOption) {
 			val timerOption = state.timerOption
-			if (timerOption.countUpPoiString.isEmpty()) {
+			if (timerOption.countUpString.isEmpty()) {
 				tv_bellsAt.setInvisible()
 			} else {
 				tv_bellsAt.setVisible()
@@ -267,9 +267,9 @@ class MainActivity : AppCompatActivity() {
 				}
 				
 				val string = if (timerDisplayCountUp) {
-					timerOption.countUpPoiString
+					timerOption.countUpString
 				} else {
-					timerOption.countDownPoiString
+					timerOption.countDownString
 				}
 				
 				tv_bellsAt.text = format.format(string)
