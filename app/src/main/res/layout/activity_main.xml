@@ -135,6 +135,7 @@
 
     <LinearLayout
         android:id="@+id/ll_timeButtons"
+        style="@style/Widget.AppCompat.ButtonBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -143,94 +144,89 @@
         app:layout_constraintRight_toRightOf="parent">
 
         <Button
-            android:id="@+id/bt_3sec"
+            android:id="@+id/bt_debug"
+            style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
             android:alpha="0.54"
-            android:background="#00FFFFFF"
             android:tag='3;1'
-            android:text="3s"
             android:textAllCaps="false"
             android:textColor="@color/buttonUnselected"
             android:visibility="gone"
-            tools:ignore="HardcodedText"/>
+            tools:ignore="HardcodedText"
+            tools:text="debug"/>
 
         <Button
             android:id="@+id/bt_time1"
+            style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
             android:alpha="0.54"
-            android:background="#00FFFFFF"
             android:tag='120;'
-            android:text="2m"
             android:textAllCaps="false"
             android:textColor="@color/buttonUnselected"
             android:visibility="gone"
-            tools:ignore="HardcodedText"/>
+            tools:ignore="HardcodedText"
+            tools:text="time1"/>
 
         <Button
             android:id="@+id/bt_time2"
+            style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
             android:alpha="0.54"
-            android:background="#00FFFFFF"
             android:tag="180;"
-            android:text="3m"
             android:textAllCaps="false"
             android:textColor="@color/buttonUnselected"
             tools:ignore="HardcodedText"/>
 
         <Button
             android:id="@+id/bt_time3"
+            style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
             android:alpha="0.54"
-            android:background="#00FFFFFF"
             android:tag="240;"
-            android:text="4m"
             android:textAllCaps="false"
             android:textColor="@color/buttonUnselected"
             tools:ignore="HardcodedText"/>
 
         <Button
             android:id="@+id/bt_time4"
+            style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
             android:alpha="0.54"
-            android:background="#00FFFFFF"
             android:tag="300; 60, 240"
-            android:text="5m"
             android:textAllCaps="false"
             android:textColor="@color/buttonUnselected"
             tools:ignore="HardcodedText"/>
 
         <Button
             android:id="@+id/bt_time5"
+            style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
             android:alpha="0.54"
-            android:background="#00FFFFFF"
             android:tag="420; 60, 360"
-            android:text="7m"
             android:textAllCaps="false"
             android:textColor="@color/buttonUnselected"
             tools:ignore="HardcodedText"/>
 
         <Button
             android:id="@+id/bt_time6"
+            style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
             android:alpha="0.54"
-            android:background="#00FFFFFF"
             android:tag="480; 60, 420"
-            android:text="8m"
             android:textAllCaps="false"
             android:textColor="@color/buttonUnselected"
             tools:ignore="HardcodedText"/>

@@ -12,25 +12,28 @@ import org.jetbrains.anko.debug
 class TimerOption(val seconds: Int, val bellsSinceStart: Map<Int, DebateBell>) {
 	companion object : AnkoLogger {
 		private val DEFAULT = TimerOption(420, mapOf(60 to ONCE, 360 to ONCE))
+		private val cache = mutableMapOf<String, TimerOption>()
 		
 		fun parseTag(tag: String): TimerOption {
-			val noSpace = tag.filterNot { it == ' ' }
-			val tokens = noSpace.split(';')
-			
-			return try {
-				val seconds = tokens[0].toInt()
+			return cache.getOrPut(tag) {
+				val noSpace = tag.filterNot { it == ' ' }
+				val tokens = noSpace.split(';')
 				
-				val bells = if (tokens[1].isEmpty()) {
-					mapOf()
-				} else {
-					val bellTokens = tokens[1].split(',')
-					bellTokens.map { it.toInt() to ONCE }.toMap()
+				try {
+					val seconds = tokens[0].toInt()
+					
+					val bells = if (tokens[1].isEmpty()) {
+						mapOf()
+					} else {
+						val bellTokens = tokens[1].split(',')
+						bellTokens.map { it.toInt() to ONCE }.toMap()
+					}
+					
+					TimerOption(seconds, bells)
+				} catch(e: RuntimeException) {
+					debug { "Error occurred while parsing \"$tag\" for TimerOption" }
+					DEFAULT
 				}
-				
-				TimerOption(seconds, bells)
-			} catch(e: RuntimeException) {
-				debug { "Error occurred while parsing \"$tag\" for TimerOption" }
-				DEFAULT
 			}
 		}
 	}

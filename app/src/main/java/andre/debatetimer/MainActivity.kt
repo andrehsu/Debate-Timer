@@ -16,6 +16,7 @@ import android.view.MenuItem
 import android.widget.Button
 import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
+import org.jetbrains.anko.forEachChild
 import kotlin.properties.Delegates
 
 
@@ -66,12 +67,39 @@ class MainActivity : AppCompatActivity() {
 		
 		vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 		timerTexts = listOf(tv_timerNegative, tv_timer_m, tv_timer_s, tv_timer_colon)
-		buttons = ll_timeButtons.let { ll -> (0 until ll.childCount).map { ll.getChildAt(it) as Button } }
+		buttons = mutableListOf()
+		ll_timeButtons.forEachChild { child ->
+			child as Button
+			
+			buttons += child
+			
+			val tag = child.tag as String
+			
+			TimerOption.parseTag(tag)
+			
+			child.text = if (';' in tag) {
+				val seconds = tag.substringBefore(';').toInt()
+				val minuteOnly = seconds / 60
+				val secondsOnly = seconds % 60
+				
+				val sb = StringBuilder()
+				if (minuteOnly != 0) {
+					sb.append(minuteOnly).append('m').append(' ')
+				}
+				if (secondsOnly != 0) {
+					sb.append(secondsOnly).append("s")
+				}
+				
+				sb.toString().trim()
+			} else {
+				"???"
+			}
+		}
 		//</editor-fold>
 		
 		//<editor-fold desc="Show 3 second button if debugging">
 		if (BuildConfig.DEBUG) {
-			bt_3sec.setVisible()
+			bt_debug.setVisible()
 		}
 		//</editor-fold>
 		
