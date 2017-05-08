@@ -97,7 +97,7 @@ class MainActivity : AppCompatActivity() {
 		}
 		//</editor-fold>
 		
-		//<editor-fold desc="Show 3 second button if debugging">
+		//<editor-fold desc="Show debug button if debugging">
 		if (BuildConfig.DEBUG) {
 			bt_debug.setVisible()
 		}
