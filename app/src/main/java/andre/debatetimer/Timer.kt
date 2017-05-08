@@ -45,6 +45,7 @@ constructor(
 		 */
 		private val timerInterval: Long
 ) {
+	private var firstTickPast = false
 	
 	/**
 	 * boolean representing if the timer was cancelled
@@ -73,6 +74,8 @@ constructor(
 	 */
 	abstract fun onTick()
 	
+	open fun onFirstTick() {}
+	
 	// handles timing
 	private val handler = @SuppressLint("HandlerLeak")
 	object : Handler() {
@@ -83,7 +86,12 @@ constructor(
 				}
 				
 				val lastTickStart = SystemClock.elapsedRealtime()
-				onTick()
+				if (firstTickPast)
+					onTick()
+				else {
+					onFirstTick()
+					firstTickPast = true
+				}
 				
 				// take into account user's onTick taking time to execute
 				var delay = lastTickStart + timerInterval - SystemClock.elapsedRealtime()
