@@ -65,7 +65,7 @@ class MainActivity : AppCompatActivity() {
 		init(this)
 		
 		vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-		buttons = listOf(bt_3sec, bt_2min, bt_3min, bt_4min, bt_5min, bt_7min, bt_8min)
+		buttons = listOf(bt_3sec, bt_time1, bt_time2, bt_time3, bt_time4, bt_time5, bt_time6)
 		timerTexts = listOf(tv_timerNegative, tv_timer_m, tv_timer_s, tv_timer_colon)
 		//</editor-fold>
 		
