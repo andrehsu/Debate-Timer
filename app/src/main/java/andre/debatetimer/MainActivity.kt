@@ -4,9 +4,7 @@ import andre.debatetimer.extensions.*
 import andre.debatetimer.extensions.EnvVars.init
 import andre.debatetimer.extensions.EnvVars.longAnimTime
 import android.app.Dialog
-import android.content.Context
 import android.os.Bundle
-import android.os.Vibrator
 import android.support.constraint.ConstraintLayout
 import android.support.v4.app.DialogFragment
 import android.support.v7.app.AlertDialog
@@ -32,11 +30,18 @@ class MainActivity : AppCompatActivity() {
 	
 	data class WaitingToStart(override val timerOption: TimerOption) : State, HasTimerOption
 	
-	data class TimerStarted(override val timerOption: TimerOption, val timer: DebateTimer, val running: Boolean = false) : State, HasTimerOption
+	inner class TimerStarted(override val timerOption: TimerOption, val timer: DebateTimer) : State, HasTimerOption {
+		var running: Boolean by Delegates.observable(false) { _, _, newValue ->
+			if (newValue) {
+				buttons.forEach { it.isClickable = false }
+			} else {
+				buttons.forEach { it.isClickable = true }
+			}
+		}
+	}
 	//</editor-fold>
 	
 	//<editor-fold desc="Fields">
-	private lateinit var vibrator: Vibrator
 	private lateinit var buttons: List<Button>
 	private lateinit var timerTexts: List<TextView>
 	private lateinit var action_debateBell: MenuItem
@@ -65,7 +70,6 @@ class MainActivity : AppCompatActivity() {
 		//<editor-fold desc="Field initialization">
 		init(this)
 		
-		vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 		timerTexts = listOf(tv_timerNegative, tv_timer_m, tv_timer_s, tv_timer_colon)
 		buttons = mutableListOf()
 		ll_timeButtons.forEachChild { child ->
@@ -118,14 +122,13 @@ class MainActivity : AppCompatActivity() {
 					bt_startPause.callOnClick()
 				}
 				is TimerStarted -> {
-					onTap()
 					if (state.running) {
 						bt_startPause.text = getString(R.string.resume)
-						this.state = state.copy(running = false)
+						state.running = false
 						state.timer.pause()
 					} else {
 						bt_startPause.text = getString(R.string.pause)
-						this.state = state.copy(running = true)
+						state.running = true
 						state.timer.resume()
 					}
 				}
@@ -138,8 +141,6 @@ class MainActivity : AppCompatActivity() {
 			it.setOnClickListener { view ->
 				val state = state
 				if (state !is TimerStarted || state is TimerStarted && !state.running) {
-					onTap()
-					
 					buttons.forEach {
 						it.alpha = 0.54f
 						it.setTextColor(getColor(R.color.buttonUnselected))
@@ -305,10 +306,6 @@ class MainActivity : AppCompatActivity() {
 		} else {
 			tv_bellsAt.setInvisible()
 		}
-	}
-	
-	private fun onTap() {
-		vibrator.vibrate(30)
 	}
 	//</editor-fold>
 }
