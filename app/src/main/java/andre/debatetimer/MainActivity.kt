@@ -81,15 +81,13 @@ class MainActivity : AppCompatActivity() {
 			val state = state
 			when (state) {
 				is WaitingToStart -> {
-					if (state is HasTimerOption) {
-						val timer = object : DebateTimer(state.timerOption) {
-							override fun onSecond() = refreshTimer()
-						}
-						
-						this.state = TimerStarted(state.timerOption, timer)
-						
-						bt_startPause.callOnClick()
+					val timer = object : DebateTimer(state.timerOption) {
+						override fun onSecond() = refreshTimer()
 					}
+					
+					this.state = TimerStarted(state.timerOption, timer)
+					
+					bt_startPause.callOnClick()
 				}
 				is TimerStarted -> {
 					onTap()
