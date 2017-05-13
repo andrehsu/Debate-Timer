@@ -136,4 +136,4 @@ fun secondsToString(seconds: Int): String {
 	} + "$minutes:${secondsOnly.toString().padStart(2, '0')}"
 }
 
-fun Context.getColorCompat(id:Int) = ContextCompat.getColor(this,id)
+fun Context.getColorCompat(id: Int) = ContextCompat.getColor(this, id)
