@@ -3,6 +3,7 @@
 package andre.debatetimer.extensions
 
 import andre.debatetimer.MainActivity
+import andre.debatetimer.R
 import andre.debatetimer.extensions.EnvVars.shortAnimTime
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
@@ -27,18 +28,34 @@ object EnvVars {
 	var longAnimTime: Long = -1
 		private set
 	
+	var color_timerStart: Int = -1
+		private set
+	var color_timerNormal: Int = -1
+		private set
+	var color_timerEnd: Int = -1
+		private set
+	var color_timerOvertime: Int = -1
+		private set
+	
 	lateinit var applicationContext: Context
 		private set
+	
 	
 	fun init(activity: MainActivity) {
 		applicationContext = activity.applicationContext
 		with(applicationContext) {
 			clipboard = getSystemService(android.content.Context.CLIPBOARD_SERVICE) as ClipboardManager
+			
 			with(resources) {
 				shortAnimTime = getInteger(android.R.integer.config_shortAnimTime).toLong()
 				mediumAnimTime = getInteger(android.R.integer.config_mediumAnimTime).toLong()
 				longAnimTime = getInteger(android.R.integer.config_longAnimTime).toLong()
 			}
+			
+			color_timerStart = getColorCompat(R.color.timerStart)
+			color_timerNormal = getColorCompat(R.color.timerNormal)
+			color_timerEnd = getColorCompat(R.color.timerEnd)
+			color_timerOvertime = getColorCompat(R.color.timerOvertime)
 		}
 	}
 }

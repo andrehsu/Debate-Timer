@@ -1,6 +1,9 @@
 package andre.debatetimer
 
 import andre.debatetimer.extensions.*
+import andre.debatetimer.extensions.EnvVars.color_timerEnd
+import andre.debatetimer.extensions.EnvVars.color_timerNormal
+import andre.debatetimer.extensions.EnvVars.color_timerStart
 import andre.debatetimer.extensions.EnvVars.init
 import andre.debatetimer.extensions.EnvVars.longAnimTime
 import android.app.Dialog
@@ -120,6 +123,18 @@ class MainActivity : AppCompatActivity() {
 				is WaitingToStart -> {
 					val timer = object : DebateTimer(state.timerOption) {
 						override fun onSecond() = refreshTimer()
+						
+						override fun onFirstMinuteEnd() {
+							ui_color = color_timerNormal
+						}
+						
+						override fun onLastMinuteStart() {
+							ui_color = color_timerEnd
+						}
+						
+						override fun onOvertime() {
+							ui_color = color_timerEnd
+						}
 					}
 					
 					this.state = TimerStarted(state.timerOption, timer)
@@ -245,13 +260,9 @@ class MainActivity : AppCompatActivity() {
 			}
 		}
 	}
-	private var ui_isOvertime: Boolean by Delegates.observable(false) { _, oldValue, isOvertime ->
-		if (oldValue != isOvertime) {
-			if (isOvertime) {
-				timerTexts.forEach { it.setTextColor(getColor(R.color.timerOvertime)) }
-			} else {
-				timerTexts.forEach { it.setTextColor(getColor(R.color.timerNormal)) }
-			}
+	private var ui_color: Int by Delegates.observable(color_timerStart) { _, oldValue, newValue ->
+		if (oldValue != newValue) {
+			timerTexts.forEach { it.setTextColor(newValue) }
 		}
 	}
 	//</editor-fold>
@@ -268,19 +279,17 @@ class MainActivity : AppCompatActivity() {
 				ui_seconds = state.timerOption.secondsOnly
 			}
 			ui_isNegative = false
-			ui_isOvertime = false
+			ui_color = color_timerStart
 		} else if (state is TimerStarted) {
 			val timer = state.timer
 			if (timerDisplayCountUp) {
 				ui_minutes = timer.minutesSinceStart
 				ui_seconds = timer.secondsSinceStart
 				ui_isNegative = false
-				ui_isOvertime = timer.isOvertime
 			} else {
 				ui_minutes = timer.minutesUntilEnd
 				ui_seconds = timer.secondsUntilEnd
 				ui_isNegative = timer.isOvertime
-				ui_isOvertime = timer.isOvertime
 			}
 		}
 	}

@@ -32,6 +32,18 @@ abstract class DebateTimer(timerOption: TimerOption) {
 				}
 			}
 			
+			if (countUpSeconds == 60) {
+				onFirstMinuteEnd()
+			}
+			
+			if (countDownSeconds == 60) {
+				onLastMinuteStart()
+			}
+			
+			if (countDownSeconds == -1) {
+				onOvertime()
+			}
+			
 			isOvertime = countDownSeconds < 0
 			
 			onSecond()
@@ -67,6 +79,12 @@ abstract class DebateTimer(timerOption: TimerOption) {
 		private set
 	
 	abstract fun onSecond()
+	
+	open fun onFirstMinuteEnd() {}
+	
+	open fun onLastMinuteStart() {}
+	
+	open fun onOvertime() {}
 	
 	override fun toString(): String {
 		return "DebateTimer"
