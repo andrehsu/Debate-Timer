@@ -81,7 +81,7 @@ class MainActivity : AppCompatActivity() {
 			
 			TimerOption.parseTag(tag)
 			
-			child.text = if (';' in tag) {
+			child.text = if (tag.isNotBlank()) {
 				val seconds = tag.substringBefore(';').toInt()
 				val minuteOnly = seconds / 60
 				val secondsOnly = seconds % 60
@@ -143,12 +143,12 @@ class MainActivity : AppCompatActivity() {
 				if (state !is TimerStarted || state is TimerStarted && !state.running) {
 					buttons.forEach {
 						it.alpha = 0.54f
-						it.setTextColor(getColor(R.color.buttonUnselected))
+						it.setTextColor(getColorCompat(R.color.buttonUnselected))
 					}
 					
 					view as Button
 					view.alpha = 1.0f
-					view.setTextColor(getColor(R.color.buttonSelected))
+					view.setTextColor(getColorCompat(R.color.buttonSelected))
 					
 					bt_startPause.text = getString(R.string.start)
 					

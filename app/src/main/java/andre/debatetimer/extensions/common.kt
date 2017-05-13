@@ -10,6 +10,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.support.design.widget.Snackbar
+import android.support.v4.content.ContextCompat
 import android.view.View
 import android.view.ViewPropertyAnimator
 import android.widget.EditText
@@ -134,3 +135,5 @@ fun secondsToString(seconds: Int): String {
 		"-"
 	} + "$minutes:${secondsOnly.toString().padStart(2, '0')}"
 }
+
+fun Context.getColorCompat(id:Int) = ContextCompat.getColor(this,id)
