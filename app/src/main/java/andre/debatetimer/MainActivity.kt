@@ -11,6 +11,7 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
@@ -33,8 +34,12 @@ class MainActivity : AppCompatActivity() {
 	inner class TimerStarted(override val timerOption: TimerOption, val timer: DebateTimer) : State, HasTimerOption {
 		var running: Boolean by Delegates.observable(false) { _, _, newValue ->
 			if (newValue) {
+				timer.resume()
+				window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 				buttons.forEach { it.isClickable = false }
 			} else {
+				timer.pause()
+				window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 				buttons.forEach { it.isClickable = true }
 			}
 		}
@@ -125,11 +130,9 @@ class MainActivity : AppCompatActivity() {
 					if (state.running) {
 						bt_startPause.text = getString(R.string.resume)
 						state.running = false
-						state.timer.pause()
 					} else {
 						bt_startPause.text = getString(R.string.pause)
 						state.running = true
-						state.timer.resume()
 					}
 				}
 			}
@@ -139,26 +142,28 @@ class MainActivity : AppCompatActivity() {
 		//<editor-fold desc="Time buttons onClick">
 		buttons.forEach {
 			it.setOnClickListener { view ->
-				val state = state
-				if (state !is TimerStarted || state is TimerStarted && !state.running) {
-					buttons.forEach {
-						it.alpha = 0.54f
-						it.setTextColor(getColorCompat(R.color.buttonUnselected))
-					}
-					
-					view as Button
-					view.alpha = 1.0f
-					view.setTextColor(getColorCompat(R.color.buttonSelected))
-					
-					bt_startPause.text = getString(R.string.start)
-					
-					val timerOption = TimerOption.parseTag(view.tag as String)
-					
-					this.state = WaitingToStart(timerOption)
-					
-					refreshTimer()
-					refreshBellLabel()
+				buttons.forEach {
+					it.alpha = 0.54f
+					it.setTextColor(getColorCompat(R.color.buttonUnselected))
 				}
+				
+				view as Button
+				view.alpha = 1.0f
+				view.setTextColor(getColorCompat(R.color.buttonSelected))
+				
+				bt_startPause.text = getString(R.string.start)
+				
+				val timerOption = TimerOption.parseTag(view.tag as String)
+				
+				val state = state
+				if (state is TimerStarted) {
+					state.running = false
+				}
+				
+				this.state = WaitingToStart(timerOption)
+				
+				refreshTimer()
+				refreshBellLabel()
 			}
 		}
 		//</editor-fold>
