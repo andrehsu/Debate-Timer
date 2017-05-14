@@ -13,6 +13,10 @@ abstract class DebateTimer(timerOption: TimerOption) {
 	
 	fun newTimerInstance() = object : Timer(1000) {
 		override fun onTick() {
+			if (countDownSeconds <= -120) {
+				stop()
+			}
+			
 			countUpSeconds++
 			countDownSeconds--
 			
@@ -27,9 +31,6 @@ abstract class DebateTimer(timerOption: TimerOption) {
 			
 			if (countDownSeconds <= 0 && countDownSeconds % 15 == 0) {
 				DebateBell.TWICE.ring()
-				if (countDownSeconds <= -120) {
-					stop()
-				}
 			}
 			
 			if (countUpSeconds == 60) {
