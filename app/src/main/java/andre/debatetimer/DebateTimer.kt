@@ -87,7 +87,5 @@ abstract class DebateTimer(timerOption: TimerOption) {
 	
 	open fun onOvertime() {}
 	
-	override fun toString(): String {
-		return "DebateTimer"
-	}
+	override fun toString(): String = "DebateTimer"
 }
