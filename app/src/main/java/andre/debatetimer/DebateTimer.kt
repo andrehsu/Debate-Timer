@@ -15,6 +15,7 @@ abstract class DebateTimer(timerOption: TimerOption) {
 		override fun onTick() {
 			if (countDownSeconds <= -120) {
 				stop()
+				return
 			}
 			
 			countUpSeconds++
