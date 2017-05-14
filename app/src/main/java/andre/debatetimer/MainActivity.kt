@@ -289,7 +289,7 @@ class MainActivity : AppCompatActivity() {
 			} else {
 				ui_minutes = timer.minutesUntilEnd
 				ui_seconds = timer.secondsUntilEnd
-				ui_isNegative = timer.isOvertime
+				ui_isNegative = timer.isTimeUntilEndNegative
 			}
 		}
 	}
