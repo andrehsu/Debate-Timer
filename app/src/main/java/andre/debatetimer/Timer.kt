@@ -74,7 +74,7 @@ constructor(
 	 */
 	abstract fun onTick()
 	
-	open fun onFirstTick() {}
+	open fun onStart() {}
 	
 	// handles timing
 	private val handler = @SuppressLint("HandlerLeak")
@@ -89,7 +89,7 @@ constructor(
 				if (firstTickPast)
 					onTick()
 				else {
-					onFirstTick()
+					onStart()
 					firstTickPast = true
 				}
 				

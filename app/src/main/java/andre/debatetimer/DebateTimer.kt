@@ -36,7 +36,7 @@ abstract class DebateTimer(timerOption: TimerOption) {
 				DebateBell.TWICE.ring()
 			}
 			
-			if (countUpSeconds == 60) {
+			if (countUpSeconds == 60 && countDownSeconds > 60) {
 				onFirstMinuteEnd()
 			}
 			
