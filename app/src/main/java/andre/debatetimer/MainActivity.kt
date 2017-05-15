@@ -304,9 +304,9 @@ class MainActivity : AppCompatActivity() {
 				tv_bellsAt.setVisible()
 				
 				val format = if (timerOption.bellsSinceStart.count() == 1) {
-					getString(R.string.poi_bell)
+					getString(R.string.bell_at)
 				} else {
-					getString(R.string.poi_bells)
+					getString(R.string.bells_at)
 				}
 				
 				val string = if (timerDisplayCountUp) {
