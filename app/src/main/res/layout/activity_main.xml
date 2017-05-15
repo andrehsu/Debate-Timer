@@ -149,13 +149,10 @@
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
-            android:alpha="0.54"
             android:tag='3;1'
             android:textAllCaps="false"
             android:textColor="@color/buttonUnselected"
-            android:visibility="gone"
-            tools:ignore="HardcodedText"
-            tools:text="debug"/>
+            android:visibility="gone"/>
 
         <Button
             android:id="@+id/bt_time1"
@@ -163,13 +160,9 @@
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
-            android:alpha="0.54"
-            android:tag='120;'
+            android:tag='180;-1'
             android:textAllCaps="false"
-            android:textColor="@color/buttonUnselected"
-            android:visibility="gone"
-            tools:ignore="HardcodedText"
-            tools:text="time1"/>
+            android:textColor="@color/buttonUnselected"/>
 
         <Button
             android:id="@+id/bt_time2"
@@ -177,11 +170,9 @@
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
-            android:alpha="0.54"
-            android:tag="180;"
+            android:tag="240;-1"
             android:textAllCaps="false"
-            android:textColor="@color/buttonUnselected"
-            tools:ignore="HardcodedText"/>
+            android:textColor="@color/buttonUnselected"/>
 
         <Button
             android:id="@+id/bt_time3"
@@ -189,11 +180,9 @@
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
-            android:alpha="0.54"
-            android:tag="240;"
+            android:tag="300;-1"
             android:textAllCaps="false"
-            android:textColor="@color/buttonUnselected"
-            tools:ignore="HardcodedText"/>
+            android:textColor="@color/buttonUnselected"/>
 
         <Button
             android:id="@+id/bt_time4"
@@ -201,11 +190,9 @@
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
-            android:alpha="0.54"
-            android:tag="300; 60, 240"
+            android:tag="360;-1"
             android:textAllCaps="false"
-            android:textColor="@color/buttonUnselected"
-            tools:ignore="HardcodedText"/>
+            android:textColor="@color/buttonUnselected"/>
 
         <Button
             android:id="@+id/bt_time5"
@@ -213,11 +200,9 @@
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
-            android:alpha="0.54"
-            android:tag="420; 60, 360"
+            android:tag="420;-1"
             android:textAllCaps="false"
-            android:textColor="@color/buttonUnselected"
-            tools:ignore="HardcodedText"/>
+            android:textColor="@color/buttonUnselected"/>
 
         <Button
             android:id="@+id/bt_time6"
@@ -225,10 +210,8 @@
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
-            android:alpha="0.54"
-            android:tag="480; 60, 420"
+            android:tag="480;-1"
             android:textAllCaps="false"
-            android:textColor="@color/buttonUnselected"
-            tools:ignore="HardcodedText"/>
+            android:textColor="@color/buttonUnselected"/>
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>

@@ -39,11 +39,17 @@ class MainActivity : AppCompatActivity() {
 			if (newValue) {
 				timer.resume()
 				window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-				buttons.forEach { it.isClickable = false }
+				buttons.forEach {
+					it.isClickable = false
+					it.alpha = 0.54f
+				}
 			} else {
 				timer.pause()
 				window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-				buttons.forEach { it.isClickable = true }
+				buttons.forEach {
+					it.isClickable = true
+					it.alpha = 1.0f
+				}
 			}
 		}
 	}
@@ -158,12 +164,10 @@ class MainActivity : AppCompatActivity() {
 		buttons.forEach {
 			it.setOnClickListener { view ->
 				buttons.forEach {
-					it.alpha = 0.54f
 					it.setTextColor(getColorCompat(R.color.buttonUnselected))
 				}
 				
 				view as Button
-				view.alpha = 1.0f
 				view.setTextColor(getColorCompat(R.color.buttonSelected))
 				
 				bt_startPause.text = getString(R.string.start)

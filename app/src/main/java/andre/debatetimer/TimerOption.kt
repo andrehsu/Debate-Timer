@@ -24,6 +24,8 @@ class TimerOption(val seconds: Int, val bellsSinceStart: Map<Int, DebateBell>) {
 					
 					val bells = if (tokens[1].isEmpty()) {
 						mapOf()
+					} else if (tokens[1].toIntOrNull() == -1) {
+						mapOf(60 to ONCE, seconds - 60 to ONCE)
 					} else {
 						val bellTokens = tokens[1].split(',')
 						bellTokens.map { it.toInt() to ONCE }.toMap()
