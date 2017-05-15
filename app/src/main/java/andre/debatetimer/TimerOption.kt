@@ -15,9 +15,10 @@ class TimerOption(val seconds: Int, val bellsSinceStart: Map<Int, DebateBell>) {
 		private val cache = mutableMapOf<String, TimerOption>()
 		
 		fun parseTag(tag: String): TimerOption {
+			@Suppress("NAME_SHADOWING")
+			val tag = tag.filterNot { it == ' ' }
 			return cache.getOrPut(tag) {
-				val noSpace = tag.filterNot { it == ' ' }
-				val tokens = noSpace.split(';')
+				val tokens = tag.split(';')
 				
 				try {
 					val seconds = tokens[0].toInt()
