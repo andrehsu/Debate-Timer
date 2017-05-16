@@ -292,9 +292,9 @@ class MainActivity : AppCompatActivity() {
 				ui_seconds = timer.secondsSinceStart
 				ui_isNegative = false
 			} else {
-				ui_minutes = timer.minutesUntilEnd
-				ui_seconds = timer.secondsUntilEnd
-				ui_isNegative = timer.isTimeUntilEndNegative
+				ui_minutes = timer.minutesLeft
+				ui_seconds = timer.secondsLeft
+				ui_isNegative = timer.isTimeEndNegative
 			}
 		}
 	}
