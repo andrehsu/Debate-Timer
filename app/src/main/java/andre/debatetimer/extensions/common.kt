@@ -142,6 +142,8 @@ inline infix fun View.replaceWith(to: View) {
 
 inline fun Int.abs() = if (this < 0) -this else this
 
+inline fun Long.abs() = if (this < 0) -this else this
+
 fun secondsToString(seconds: Int): String {
 	val abs = seconds.abs()
 	val minutes = abs / 60

@@ -1,5 +1,6 @@
 package andre.debatetimer
 
+import andre.debatetimer.DebateBell.Companion.debateBellEnabled
 import andre.debatetimer.extensions.*
 import andre.debatetimer.extensions.EnvVars.color_timerEnd
 import andre.debatetimer.extensions.EnvVars.color_timerNormal

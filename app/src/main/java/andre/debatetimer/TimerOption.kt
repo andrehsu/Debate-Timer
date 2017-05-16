@@ -1,7 +1,6 @@
 package andre.debatetimer
 
-import andre.debatetimer.extensions.DebateBell
-import andre.debatetimer.extensions.DebateBell.ONCE
+import andre.debatetimer.DebateBell.ONCE
 import andre.debatetimer.extensions.secondsToString
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.debug

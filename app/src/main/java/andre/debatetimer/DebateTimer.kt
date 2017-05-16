@@ -1,6 +1,5 @@
 package andre.debatetimer
 
-import andre.debatetimer.extensions.DebateBell
 import andre.debatetimer.extensions.abs
 
 /**
