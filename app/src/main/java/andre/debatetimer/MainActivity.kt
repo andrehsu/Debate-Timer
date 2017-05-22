@@ -96,23 +96,19 @@ class MainActivity : AppCompatActivity() {
 			
 			TimerOption.parseTag(tag)
 			
-			child.text = if (tag.isNotBlank()) {
-				val seconds = tag.substringBefore(';').toInt()
-				val minuteOnly = seconds / 60
-				val secondsOnly = seconds % 60
-				
-				val sb = StringBuilder()
-				if (minuteOnly != 0) {
-					sb.append(minuteOnly).append('m').append(' ')
-				}
-				if (secondsOnly != 0) {
-					sb.append(secondsOnly).append("s")
-				}
-				
-				sb.toString().trim()
-			} else {
-				"???"
+			val seconds = tag.substringBefore(';').toInt()
+			val minuteOnly = seconds / 60
+			val secondsOnly = seconds % 60
+			
+			val sb = StringBuilder()
+			if (minuteOnly != 0) {
+				sb.append(minuteOnly).append('m').append(' ')
 			}
+			if (secondsOnly != 0) {
+				sb.append(secondsOnly).append("s")
+			}
+			
+			child.text = sb.toString().trim()
 		}
 		//</editor-fold>
 		
