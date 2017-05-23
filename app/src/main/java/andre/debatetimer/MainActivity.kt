@@ -1,12 +1,14 @@
 package andre.debatetimer
 
-import andre.debatetimer.DebateBell.Companion.debateBellEnabled
 import andre.debatetimer.extensions.*
 import andre.debatetimer.extensions.EnvVars.color_timerEnd
 import andre.debatetimer.extensions.EnvVars.color_timerNormal
 import andre.debatetimer.extensions.EnvVars.color_timerStart
 import andre.debatetimer.extensions.EnvVars.init
 import andre.debatetimer.extensions.EnvVars.longAnimTime
+import andre.debatetimer.timer.DebateBell.Companion.debateBellEnabled
+import andre.debatetimer.timer.DebateTimer
+import andre.debatetimer.timer.TimerOption
 import android.app.Dialog
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
