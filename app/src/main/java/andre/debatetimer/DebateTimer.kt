@@ -2,9 +2,6 @@ package andre.debatetimer
 
 import andre.debatetimer.extensions.abs
 
-/**
- * Created by Andre on 5/4/2017.
- */
 abstract class DebateTimer(timerOption: TimerOption) {
 	private var countUpSeconds: Int = 0
 	private var countDownSeconds: Int = timerOption.seconds
@@ -23,7 +20,7 @@ abstract class DebateTimer(timerOption: TimerOption) {
 	
 	private fun onSecondInternal() {
 		if (countDownSeconds <= -120) {
-			stop()
+			pause()
 			return
 		}
 		
@@ -67,10 +64,6 @@ abstract class DebateTimer(timerOption: TimerOption) {
 	
 	fun resume() {
 		timer.start()
-	}
-	
-	fun stop() {
-		timer.cancel()
 	}
 	
 	val bellsSinceStart = timerOption.bellsSinceStart

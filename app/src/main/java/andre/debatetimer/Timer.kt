@@ -6,10 +6,6 @@ import android.os.Message
 import android.os.SystemClock
 
 /**
- * Created by Andre on 5/6/2017.
- */
-
-/**
  * Schedule a countdown until a time in the future, with
  * regular notifications on intervals along the way.
  
@@ -56,6 +52,7 @@ constructor(
 	 * Cancel the countdown.
 	 */
 	@Synchronized fun cancel() {
+		firstTickPast = false
 		cancelled = true
 		handler.removeMessages(MSG)
 	}
@@ -74,7 +71,7 @@ constructor(
 	 */
 	abstract fun onTick()
 	
-	open fun onStart() {}
+	open fun onTickAfterStart() {}
 	
 	// handles timing
 	private val handler = @SuppressLint("HandlerLeak")
@@ -89,7 +86,7 @@ constructor(
 				if (firstTickPast)
 					onTick()
 				else {
-					onStart()
+					onTickAfterStart()
 					firstTickPast = true
 				}
 				

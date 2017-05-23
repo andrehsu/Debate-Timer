@@ -17,9 +17,6 @@ import android.view.ViewPropertyAnimator
 import android.widget.EditText
 import java.util.*
 
-/**
- * Created by Andre on 3/25/2017.
- */
 object EnvVars {
 	var shortAnimTime: Long = -1
 		private set

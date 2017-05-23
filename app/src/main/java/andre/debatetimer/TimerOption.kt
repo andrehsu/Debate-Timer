@@ -5,9 +5,6 @@ import andre.debatetimer.extensions.secondsToString
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.debug
 
-/**
- * Created by Andre on 5/5/2017.
- */
 class TimerOption(val seconds: Int, val bellsSinceStart: Map<Int, DebateBell>) {
 	companion object : AnkoLogger {
 		private val DEFAULT = TimerOption(420, mapOf(60 to ONCE, 360 to ONCE))

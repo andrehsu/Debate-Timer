@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
 		}
 		
 		if (oldValue is TimerStarted && (newValue !is TimerStarted || newValue is TimerStarted && oldValue.timer !== newValue.timer)) {
-			oldValue.timer.stop()
+			oldValue.timer.pause()
 		}
 	}
 	//</editor-fold>
