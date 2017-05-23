@@ -94,28 +94,28 @@ class MainActivity : AppCompatActivity() {
 			
 			val tag = child.tag as String
 			
-			TimerOption.parseTag(tag)
+			val timerOption = TimerOption.parseTag(tag)
 			
-			val seconds = tag.substringBefore(';').toInt()
-			val minuteOnly = seconds / 60
-			val secondsOnly = seconds % 60
-			
-			val sb = StringBuilder()
-			if (minuteOnly != 0) {
-				sb.append(minuteOnly).append('m').append(' ')
+			val text = with(timerOption) {
+				if (minutesOnly != 0 && secondsOnly != 0) {
+					"${minutesOnly}m${secondsOnly}s"
+				} else if (minutesOnly != 0) {
+					"${minutesOnly}m"
+				} else if (secondsOnly != 0) {
+					"${secondsOnly}s"
+				} else {
+					"nil"
+				}
 			}
-			if (secondsOnly != 0) {
-				sb.append(secondsOnly).append("s")
-			}
 			
-			child.text = sb.toString().trim()
+			child.text = text
 		}
 		//</editor-fold>
 		
 		//<editor-fold desc="Show debug button if debugging">
-		if (BuildConfig.DEBUG) {
-			bt_debug.setVisible()
-		}
+//		if (BuildConfig.DEBUG) {
+//			bt_debug.setVisible()
+//		}
 		//</editor-fold>
 		
 		//<editor-fold desc="StartPause button onClick">
