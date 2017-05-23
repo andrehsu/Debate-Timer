@@ -9,46 +9,55 @@ abstract class DebateTimer(timerOption: TimerOption) {
 	private var countUpSeconds: Int = 0
 	private var countDownSeconds: Int = timerOption.seconds
 	private var timer: Timer = newTimerInstance()
+	private var deciseconds: Int = 0
 	
-	fun newTimerInstance() = object : Timer(1000) {
+	fun newTimerInstance() = object : Timer(100) {
 		override fun onTick() {
-			if (countDownSeconds <= -120) {
-				stop()
-				return
+			deciseconds++
+			if (deciseconds == 10) {
+				deciseconds = 0
+				onSecondInternal()
 			}
-			
-			countUpSeconds++
-			countDownSeconds--
-			
-			val absVal = countDownSeconds.abs()
-			
-			isTimeEndNegative = countDownSeconds < 0
-			secondsLeft = absVal % 60
-			minutesLeft = absVal / 60
-			
-			secondsSinceStart = countUpSeconds % 60
-			minutesSinceStart = countUpSeconds / 60
-			
-			bellsSinceStart[countUpSeconds]?.ring()
-			
-			if (countDownSeconds <= 0 && countDownSeconds % 15 == 0) {
-				DebateBell.TWICE.ring()
-			}
-			
-			if (countUpSeconds == 60 && countDownSeconds > 60) {
-				onFirstMinuteEnd()
-			}
-			
-			if (countDownSeconds == 60) {
-				onLastMinuteStart()
-			}
-			
-			if (countDownSeconds == -1) {
-				onOvertime()
-			}
-			
-			onSecond()
 		}
+	}
+	
+	private fun onSecondInternal() {
+		if (countDownSeconds <= -120) {
+			stop()
+			return
+		}
+		
+		countUpSeconds++
+		countDownSeconds--
+		
+		val absVal = countDownSeconds.abs()
+		
+		isTimeEndNegative = countDownSeconds < 0
+		secondsLeft = absVal % 60
+		minutesLeft = absVal / 60
+		
+		secondsSinceStart = countUpSeconds % 60
+		minutesSinceStart = countUpSeconds / 60
+		
+		bellsSinceStart[countUpSeconds]?.ring()
+		
+		if (countDownSeconds <= 0 && countDownSeconds % 15 == 0) {
+			DebateBell.TWICE.ring()
+		}
+		
+		if (countUpSeconds == 60 && countDownSeconds > 60) {
+			onFirstMinuteEnd()
+		}
+		
+		if (countDownSeconds == 60) {
+			onLastMinuteStart()
+		}
+		
+		if (countDownSeconds == -1) {
+			onOvertime()
+		}
+		
+		onSecond()
 	}
 	
 	fun pause() {
