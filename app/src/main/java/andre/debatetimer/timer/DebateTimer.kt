@@ -1,4 +1,4 @@
-package andre.debatetimer
+package andre.debatetimer.timer
 
 import andre.debatetimer.extensions.abs
 

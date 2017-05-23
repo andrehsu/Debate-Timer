@@ -1,4 +1,4 @@
-package andre.debatetimer
+package andre.debatetimer.timer
 
 import android.annotation.SuppressLint
 import android.os.Handler

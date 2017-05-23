@@ -1,5 +1,6 @@
-package andre.debatetimer
+package andre.debatetimer.timer
 
+import andre.debatetimer.R
 import andre.debatetimer.extensions.EnvVars
 import android.media.MediaPlayer
 
