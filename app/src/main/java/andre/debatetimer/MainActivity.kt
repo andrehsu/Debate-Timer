@@ -96,7 +96,7 @@ class MainActivity : AppCompatActivity() {
 			
 			val timerOption = TimerOption.parseTag(tag)
 			
-			val text = with(timerOption) {
+			child.text = with(timerOption) {
 				if (minutesOnly != 0 && secondsOnly != 0) {
 					"${minutesOnly}m${secondsOnly}s"
 				} else if (minutesOnly != 0) {
@@ -107,8 +107,6 @@ class MainActivity : AppCompatActivity() {
 					"nil"
 				}
 			}
-			
-			child.text = text
 		}
 		//</editor-fold>
 		
