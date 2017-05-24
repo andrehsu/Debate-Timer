@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity() {
 	
 	object WaitingToBegin : State
 	
-	data class WaitingToStart(override val timerOption: TimerOption) : State, HasTimerOption
+	class WaitingToStart(override val timerOption: TimerOption) : State, HasTimerOption
 	
 	inner class TimerStarted(override val timerOption: TimerOption, val timer: DebateTimer) : State, HasTimerOption {
 		var running: Boolean by Delegates.observable(false) { _, _, newValue ->
