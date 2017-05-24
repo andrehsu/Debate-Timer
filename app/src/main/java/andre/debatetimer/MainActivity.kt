@@ -17,6 +17,7 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.TextView
@@ -85,103 +86,37 @@ class MainActivity : AppCompatActivity() {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_main)
 		
-		//<editor-fold desc="Field initialization">
 		init(this)
 		
 		timerTexts = listOf(tv_timerNegative, tv_timer_m, tv_timer_s, tv_timer_colon)
 		buttons = mutableListOf()
 		ll_timeButtons.forEachChild { child ->
-			child as Button
-			
-			buttons += child
-			
-			val tag = child.tag as String
-			
-			val timerOption = TimerOption.parseTag(tag)
-			
-			child.text = with(timerOption) {
-				if (minutesOnly != 0 && secondsOnly != 0) {
-					"${minutesOnly}m${secondsOnly}s"
-				} else if (minutesOnly != 0) {
-					"${minutesOnly}m"
-				} else if (secondsOnly != 0) {
-					"${secondsOnly}s"
-				} else {
-					"nil"
-				}
-			}
-		}
-		//</editor-fold>
-		
-		//<editor-fold desc="StartPause button onClick">
-		bt_startPause.setOnClickListener {
-			fun timerStarted(state: TimerStarted) {
-				if (state.running) {
-					bt_startPause.text = getString(R.string.resume)
-					state.running = false
-				} else {
-					bt_startPause.text = getString(R.string.pause)
-					state.running = true
-				}
-			}
-			
-			bt_startPause crossfadeTo bt_startPause withDuration longAnimTime
-			val state = state
-			when (state) {
-				is WaitingToStart -> {
-					val timer = object : DebateTimer(state.timerOption) {
-						override fun onSecond() = refreshTimer()
-						
-						override fun onFirstMinuteEnd() {
-							ui_color = color_timerNormal
-						}
-						
-						override fun onLastMinuteStart() {
-							ui_color = color_timerEnd
-						}
-						
-						override fun onOvertime() {
-							ui_color = color_timerEnd
-						}
+			if (child is Button) {
+				buttons += child
+				
+				val tag = child.tag as String
+				
+				val timerOption = TimerOption.parseTag(tag)
+				
+				child.text = with(timerOption) {
+					if (minutesOnly != 0 && secondsOnly != 0) {
+						"${minutesOnly}m${secondsOnly}s"
+					} else if (minutesOnly != 0) {
+						"${minutesOnly}m"
+					} else if (secondsOnly != 0) {
+						"${secondsOnly}s"
+					} else {
+						"nil"
 					}
-					
-					this.state = TimerStarted(state.timerOption, timer).also(::timerStarted)
 				}
-				is TimerStarted -> timerStarted(state)
+				child.setTextColor(getColorCompat(R.color.buttonUnselected))
+				child.setAllCaps(false)
+				
+				child.setOnClickListener(this::onTimeButtonSelected)
+			} else {
+				child.setInvisible()
 			}
 		}
-		//</editor-fold>
-		
-		//<editor-fold desc="Time buttons onClick">
-		buttons.forEach {
-			it.setOnClickListener { view ->
-				buttons.forEach {
-					it.setTextColor(getColorCompat(R.color.buttonUnselected))
-				}
-				
-				view as Button
-				view.setTextColor(getColorCompat(R.color.buttonSelected))
-				
-				bt_startPause.text = getString(R.string.start)
-				
-				val timerOption = TimerOption.parseTag(view.tag as String)
-				
-				val state = state
-				if (state is TimerStarted) {
-					state.running = false
-				}
-				
-				this.state = WaitingToStart(timerOption)
-				
-				refreshTimer()
-				refreshBellLabel()
-			}
-		}
-		//</editor-fold>
-		
-		//<editor-fold desc="Set on toggle for elapsed/ remaining">
-		cl_timer.setOnClickListener { ui_timerDisplayCountUp = !ui_timerDisplayCountUp }
-		//</editor-fold>
 	}
 	
 	override fun onBackPressed() {
@@ -339,6 +274,72 @@ class MainActivity : AppCompatActivity() {
 		} else {
 			tv_bellsAt.setInvisible()
 		}
+	}
+	
+	@Suppress("UNUSED_PARAMETER")
+	fun onStartPauseSelected(view: View) {
+		fun timerStarted(state: TimerStarted) {
+			if (state.running) {
+				bt_startPause.text = getString(R.string.resume)
+				state.running = false
+			} else {
+				bt_startPause.text = getString(R.string.pause)
+				state.running = true
+			}
+		}
+		
+		bt_startPause crossfadeTo bt_startPause withDuration longAnimTime
+		val state = state
+		when (state) {
+			is WaitingToStart -> {
+				val timer = object : DebateTimer(state.timerOption) {
+					override fun onSecond() = refreshTimer()
+					
+					override fun onFirstMinuteEnd() {
+						ui_color = color_timerNormal
+					}
+					
+					override fun onLastMinuteStart() {
+						ui_color = color_timerEnd
+					}
+					
+					override fun onOvertime() {
+						ui_color = color_timerEnd
+					}
+				}
+				
+				this.state = TimerStarted(state.timerOption, timer).also(::timerStarted)
+			}
+			is TimerStarted -> timerStarted(state)
+		}
+	}
+	
+	@Suppress("UNUSED_PARAMETER")
+	fun onToggleElapsedRemainingSelected(view: View) {
+		ui_timerDisplayCountUp = !ui_timerDisplayCountUp
+	}
+	
+	fun onTimeButtonSelected(view: View) {
+		buttons.forEach {
+			it.setTextColor(getColorCompat(R.color.buttonUnselected))
+		}
+		
+		view as Button
+		view.setTextColor(getColorCompat(R.color.buttonSelected))
+		
+		bt_startPause.text = getString(R.string.start)
+		
+		val timerOption = TimerOption.parseTag(view.tag as String)
+		
+		val state = state
+		if (state is TimerStarted) {
+			state.running = false
+		}
+		
+		this.state = WaitingToStart(timerOption)
+		
+		refreshTimer()
+		refreshBellLabel()
 	}
 	//</editor-fold>
 }

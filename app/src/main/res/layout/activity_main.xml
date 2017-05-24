@@ -15,6 +15,7 @@
         android:id="@+id/cl_timer"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:onClick="onToggleElapsedRemainingSelected"
         android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/ll_timeButtons"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -126,6 +127,7 @@
         android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:background="#00FFFFFF"
+        android:onClick="onStartPauseSelected"
         android:text="@string/start"
         android:textSize="32sp"
         android:visibility="gone"
@@ -150,68 +152,48 @@
             android:layout_height="48dp"
             android:layout_weight="1"
             android:tag='3;1'
-            android:textAllCaps="false"
-            android:textColor="@color/buttonUnselected"
             android:visibility="gone"/>
 
         <Button
-            android:id="@+id/bt_time1"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
-            android:tag='180;-1'
-            android:textAllCaps="false"
-            android:textColor="@color/buttonUnselected"/>
+            android:tag='180;-1'/>
 
         <Button
-            android:id="@+id/bt_time2"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
-            android:tag="240;-1"
-            android:textAllCaps="false"
-            android:textColor="@color/buttonUnselected"/>
+            android:tag="240;-1"/>
 
         <Button
-            android:id="@+id/bt_time3"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
-            android:tag="300;-1"
-            android:textAllCaps="false"
-            android:textColor="@color/buttonUnselected"/>
+            android:tag="300;-1"/>
 
         <Button
-            android:id="@+id/bt_time4"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
-            android:tag="360;-1"
-            android:textAllCaps="false"
-            android:textColor="@color/buttonUnselected"/>
+            android:tag="360;-1"/>
 
         <Button
-            android:id="@+id/bt_time5"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
-            android:tag="420;-1"
-            android:textAllCaps="false"
-            android:textColor="@color/buttonUnselected"/>
+            android:tag="420;-1"/>
 
         <Button
-            android:id="@+id/bt_time6"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
-            android:tag="480;-1"
-            android:textAllCaps="false"
-            android:textColor="@color/buttonUnselected"/>
+            android:tag="480;-1"/>
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>
