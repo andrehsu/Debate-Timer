@@ -22,8 +22,6 @@ import android.widget.Button
 import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.forEachChild
-import kotlin.properties.Delegates
-
 
 class MainActivity : AppCompatActivity() {
 	//<editor-fold desc="State classes">
@@ -38,23 +36,28 @@ class MainActivity : AppCompatActivity() {
 	class WaitingToStart(override val timerOption: TimerOption) : State, HasTimerOption
 	
 	inner class TimerStarted(override val timerOption: TimerOption, val timer: DebateTimer) : State, HasTimerOption {
-		var running: Boolean by Delegates.observable(false) { _, _, newValue ->
-			if (newValue) {
-				timer.resume()
-				window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-				buttons.forEach {
-					it.isClickable = false
-					it.alpha = 0.54f
+		var running: Boolean = false
+			set(value) {
+				if (field != value) {
+					if (value) {
+						timer.resume()
+						window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+						buttons.forEach {
+							it.isClickable = false
+							it.alpha = 0.54f
+						}
+					} else {
+						timer.pause()
+						window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+						buttons.forEach {
+							it.isClickable = true
+							it.alpha = 1.0f
+						}
+					}
 				}
-			} else {
-				timer.pause()
-				window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-				buttons.forEach {
-					it.isClickable = true
-					it.alpha = 1.0f
-				}
+				
+				field = value
 			}
-		}
 	}
 	//</editor-fold>
 	
@@ -63,20 +66,25 @@ class MainActivity : AppCompatActivity() {
 	private lateinit var timerTexts: List<TextView>
 	private lateinit var action_debateBell: MenuItem
 	private var timerDisplayCountUp = false
-	private var state: State by Delegates.observable(WaitingToBegin as State) { _, oldValue, newValue ->
-		require(newValue !is WaitingToBegin)
-		
-		if (oldValue is WaitingToBegin) {
-			cl_timer.setVisible()
-			bt_startPause.setVisible()
-			action_debateBell.isVisible = true
-			tv_startingText.setGone()
+	private var state: State = WaitingToBegin
+		set(value) {
+			require(value !is WaitingToBegin)
+			
+			val oldValue = field
+			
+			if (oldValue is WaitingToBegin) {
+				cl_timer.setVisible()
+				bt_startPause.setVisible()
+				action_debateBell.isVisible = true
+				tv_startingText.setGone()
+			}
+			
+			if (oldValue is TimerStarted && (value !is TimerStarted || value is TimerStarted && oldValue.timer !== value.timer)) {
+				oldValue.timer.pause()
+			}
+			
+			field = value
 		}
-		
-		if (oldValue is TimerStarted && (newValue !is TimerStarted || newValue is TimerStarted && oldValue.timer !== newValue.timer)) {
-			oldValue.timer.pause()
-		}
-	}
 	//</editor-fold>
 	
 	//<editor-fold desc="Activity callbacks">
@@ -240,32 +248,44 @@ class MainActivity : AppCompatActivity() {
 	//</editor-fold>
 	
 	//<editor-fold desc="UI fields">
-	private var ui_minutes: Int by Delegates.observable(0) { _, oldValue, minutes ->
-		if (oldValue != minutes) {
-			tv_timer_m.text = minutes.toString()
-		}
-	}
-	private var ui_seconds: Int by Delegates.observable(0) { _, oldValue, seconds ->
-		if (oldValue != seconds) {
-			tv_timer_s.text = seconds.toString().padStart(2, '0')
-		}
-	}
-	private var ui_isNegative: Boolean by Delegates.observable(false) { _, oldValue, isNegative ->
-		if (oldValue != isNegative) {
-			if (isNegative) {
-				tv_timerNegative.setVisible()
-				guideline.layoutParams = (guideline.layoutParams as ConstraintLayout.LayoutParams).also { it.guidePercent = 0.5f }
-			} else {
-				tv_timerNegative.setGone()
-				guideline.layoutParams = (guideline.layoutParams as ConstraintLayout.LayoutParams).also { it.guidePercent = 0.44f }
+	private var ui_minutes: Int = 0
+		set(value) {
+			if (field != value) {
+				tv_timer_m.text = value.toString()
 			}
+			
+			field = value
 		}
-	}
-	private var ui_color: Int by Delegates.observable(color_timerStart) { _, oldValue, newValue ->
-		if (oldValue != newValue) {
-			timerTexts.forEach { it.setTextColor(newValue) }
+	private var ui_seconds: Int = 0
+		set(value) {
+			if (field != value) {
+				tv_timer_s.text = value.toString().padStart(2, '0')
+			}
+			
+			field = value
 		}
-	}
+	private var ui_isNegative: Boolean = false
+		set(value) {
+			if (field != value) {
+				if (value) {
+					tv_timerNegative.setVisible()
+					guideline.layoutParams = (guideline.layoutParams as ConstraintLayout.LayoutParams).apply { guidePercent = 0.5f }
+				} else {
+					tv_timerNegative.setGone()
+					guideline.layoutParams = (guideline.layoutParams as ConstraintLayout.LayoutParams).apply { guidePercent = 0.44f }
+				}
+			}
+			
+			field = value
+		}
+	private var ui_color: Int = color_timerStart
+		set(value) {
+			if (field != value) {
+				timerTexts.forEach { it.setTextColor(value) }
+			}
+			
+			field = value
+		}
 	//</editor-fold>
 	
 	//<editor-fold desc="UI functions">
