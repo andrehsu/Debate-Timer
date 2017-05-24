@@ -24,7 +24,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.forEachChild
 
 class MainActivity : AppCompatActivity() {
-	//<editor-fold desc="State classes">
+	//<editor-fold desc="State fields and functions">
 	interface State
 	
 	interface HasTimerOption : State {
@@ -39,6 +39,8 @@ class MainActivity : AppCompatActivity() {
 		var running: Boolean = false
 			set(value) {
 				if (field != value) {
+					field = value
+					
 					if (value) {
 						timer.resume()
 						window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -55,22 +57,15 @@ class MainActivity : AppCompatActivity() {
 						}
 					}
 				}
-				
-				field = value
 			}
 	}
-	//</editor-fold>
 	
-	//<editor-fold desc="Fields">
-	private lateinit var buttons: List<Button>
-	private lateinit var timerTexts: List<TextView>
-	private lateinit var action_debateBell: MenuItem
-	private var timerDisplayCountUp = false
 	private var state: State = WaitingToBegin
 		set(value) {
 			require(value !is WaitingToBegin)
 			
 			val oldValue = field
+			field = value
 			
 			if (oldValue is WaitingToBegin) {
 				cl_timer.setVisible()
@@ -82,8 +77,6 @@ class MainActivity : AppCompatActivity() {
 			if (oldValue is TimerStarted && (value !is TimerStarted || value is TimerStarted && oldValue.timer !== value.timer)) {
 				oldValue.timer.pause()
 			}
-			
-			field = value
 		}
 	//</editor-fold>
 	
@@ -187,30 +180,21 @@ class MainActivity : AppCompatActivity() {
 		//</editor-fold>
 		
 		//<editor-fold desc="Set on toggle for elapsed/ remaining">
-		cl_timer.setOnClickListener {
-			timerDisplayCountUp = !timerDisplayCountUp
-			if (timerDisplayCountUp) {
-				tv_timerDisplayMode.text = getString(R.string.timer_display_count_up)
-			} else {
-				tv_timerDisplayMode.text = getString(R.string.timer_display_count_down)
-			}
-			refreshTimer()
-			refreshBellLabel()
-		}
+		cl_timer.setOnClickListener { ui_timerDisplayCountUp = !ui_timerDisplayCountUp }
 		//</editor-fold>
 	}
 	
-	class ExitDialogFragment : DialogFragment() {
-		override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-			return AlertDialog.Builder(activity)
-					.setTitle(R.string.exit_question)
-					.setPositiveButton(android.R.string.yes, { _, _ -> activity.finish() })
-					.setNegativeButton(android.R.string.no, { _, _ -> dialog.cancel() })
-					.create()
-		}
-	}
-	
 	override fun onBackPressed() {
+		class ExitDialogFragment : DialogFragment() {
+			override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+				return AlertDialog.Builder(activity)
+						.setTitle(R.string.exit_question)
+						.setPositiveButton(android.R.string.yes, { _, _ -> activity.finish() })
+						.setNegativeButton(android.R.string.no, { _, _ -> dialog.cancel() })
+						.create()
+			}
+		}
+		
 		if (isTaskRoot) {
 			ExitDialogFragment().show(supportFragmentManager, null)
 		} else {
@@ -228,39 +212,49 @@ class MainActivity : AppCompatActivity() {
 		when (item.itemId) {
 			R.id.action_debate_bell -> {
 				debateBellEnabled = !debateBellEnabled
-				if (debateBellEnabled) {
-					action_debateBell.icon = getDrawable(R.drawable.ic_notifications_active_white_24dp)
-				} else {
-					action_debateBell.icon = getDrawable(R.drawable.ic_notifications_off_white_24dp)
-				}
+				action_debateBell.icon = getDrawable(
+						if (debateBellEnabled) {
+							R.drawable.ic_notifications_active_white_24dp
+						} else {
+							R.drawable.ic_notifications_off_white_24dp
+						}
+				)
+				
 				refreshBellLabel()
 			}
 			else -> return super.onOptionsItemSelected(item)
 		}
+		
 		return true
 	}
 	//</editor-fold>
 	
-	//<editor-fold desc="UI fields">
+	//<editor-fold desc="UI fields and functions">
+	private lateinit var buttons: List<Button>
+	private lateinit var timerTexts: List<TextView>
+	private lateinit var action_debateBell: MenuItem
+	
 	private var ui_minutes: Int = 0
 		set(value) {
 			if (field != value) {
+				field = value
+				
 				tv_timer_m.text = value.toString()
 			}
-			
-			field = value
 		}
 	private var ui_seconds: Int = 0
 		set(value) {
 			if (field != value) {
+				field = value
+				
 				tv_timer_s.text = value.toString().padStart(2, '0')
 			}
-			
-			field = value
 		}
 	private var ui_isNegative: Boolean = false
 		set(value) {
 			if (field != value) {
+				field = value
+				
 				if (value) {
 					tv_timerNegative.setVisible()
 					guideline.layoutParams = (guideline.layoutParams as ConstraintLayout.LayoutParams).apply { guidePercent = 0.5f }
@@ -270,24 +264,33 @@ class MainActivity : AppCompatActivity() {
 				}
 			}
 			
-			field = value
 		}
 	private var ui_color: Int = color_timerStart
 		set(value) {
 			if (field != value) {
+				field = value
+				
 				timerTexts.forEach { it.setTextColor(value) }
 			}
-			
-			field = value
 		}
-	//</editor-fold>
+	private var ui_timerDisplayCountUp = false
+		set(value) {
+			if (field != value) {
+				field = value
+				
+				tv_timerDisplayMode.text = getString(
+						if (value) R.string.timer_display_count_up else R.string.timer_display_count_down
+				)
+				refreshTimer()
+				refreshBellLabel()
+			}
+		}
 	
-	//<editor-fold desc="UI functions">
 	private fun refreshTimer() {
 		val state = state
 		when (state) {
 			is WaitingToStart -> {
-				if (timerDisplayCountUp) {
+				if (ui_timerDisplayCountUp) {
 					ui_minutes = 0
 					ui_seconds = 0
 				} else {
@@ -299,7 +302,7 @@ class MainActivity : AppCompatActivity() {
 			}
 			is TimerStarted -> {
 				val timer = state.timer
-				if (timerDisplayCountUp) {
+				if (ui_timerDisplayCountUp) {
 					ui_minutes = timer.minutesSinceStart
 					ui_seconds = timer.secondsSinceStart
 					ui_isNegative = false
@@ -321,13 +324,11 @@ class MainActivity : AppCompatActivity() {
 			} else {
 				tv_bellsAt.setVisible()
 				
-				val format = if (timerOption.bellsSinceStart.count() == 1) {
-					getString(R.string.bell_at)
-				} else {
-					getString(R.string.bells_at)
-				}
+				val format = getString(
+						if (timerOption.bellsSinceStart.count() == 1) R.string.bell_at else R.string.bells_at
+				)
 				
-				val string = if (timerDisplayCountUp) {
+				val string = if (ui_timerDisplayCountUp) {
 					timerOption.countUpString
 				} else {
 					timerOption.countDownString
