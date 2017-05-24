@@ -291,26 +291,29 @@ class MainActivity : AppCompatActivity() {
 	//<editor-fold desc="UI functions">
 	private fun refreshTimer() {
 		val state = state
-		if (state is WaitingToStart) {
-			if (timerDisplayCountUp) {
-				ui_minutes = 0
-				ui_seconds = 0
-			} else {
-				ui_minutes = state.timerOption.minutesOnly
-				ui_seconds = state.timerOption.secondsOnly
-			}
-			ui_isNegative = false
-			ui_color = color_timerStart
-		} else if (state is TimerStarted) {
-			val timer = state.timer
-			if (timerDisplayCountUp) {
-				ui_minutes = timer.minutesSinceStart
-				ui_seconds = timer.secondsSinceStart
+		when (state) {
+			is WaitingToStart -> {
+				if (timerDisplayCountUp) {
+					ui_minutes = 0
+					ui_seconds = 0
+				} else {
+					ui_minutes = state.timerOption.minutesOnly
+					ui_seconds = state.timerOption.secondsOnly
+				}
 				ui_isNegative = false
-			} else {
-				ui_minutes = timer.minutesLeft
-				ui_seconds = timer.secondsLeft
-				ui_isNegative = timer.isTimeEndNegative
+				ui_color = color_timerStart
+			}
+			is TimerStarted -> {
+				val timer = state.timer
+				if (timerDisplayCountUp) {
+					ui_minutes = timer.minutesSinceStart
+					ui_seconds = timer.secondsSinceStart
+					ui_isNegative = false
+				} else {
+					ui_minutes = timer.minutesLeft
+					ui_seconds = timer.secondsLeft
+					ui_isNegative = timer.isTimeEndNegative
+				}
 			}
 		}
 	}
