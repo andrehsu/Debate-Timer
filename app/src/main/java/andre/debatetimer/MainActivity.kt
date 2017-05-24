@@ -120,14 +120,18 @@ class MainActivity : AppCompatActivity() {
 		}
 		//</editor-fold>
 		
-		//<editor-fold desc="Show debug button if debugging">
-//		if (BuildConfig.DEBUG) {
-//			bt_debug.setVisible()
-//		}
-		//</editor-fold>
-		
 		//<editor-fold desc="StartPause button onClick">
 		bt_startPause.setOnClickListener {
+			fun timerStarted(state: TimerStarted) {
+				if (state.running) {
+					bt_startPause.text = getString(R.string.resume)
+					state.running = false
+				} else {
+					bt_startPause.text = getString(R.string.pause)
+					state.running = true
+				}
+			}
+			
 			bt_startPause crossfadeTo bt_startPause withDuration longAnimTime
 			val state = state
 			when (state) {
@@ -148,19 +152,9 @@ class MainActivity : AppCompatActivity() {
 						}
 					}
 					
-					this.state = TimerStarted(state.timerOption, timer)
-					
-					bt_startPause.callOnClick()
+					this.state = TimerStarted(state.timerOption, timer).also(::timerStarted)
 				}
-				is TimerStarted -> {
-					if (state.running) {
-						bt_startPause.text = getString(R.string.resume)
-						state.running = false
-					} else {
-						bt_startPause.text = getString(R.string.pause)
-						state.running = true
-					}
-				}
+				is TimerStarted -> timerStarted(state)
 			}
 		}
 		//</editor-fold>
