@@ -111,8 +111,8 @@ class MainActivity : AppCompatActivity() {
 				}
 				child.setTextColor(getColorCompat(R.color.buttonUnselected))
 				child.setAllCaps(false)
-				
-				child.setOnClickListener(this::onTimeButtonSelected)
+
+                child.setOnClickListener(this::onTimeButtonClick)
 			} else {
 				child.setInvisible()
 			}
@@ -154,8 +154,8 @@ class MainActivity : AppCompatActivity() {
 							R.drawable.ic_notifications_off_white_24dp
 						}
 				)
-				
-				refreshBellLabel()
+
+                refreshBells()
 			}
 			else -> return super.onOptionsItemSelected(item)
 		}
@@ -217,7 +217,7 @@ class MainActivity : AppCompatActivity() {
 						if (value) R.string.timer_display_count_up else R.string.timer_display_count_down
 				)
 				refreshTimer()
-				refreshBellLabel()
+                refreshBells()
 			}
 		}
 	
@@ -249,8 +249,8 @@ class MainActivity : AppCompatActivity() {
 			}
 		}
 	}
-	
-	private fun refreshBellLabel() {
+
+    private fun refreshBells() {
 		val state = state
 		if (debateBellEnabled && state is HasTimerOption) {
 			val timerOption = state.timerOption
@@ -277,7 +277,7 @@ class MainActivity : AppCompatActivity() {
 	}
 	
 	@Suppress("UNUSED_PARAMETER")
-	fun onStartPauseSelected(view: View) {
+    fun onStartPauseClick(view: View) {
 		fun timerStarted(state: TimerStarted) {
 			if (state.running) {
 				bt_startPause.text = getString(R.string.resume)
@@ -315,11 +315,11 @@ class MainActivity : AppCompatActivity() {
 	}
 	
 	@Suppress("UNUSED_PARAMETER")
-	fun onToggleElapsedRemainingSelected(view: View) {
+    fun onToggleElapsedRemainingClick(view: View) {
 		ui_timerDisplayCountUp = !ui_timerDisplayCountUp
 	}
-	
-	fun onTimeButtonSelected(view: View) {
+
+    fun onTimeButtonClick(view: View) {
 		buttons.forEach {
 			it.setTextColor(getColorCompat(R.color.buttonUnselected))
 		}
@@ -339,7 +339,7 @@ class MainActivity : AppCompatActivity() {
 		this.state = WaitingToStart(timerOption)
 		
 		refreshTimer()
-		refreshBellLabel()
+        refreshBells()
 	}
 	//</editor-fold>
 }
