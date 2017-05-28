@@ -111,8 +111,8 @@ class MainActivity : AppCompatActivity() {
 				}
 				child.setTextColor(getColorCompat(R.color.buttonUnselected))
 				child.setAllCaps(false)
-
-                child.setOnClickListener(this::onTimeButtonClick)
+				
+				child.setOnClickListener(this::onTimeButtonClick)
 			} else {
 				child.setInvisible()
 			}
@@ -154,13 +154,21 @@ class MainActivity : AppCompatActivity() {
 							R.drawable.ic_notifications_off_white_24dp
 						}
 				)
-
-                refreshBells()
+				
+				refreshBells()
 			}
 			else -> return super.onOptionsItemSelected(item)
 		}
 		
 		return true
+	}
+	
+	override fun onDestroy() {
+		super.onDestroy()
+		val state = state
+		if (state is TimerStarted) {
+			state.timer.pause()
+		}
 	}
 	//</editor-fold>
 	
@@ -217,7 +225,7 @@ class MainActivity : AppCompatActivity() {
 						if (value) R.string.timer_display_count_up else R.string.timer_display_count_down
 				)
 				refreshTimer()
-                refreshBells()
+				refreshBells()
 			}
 		}
 	
@@ -249,8 +257,8 @@ class MainActivity : AppCompatActivity() {
 			}
 		}
 	}
-
-    private fun refreshBells() {
+	
+	private fun refreshBells() {
 		val state = state
 		if (debateBellEnabled && state is HasTimerOption) {
 			val timerOption = state.timerOption
@@ -277,7 +285,7 @@ class MainActivity : AppCompatActivity() {
 	}
 	
 	@Suppress("UNUSED_PARAMETER")
-    fun onStartPauseClick(view: View) {
+	fun onStartPauseClick(view: View) {
 		fun timerStarted(state: TimerStarted) {
 			if (state.running) {
 				bt_startPause.text = getString(R.string.resume)
@@ -315,11 +323,11 @@ class MainActivity : AppCompatActivity() {
 	}
 	
 	@Suppress("UNUSED_PARAMETER")
-    fun onToggleElapsedRemainingClick(view: View) {
+	fun onToggleElapsedRemainingClick(view: View) {
 		ui_timerDisplayCountUp = !ui_timerDisplayCountUp
 	}
-
-    fun onTimeButtonClick(view: View) {
+	
+	fun onTimeButtonClick(view: View) {
 		buttons.forEach {
 			it.setTextColor(getColorCompat(R.color.buttonUnselected))
 		}
@@ -339,7 +347,7 @@ class MainActivity : AppCompatActivity() {
 		this.state = WaitingToStart(timerOption)
 		
 		refreshTimer()
-        refreshBells()
+		refreshBells()
 	}
 	//</editor-fold>
 }
