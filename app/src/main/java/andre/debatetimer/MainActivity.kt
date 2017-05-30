@@ -144,7 +144,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 		menuInflater.inflate(R.menu.activity_main, menu)
 		action_debateBell = menu.findItem(R.id.action_debate_bell)
 		
-		pref_bell_enabled(defaultSharedPreference)
+		update_bell_enabled(defaultSharedPreference)
 		return true
 	}
 	
@@ -182,14 +182,14 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 		pref_bell_enabled_key = getString(R.string.pref_bell_enabled_key)
 		pref_bell_enabled_default = resources.getBoolean(R.bool.pref_bell_enabled_default)
 		
-		pref_bell_enabled(sharedPreference)
+		update_bell_enabled(sharedPreference)
 		
 		sharedPreference.registerOnSharedPreferenceChangeListener(this)
 	}
 	
 	override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
 		when (key) {
-			pref_bell_enabled_key -> pref_bell_enabled(sharedPreferences)
+			pref_bell_enabled_key -> update_bell_enabled(sharedPreferences)
 		}
 	}
 	
@@ -201,7 +201,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 				.apply()
 	}
 	
-	private fun pref_bell_enabled(sharedPreferences: SharedPreferences) {
+	private fun update_bell_enabled(sharedPreferences: SharedPreferences) {
 		debateBellEnabled = sharedPreferences.getBoolean(
 				pref_bell_enabled_key,
 				pref_bell_enabled_default
