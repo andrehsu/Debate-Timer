@@ -10,7 +10,9 @@ import andre.debatetimer.timer.DebateBell.Companion.debateBellEnabled
 import andre.debatetimer.timer.DebateTimer
 import andre.debatetimer.timer.TimerOption
 import android.app.Dialog
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.support.constraint.ConstraintLayout
 import android.support.v4.app.DialogFragment
 import android.support.v7.app.AlertDialog
@@ -24,7 +26,7 @@ import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.forEachChild
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceChangeListener {
 	//<editor-fold desc="State fields and functions">
 	interface State
 	
@@ -71,7 +73,6 @@ class MainActivity : AppCompatActivity() {
 			if (oldValue is WaitingToBegin) {
 				cl_timer.setVisible()
 				bt_startPause.setVisible()
-				action_debateBell.isVisible = true
 				tv_startingText.setGone()
 			}
 			
@@ -117,6 +118,8 @@ class MainActivity : AppCompatActivity() {
 				child.setInvisible()
 			}
 		}
+		
+		setupSharedPreference()
 	}
 	
 	override fun onBackPressed() {
@@ -140,20 +143,15 @@ class MainActivity : AppCompatActivity() {
 	override fun onCreateOptionsMenu(menu: Menu): Boolean {
 		menuInflater.inflate(R.menu.activity_main, menu)
 		action_debateBell = menu.findItem(R.id.action_debate_bell)
+		
+		pref_bell_enabled(defaultSharedPreference)
 		return true
 	}
 	
 	override fun onOptionsItemSelected(item: MenuItem): Boolean {
 		when (item.itemId) {
 			R.id.action_debate_bell -> {
-				debateBellEnabled = !debateBellEnabled
-				action_debateBell.icon = getDrawable(
-						if (debateBellEnabled) {
-							R.drawable.ic_notifications_active_white_24dp
-						} else {
-							R.drawable.ic_notifications_off_white_24dp
-						}
-				)
+				setDebateBellEnabled(!debateBellEnabled)
 				
 				refreshBells()
 			}
@@ -169,13 +167,63 @@ class MainActivity : AppCompatActivity() {
 		if (state is TimerStarted) {
 			state.timer.pause()
 		}
+		
+		defaultSharedPreference.unregisterOnSharedPreferenceChangeListener(this)
 	}
+	//</editor-fold>
+	
+	//<editor-fold desc="SharedPreference">
+	private lateinit var pref_bell_enabled_key: String
+	private var pref_bell_enabled_default: Boolean = false
+	
+	private fun setupSharedPreference() {
+		val sharedPreference = defaultSharedPreference
+		
+		pref_bell_enabled_key = getString(R.string.pref_bell_enabled_key)
+		pref_bell_enabled_default = resources.getBoolean(R.bool.pref_bell_enabled_default)
+		
+		pref_bell_enabled(sharedPreference)
+		
+		sharedPreference.registerOnSharedPreferenceChangeListener(this)
+	}
+	
+	override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
+		when (key) {
+			pref_bell_enabled_key -> pref_bell_enabled(sharedPreferences)
+		}
+	}
+	
+	private fun setDebateBellEnabled(enabled: Boolean) {
+		val sharedPreference = defaultSharedPreference
+		
+		sharedPreference.edit()
+				.putBoolean(pref_bell_enabled_key, enabled)
+				.apply()
+	}
+	
+	private fun pref_bell_enabled(sharedPreferences: SharedPreferences) {
+		debateBellEnabled = sharedPreferences.getBoolean(
+				pref_bell_enabled_key,
+				pref_bell_enabled_default
+		)
+		
+		action_debateBell?.icon = getDrawable(
+				if (debateBellEnabled) {
+					R.drawable.ic_notifications_active_white_24dp
+				} else {
+					R.drawable.ic_notifications_off_white_24dp
+				}
+		)
+	}
+	
+	private val defaultSharedPreference
+		get() = PreferenceManager.getDefaultSharedPreferences(this)
 	//</editor-fold>
 	
 	//<editor-fold desc="UI fields and functions">
 	private lateinit var buttons: List<Button>
 	private lateinit var timerTexts: List<TextView>
-	private lateinit var action_debateBell: MenuItem
+	private var action_debateBell: MenuItem? = null
 	
 	private var ui_minutes: Int = 0
 		set(value) {
