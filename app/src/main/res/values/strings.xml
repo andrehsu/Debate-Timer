@@ -10,8 +10,10 @@
     <string name="timer_display_count_down">Remaining (tap for elapsed)</string>
     <string name="starting_text">Select a time to begin</string>
     <string name="exit_question">Are you sure you want to exit?</string>
-    <string name="bell_at" formatted="false">Bell at %s</string>
-    <string name="bells_at" formatted="false">Bells at %s</string>
+    <plurals name="bells_at">
+        <item quantity="one">Bell at %s</item>
+        <item quantity="other">Bells at %s</item>
+    </plurals>
     <string name="debate_bell_on_off">Debate Bell On/Off</string>
 
     <!--Settings-->

@@ -315,17 +315,13 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 			} else {
 				tv_bellsAt.setVisible()
 				
-				val format = getString(
-						if (timerOption.bellsSinceStart.count() == 1) R.string.bell_at else R.string.bells_at
-				)
-				
-				val string = if (ui_timerDisplayCountUp) {
+				val bellString = if (ui_timerDisplayCountUp) {
 					timerOption.countUpString
 				} else {
 					timerOption.countDownString
 				}
 				
-				tv_bellsAt.text = format.format(string)
+				tv_bellsAt.text = resources.getQuantityString(R.plurals.bells_at, timerOption.bellsSinceStart.count(), bellString)
 			}
 		} else {
 			tv_bellsAt.setInvisible()
