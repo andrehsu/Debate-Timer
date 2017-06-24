@@ -12,7 +12,6 @@ import andre.debatetimer.timer.TimerOption
 import android.app.Dialog
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.support.constraint.ConstraintLayout
 import android.support.v4.app.DialogFragment
 import android.support.v7.app.AlertDialog
@@ -145,14 +144,14 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 		menuInflater.inflate(R.menu.activity_main, menu)
 		action_debateBell = menu.findItem(R.id.action_debate_bell)
 		
-		update_bell_enabled(defaultSharedPreference)
+		updateDebateBellEnabled(defaultSharedPreference)
 		return true
 	}
 	
 	override fun onOptionsItemSelected(item: MenuItem): Boolean {
 		when (item.itemId) {
 			R.id.action_debate_bell -> {
-				setDebateBellEnabled(!debateBellEnabled)
+				Prefs.setDebateBellEnabled(!debateBellEnabled, defaultSharedPreference)
 				
 				refreshBells()
 			}
@@ -174,39 +173,24 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 	//</editor-fold>
 	
 	//<editor-fold desc="SharedPreference">
-	private lateinit var pref_bell_enabled_key: String
-	private var pref_bell_enabled_default: Boolean = false
-	
 	private fun setupSharedPreference() {
 		val sharedPreference = defaultSharedPreference
 		
-		pref_bell_enabled_key = getString(R.string.pref_bell_enabled_key)
-		pref_bell_enabled_default = resources.getBoolean(R.bool.pref_bell_enabled_default)
+		Prefs.init(this)
 		
-		update_bell_enabled(sharedPreference)
+		updateDebateBellEnabled(sharedPreference)
 		
 		sharedPreference.registerOnSharedPreferenceChangeListener(this)
 	}
 	
 	override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
 		when (key) {
-			pref_bell_enabled_key -> update_bell_enabled(sharedPreferences)
+			Prefs.pref_bell_enabled_key -> updateDebateBellEnabled(sharedPreferences)
 		}
 	}
 	
-	private fun setDebateBellEnabled(enabled: Boolean) {
-		val sharedPreference = defaultSharedPreference
-		
-		sharedPreference.edit()
-				.putBoolean(pref_bell_enabled_key, enabled)
-				.apply()
-	}
-	
-	private fun update_bell_enabled(sharedPreferences: SharedPreferences) {
-		debateBellEnabled = sharedPreferences.getBoolean(
-				pref_bell_enabled_key,
-				pref_bell_enabled_default
-		)
+	private fun updateDebateBellEnabled(sharedPreferences: SharedPreferences) {
+		debateBellEnabled = Prefs.getDebateBellEnabled(sharedPreferences)
 		
 		action_debateBell?.icon = getDrawable(
 				if (debateBellEnabled) {
@@ -216,9 +200,6 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 				}
 		)
 	}
-	
-	private val defaultSharedPreference
-		get() = PreferenceManager.getDefaultSharedPreferences(this)
 	//</editor-fold>
 	
 	//<editor-fold desc="UI fields and functions">

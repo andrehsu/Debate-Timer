@@ -10,6 +10,7 @@ import android.animation.AnimatorListenerAdapter
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.preference.PreferenceManager
 import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.view.View
@@ -153,3 +154,6 @@ fun secondsToString(seconds: Int): String {
 }
 
 fun Context.getColorCompat(id: Int) = ContextCompat.getColor(this, id)
+
+inline val Context.defaultSharedPreference
+	get() = PreferenceManager.getDefaultSharedPreferences(this)
