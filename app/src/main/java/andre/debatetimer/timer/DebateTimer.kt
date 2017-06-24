@@ -19,7 +19,7 @@ abstract class DebateTimer(timerOption: TimerOption) {
 	}
 	
 	private fun onSecondInternal() {
-		if (countDownSeconds <= -120) {
+		if (countDownSeconds <= -60) {
 			pause()
 			return
 		}

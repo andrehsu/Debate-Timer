@@ -249,9 +249,13 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 				
 				if (value) {
 					tv_timerNegative.setVisible()
-					guideline.layoutParams = (guideline.layoutParams as ConstraintLayout.LayoutParams).apply { guidePercent = 0.5f }
+					tv_timer_m.setGone()
+					tv_timer_colon.setGone()
+					guideline.layoutParams = (guideline.layoutParams as ConstraintLayout.LayoutParams).apply { guidePercent = 0.36f }
 				} else {
 					tv_timerNegative.setGone()
+					tv_timer_m.setVisible()
+					tv_timer_colon.setVisible()
 					guideline.layoutParams = (guideline.layoutParams as ConstraintLayout.LayoutParams).apply { guidePercent = 0.43f }
 				}
 			}
