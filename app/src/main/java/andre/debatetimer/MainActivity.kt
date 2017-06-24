@@ -296,6 +296,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 		val state = state
 		if (debateBellEnabled && state is HasTimerOption) {
 			val timerOption = state.timerOption
+			
 			if (timerOption.countUpString.isEmpty()) {
 				tv_bellsAt.setInvisible()
 			} else {

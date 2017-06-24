@@ -4,6 +4,7 @@ package andre.debatetimer.extensions
 
 import andre.debatetimer.MainActivity
 import andre.debatetimer.R
+import andre.debatetimer.extensions.EnvVars.clipboard
 import andre.debatetimer.extensions.EnvVars.shortAnimTime
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
@@ -13,66 +14,90 @@ import android.content.Context
 import android.preference.PreferenceManager
 import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
+import android.util.Log
 import android.view.View
 import android.view.ViewPropertyAnimator
 import android.widget.EditText
 import java.util.*
 
 object EnvVars {
+	private val LogTag = EnvVars::class.java.simpleName
+	
+	
+	private inline fun <R> requireInitialized(block: () -> R): R {
+		require(initialized) { "EnvVars not initialized" }
+		return block()
+	}
+	
+	private var initialized = false
+	
 	var shortAnimTime: Long = -1
+		get() = requireInitialized { return field }
 		private set
 	var mediumAnimTime: Long = -1
+		get() = requireInitialized { return field }
 		private set
 	var longAnimTime: Long = -1
+		get () = requireInitialized { return field }
 		private set
 	
 	var color_timerStart: Int = -1
+		get () = requireInitialized { return field }
 		private set
 	var color_timerNormal: Int = -1
+		get () = requireInitialized { return field }
 		private set
 	var color_timerEnd: Int = -1
+		get () = requireInitialized { return field }
 		private set
 	var color_timerOvertime: Int = -1
+		get () = requireInitialized { return field }
 		private set
 	
 	lateinit var applicationContext: Context
 		private set
-	
+	lateinit var clipboard: ClipboardManager
+		private set
 	
 	fun init(activity: MainActivity) {
-		applicationContext = activity.applicationContext
-		with(applicationContext) {
-			clipboard = getSystemService(android.content.Context.CLIPBOARD_SERVICE) as ClipboardManager
-			
-			with(resources) {
-				shortAnimTime = getInteger(android.R.integer.config_shortAnimTime).toLong()
-				mediumAnimTime = getInteger(android.R.integer.config_mediumAnimTime).toLong()
-				longAnimTime = getInteger(android.R.integer.config_longAnimTime).toLong()
+		if (!initialized) {
+			applicationContext = activity.applicationContext
+			with(applicationContext) {
+				clipboard = getSystemService(android.content.Context.CLIPBOARD_SERVICE) as ClipboardManager
+				
+				with(resources) {
+					shortAnimTime = getInteger(android.R.integer.config_shortAnimTime).toLong()
+					mediumAnimTime = getInteger(android.R.integer.config_mediumAnimTime).toLong()
+					longAnimTime = getInteger(android.R.integer.config_longAnimTime).toLong()
+				}
+				
+				color_timerStart = getColorCompat(R.color.timerStart)
+				color_timerNormal = getColorCompat(R.color.timerNormal)
+				color_timerEnd = getColorCompat(R.color.timerEnd)
+				color_timerOvertime = getColorCompat(R.color.timerOvertime)
 			}
 			
-			color_timerStart = getColorCompat(R.color.timerStart)
-			color_timerNormal = getColorCompat(R.color.timerNormal)
-			color_timerEnd = getColorCompat(R.color.timerEnd)
-			color_timerOvertime = getColorCompat(R.color.timerOvertime)
+			initialized = true
+		} else {
+			Log.d(LogTag, "Already initialized")
 		}
 	}
 }
 
-private var clipboard: ClipboardManager? = null
 
 fun copyText(view: View, label: String, textToCopy: String, textToShow: String? = null): Boolean {
-	clipboard!!.primaryClip = ClipData.newPlainText(label, textToCopy)
+	clipboard.primaryClip = ClipData.newPlainText(label, textToCopy)
 	Snackbar.make(view, (textToShow ?: textToCopy) + " copied", Snackbar.LENGTH_SHORT).show()
 	return true
 }
 
 inline var EditText.textStr: String
-	get() = this.text.toString()
-	set(value) = this.setText(value)
+	get() = text.toString()
+	set(value) = setText(value)
 
-inline fun EditText.clearText() = this.setText("")
+inline fun EditText.clearText() = setText("")
 
-inline fun EditText.isEmpty(): Boolean = this.text.toString().isEmpty()
+inline fun EditText.isEmpty(): Boolean = textStr.isEmpty()
 
 inline fun View.setVisible() {
 	this.visibility = View.VISIBLE
