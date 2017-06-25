@@ -3,17 +3,17 @@ package andre.debatetimer
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import org.jetbrains.anko.defaultSharedPreferences
+import java.util.concurrent.ConcurrentHashMap
 
 object Prefs {
 	private val LogTag = Prefs::class.java.simpleName
-	
 	
 	private inline fun <R> requireInitialized(block: () -> R): R {
 		require(initialized) { "Prefs not initialized" }
 		return block()
 	}
 	
-	private var initialized = false
 	
 	lateinit var pref_bell_enabled_key: String
 		private set
@@ -21,26 +21,35 @@ object Prefs {
 		get() = requireInitialized { return field }
 		private set
 	
+	private val cache = ConcurrentHashMap<String, Any>()
+	private lateinit var sharedPreferences: SharedPreferences
+	private var initialized = false
+	
 	fun init(context: Context) {
 		if (!initialized) {
 			with(context.resources) {
 				pref_bell_enabled_key = getString(R.string.pref_bell_enabled_key)
 				pref_bell_enabled_default = getBoolean(R.bool.pref_bell_enabled_default)
 			}
+			sharedPreferences = context.defaultSharedPreferences
+			
 			initialized = true
 		} else {
 			Log.d(LogTag, "Already initialized")
 		}
 	}
 	
-	fun getDebateBellEnabled(sharedPreferences: SharedPreferences): Boolean = requireInitialized {
-		sharedPreferences.getBoolean(pref_bell_enabled_key, pref_bell_enabled_default)
-	}
-	
-	
-	fun setDebateBellEnabled(enabled: Boolean, sharedPreferences: SharedPreferences) = requireInitialized {
-		sharedPreferences.edit()
-				.putBoolean(pref_bell_enabled_key, enabled)
-				.apply()
-	}
+	var debateBellEnabled: Boolean
+		get() = requireInitialized {
+			return cache.getOrPut(pref_bell_enabled_key)
+			{ sharedPreferences.getBoolean(pref_bell_enabled_key, pref_bell_enabled_default) } as Boolean
+		}
+		set(value) {
+			requireInitialized {
+				cache[pref_bell_enabled_key] = value
+				sharedPreferences.edit()
+						.putBoolean(pref_bell_enabled_key, value)
+						.apply()
+			}
+		}
 }

@@ -6,7 +6,6 @@ import andre.debatetimer.extensions.EnvVars.color_timerNormal
 import andre.debatetimer.extensions.EnvVars.color_timerStart
 import andre.debatetimer.extensions.EnvVars.init
 import andre.debatetimer.extensions.EnvVars.longAnimTime
-import andre.debatetimer.timer.DebateBell.Companion.debateBellEnabled
 import andre.debatetimer.timer.DebateTimer
 import andre.debatetimer.timer.TimerOption
 import android.app.Dialog
@@ -24,6 +23,7 @@ import android.widget.Button
 import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.timer.*
+import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.forEachChild
 
 class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceChangeListener {
@@ -144,14 +144,14 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 		menuInflater.inflate(R.menu.activity_main, menu)
 		action_debateBell = menu.findItem(R.id.action_debate_bell)
 		
-		updateDebateBellEnabled(defaultSharedPreference)
+		updateDebateBellIcon()
 		return true
 	}
 	
 	override fun onOptionsItemSelected(item: MenuItem): Boolean {
 		when (item.itemId) {
 			R.id.action_debate_bell -> {
-				Prefs.setDebateBellEnabled(!debateBellEnabled, defaultSharedPreference)
+				Prefs.debateBellEnabled = !Prefs.debateBellEnabled
 				
 				refreshBells()
 			}
@@ -168,32 +168,30 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 			state.timer.pause()
 		}
 		
-		defaultSharedPreference.unregisterOnSharedPreferenceChangeListener(this)
+		defaultSharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
 	}
 	//</editor-fold>
 	
 	//<editor-fold desc="SharedPreference">
 	private fun setupSharedPreference() {
-		val sharedPreference = defaultSharedPreference
+		val sharedPreference = defaultSharedPreferences
 		
 		Prefs.init(this)
 		
-		updateDebateBellEnabled(sharedPreference)
+		updateDebateBellIcon()
 		
 		sharedPreference.registerOnSharedPreferenceChangeListener(this)
 	}
 	
 	override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
 		when (key) {
-			Prefs.pref_bell_enabled_key -> updateDebateBellEnabled(sharedPreferences)
+			Prefs.pref_bell_enabled_key -> updateDebateBellIcon()
 		}
 	}
 	
-	private fun updateDebateBellEnabled(sharedPreferences: SharedPreferences) {
-		debateBellEnabled = Prefs.getDebateBellEnabled(sharedPreferences)
-		
+	private fun updateDebateBellIcon() {
 		action_debateBell?.icon = getDrawable(
-				if (debateBellEnabled) {
+				if (Prefs.debateBellEnabled) {
 					R.drawable.ic_notifications_active_white_24dp
 				} else {
 					R.drawable.ic_notifications_off_white_24dp
@@ -294,7 +292,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 	
 	private fun refreshBells() {
 		val state = state
-		if (debateBellEnabled && state is HasTimerOption) {
+		if (Prefs.debateBellEnabled && state is HasTimerOption) {
 			val timerOption = state.timerOption
 			
 			if (timerOption.countUpString.isEmpty()) {
