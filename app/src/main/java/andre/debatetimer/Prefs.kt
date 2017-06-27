@@ -6,7 +6,7 @@ import android.util.Log
 import org.jetbrains.anko.defaultSharedPreferences
 import java.util.concurrent.ConcurrentHashMap
 
-object Prefs {
+object Prefs : SharedPreferences.OnSharedPreferenceChangeListener {
 	private val LogTag = Prefs::class.java.simpleName
 	
 	private inline fun <R> requireInitialized(block: () -> R): R {
@@ -52,4 +52,11 @@ object Prefs {
 						.apply()
 			}
 		}
+	
+	override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
+		//invalidates instead of updating
+		when (key) {
+			pref_bell_enabled_key -> cache.remove(key)
+		}
+	}
 }
