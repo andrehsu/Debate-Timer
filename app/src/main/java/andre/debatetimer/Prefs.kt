@@ -9,11 +9,11 @@ import java.util.concurrent.ConcurrentHashMap
 object Prefs : SharedPreferences.OnSharedPreferenceChangeListener {
 	private val LogTag = Prefs::class.java.simpleName
 	
+	private var initialized = false
 	private inline fun <R> requireInitialized(block: () -> R): R {
 		require(initialized) { "Prefs not initialized" }
 		return block()
 	}
-	
 	
 	lateinit var pref_bell_enabled_key: String
 		private set
@@ -23,7 +23,6 @@ object Prefs : SharedPreferences.OnSharedPreferenceChangeListener {
 	
 	private val cache = ConcurrentHashMap<String, Any>()
 	private lateinit var sharedPreferences: SharedPreferences
-	private var initialized = false
 	
 	fun init(context: Context) {
 		if (!initialized) {
