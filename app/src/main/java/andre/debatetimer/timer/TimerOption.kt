@@ -1,13 +1,13 @@
 package andre.debatetimer.timer
 
 import andre.debatetimer.extensions.secondsToString
-import andre.debatetimer.timer.DebateBell.ONCE
+import andre.debatetimer.timer.DebateBell.Once
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.debug
 
 class TimerOption(val seconds: Int, val bellsSinceStart: Map<Int, DebateBell>) {
 	companion object : AnkoLogger {
-		private val DEFAULT = TimerOption(420, mapOf(60 to ONCE, 360 to ONCE))
+		private val DEFAULT = TimerOption(420, mapOf(60 to Once, 360 to Once))
 		private val cache = mutableMapOf<String, TimerOption>()
 		
 		fun parseTag(tag: String): TimerOption {
@@ -22,10 +22,10 @@ class TimerOption(val seconds: Int, val bellsSinceStart: Map<Int, DebateBell>) {
 					val bells = if (tokens[1].isEmpty()) {
 						mapOf()
 					} else if (tokens[1].toIntOrNull() == -1) {
-						mapOf(60 to ONCE, seconds - 60 to ONCE)
+						mapOf(60 to Once, seconds - 60 to Once)
 					} else {
 						val bellTokens = tokens[1].split(',')
-						bellTokens.map { it.toInt() to ONCE }.toMap()
+						bellTokens.map { it.toInt() to Once }.toMap()
 					}
 					
 					TimerOption(seconds, bells)
@@ -37,8 +37,8 @@ class TimerOption(val seconds: Int, val bellsSinceStart: Map<Int, DebateBell>) {
 		}
 	}
 	
-	val countUpString = bellsSinceStart.filter { (_, v) -> v == ONCE }.map { secondsToString(it.key) }.joinToString()
-	val countDownString = bellsSinceStart.filter { (_, v) -> v == ONCE }.map { secondsToString(seconds - it.key) }.joinToString()
+	val countUpString = bellsSinceStart.filter { (_, v) -> v == Once }.map { secondsToString(it.key) }.joinToString()
+	val countDownString = bellsSinceStart.filter { (_, v) -> v == Once }.map { secondsToString(seconds - it.key) }.joinToString()
 	
 	val minutesOnly = seconds / 60
 	val secondsOnly = seconds % 60

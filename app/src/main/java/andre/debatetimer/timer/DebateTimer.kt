@@ -36,10 +36,10 @@ abstract class DebateTimer(timerOption: TimerOption) {
 		secondsSinceStart = countUpSeconds % 60
 		minutesSinceStart = countUpSeconds / 60
 		
-		bellsSinceStart[countUpSeconds]?.ring()
+		bellsSinceStart[countUpSeconds]?.let { onBell(it) }
 		
 		if (countDownSeconds <= 0 && countDownSeconds % 15 == 0) {
-			DebateBell.TWICE.ring()
+			onBell(DebateBell.Twice)
 		}
 		
 		if (countUpSeconds == 60 && countDownSeconds > 60) {
@@ -88,5 +88,11 @@ abstract class DebateTimer(timerOption: TimerOption) {
 	
 	open fun onOvertime() {}
 	
+	open fun onBell(debateBell: DebateBell) {}
+	
 	override fun toString(): String = "DebateTimer"
+}
+
+enum class DebateBell {
+	Once, Twice
 }

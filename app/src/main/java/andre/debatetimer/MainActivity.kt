@@ -6,10 +6,14 @@ import andre.debatetimer.extensions.EnvVars.color_timerNormal
 import andre.debatetimer.extensions.EnvVars.color_timerStart
 import andre.debatetimer.extensions.EnvVars.init
 import andre.debatetimer.extensions.EnvVars.longAnimTime
+import andre.debatetimer.timer.DebateBell
 import andre.debatetimer.timer.DebateTimer
 import andre.debatetimer.timer.TimerOption
 import android.app.Dialog
 import android.content.SharedPreferences
+import android.media.AudioAttributes
+import android.media.AudioManager
+import android.media.SoundPool
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
 import android.support.v4.app.DialogFragment
@@ -82,12 +86,31 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 		}
 	//</editor-fold>
 	
+	lateinit var soundPool: SoundPool
+	var debate_bell_one: Int = -1
+	var debate_bell_two: Int = -1
+	
 	//<editor-fold desc="Activity callbacks">
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_main)
 		
 		init(this)
+		
+		val attributes = AudioAttributes.Builder()
+				.setUsage(AudioAttributes.USAGE_MEDIA)
+				.setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+				.build()
+		
+		soundPool = SoundPool.Builder()
+				.setMaxStreams(1)
+				.setAudioAttributes(attributes)
+				.build()
+		
+		debate_bell_one = soundPool.load(this, R.raw.debate_bell_one, 1)
+		debate_bell_two = soundPool.load(this, R.raw.debate_bell_two, 1)
+		
+		volumeControlStream = AudioManager.STREAM_MUSIC
 		
 		timerTexts = listOf(tv_timerNegative, tv_timer_m, tv_timer_s, tv_timer_colon)
 		buttons = mutableListOf()
@@ -240,7 +263,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 			}
 			
 		}
-	private var ui_color: Int = color_timerStart
+	private var ui_color: Int = -1
 		set(value) {
 			if (field != value) {
 				field = value
@@ -342,6 +365,20 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 					
 					override fun onOvertime() {
 						ui_color = color_timerEnd
+					}
+					
+					override fun onBell(debateBell: DebateBell) {
+						if (Prefs.debateBellEnabled)
+							soundPool.play(
+									when (debateBell) {
+										DebateBell.Once -> debate_bell_one
+										DebateBell.Twice -> debate_bell_two
+									},
+									.99f,
+									.99f,
+									1,
+									0,
+									.99f)
 					}
 				}
 				

@@ -40,7 +40,7 @@
         android:background="#00FFFFFF"
         android:onClick="onStartPauseClick"
         android:text="@string/start"
-        android:textSize="32sp"
+        android:textSize="42sp"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/ll_timeButtons"
         app:layout_constraintLeft_toLeftOf="parent"

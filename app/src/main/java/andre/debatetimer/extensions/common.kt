@@ -2,7 +2,6 @@
 
 package andre.debatetimer.extensions
 
-import andre.debatetimer.MainActivity
 import andre.debatetimer.R
 import andre.debatetimer.extensions.EnvVars.clipboard
 import andre.debatetimer.extensions.EnvVars.shortAnimTime
@@ -53,15 +52,12 @@ object EnvVars {
 		get () = requireInitialized { return field }
 		private set
 	
-	lateinit var applicationContext: Context
-		private set
 	lateinit var clipboard: ClipboardManager
 		private set
 	
-	fun init(activity: MainActivity) {
+	fun init(context: Context) {
 		if (!initialized) {
-			applicationContext = activity.applicationContext
-			with(applicationContext) {
+			with(context) {
 				clipboard = getSystemService(android.content.Context.CLIPBOARD_SERVICE) as ClipboardManager
 				
 				with(resources) {
