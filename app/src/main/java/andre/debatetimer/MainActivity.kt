@@ -70,18 +70,19 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 	private var state: State = WaitingToBegin
 		set(value) {
 			require(value !is WaitingToBegin)
-			
-			val oldValue = field
-			field = value
-			
-			if (oldValue is WaitingToBegin) {
-				cl_timer.setVisible()
-				bt_startPause.setVisible()
-				tv_startingText.setGone()
-			}
-			
-			if (oldValue is TimerStarted && (value !is TimerStarted || value is TimerStarted && oldValue.timer !== value.timer)) {
-				oldValue.timer.pause()
+			if (value !== field) {
+				val oldValue = field
+				field = value
+				
+				if (oldValue is WaitingToBegin) {
+					cl_timer.setVisible()
+					bt_startPause.setVisible()
+					tv_startingText.setGone()
+				}
+				
+				if (oldValue is TimerStarted) {
+					oldValue.running = false
+				}
 			}
 		}
 	//</editor-fold>
@@ -404,11 +405,6 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 		bt_startPause.text = getString(R.string.start)
 		
 		val timerOption = TimerOption.parseTag(view.tag as String)
-		
-		val state = state
-		if (state is TimerStarted) {
-			state.running = false
-		}
 		
 		this.state = WaitingToStart(timerOption)
 		
