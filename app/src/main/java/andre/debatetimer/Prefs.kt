@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap
 object Prefs : SharedPreferences.OnSharedPreferenceChangeListener {
 	private val LogTag = Prefs::class.java.simpleName
 	
+	
 	private var initialized = false
 	private inline fun <R> requireInitialized(block: () -> R): R {
 		require(initialized) { "Prefs not initialized" }

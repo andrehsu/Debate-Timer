@@ -2,86 +2,20 @@
 
 package andre.debatetimer.extensions
 
-import andre.debatetimer.R
-import andre.debatetimer.extensions.EnvVars.clipboard
-import andre.debatetimer.extensions.EnvVars.shortAnimTime
+import andre.debatetimer.EnvVars
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
 import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
-import android.util.Log
 import android.view.View
 import android.view.ViewPropertyAnimator
 import android.widget.EditText
 import java.util.*
 
-object EnvVars {
-	private val LogTag = EnvVars::class.java.simpleName
-	
-	
-	private inline fun <R> requireInitialized(block: () -> R): R {
-		require(initialized) { "EnvVars not initialized" }
-		return block()
-	}
-	
-	private var initialized = false
-	
-	var shortAnimTime: Long = -1
-		get() = requireInitialized { return field }
-		private set
-	var mediumAnimTime: Long = -1
-		get() = requireInitialized { return field }
-		private set
-	var longAnimTime: Long = -1
-		get () = requireInitialized { return field }
-		private set
-	
-	var color_timerStart: Int = -1
-		get () = requireInitialized { return field }
-		private set
-	var color_timerNormal: Int = -1
-		get () = requireInitialized { return field }
-		private set
-	var color_timerEnd: Int = -1
-		get () = requireInitialized { return field }
-		private set
-	var color_timerOvertime: Int = -1
-		get () = requireInitialized { return field }
-		private set
-	
-	lateinit var clipboard: ClipboardManager
-		private set
-	
-	fun init(context: Context) {
-		if (!initialized) {
-			with(context) {
-				clipboard = getSystemService(android.content.Context.CLIPBOARD_SERVICE) as ClipboardManager
-				
-				with(resources) {
-					shortAnimTime = getInteger(android.R.integer.config_shortAnimTime).toLong()
-					mediumAnimTime = getInteger(android.R.integer.config_mediumAnimTime).toLong()
-					longAnimTime = getInteger(android.R.integer.config_longAnimTime).toLong()
-				}
-				
-				color_timerStart = getColorCompat(R.color.timerStart)
-				color_timerNormal = getColorCompat(R.color.timerNormal)
-				color_timerEnd = getColorCompat(R.color.timerEnd)
-				color_timerOvertime = getColorCompat(R.color.timerOvertime)
-			}
-			
-			initialized = true
-		} else {
-			Log.d(LogTag, "Already initialized")
-		}
-	}
-}
-
-
 fun copyText(view: View, label: String, textToCopy: String, textToShow: String? = null): Boolean {
-	clipboard.primaryClip = ClipData.newPlainText(label, textToCopy)
+	EnvVars.clipboard.primaryClip = ClipData.newPlainText(label, textToCopy)
 	Snackbar.make(view, (textToShow ?: textToCopy) + " copied", Snackbar.LENGTH_SHORT).show()
 	return true
 }
@@ -131,13 +65,13 @@ fun ViewPropertyAnimator.setOnEnd(onEnd: (Animator?) -> Unit): ViewPropertyAnima
 	return this
 }
 
-inline fun View.fadeIn(animTime: Long = shortAnimTime): ViewPropertyAnimator = this.let {
+inline fun View.fadeIn(animTime: Long = EnvVars.shortAnimTime): ViewPropertyAnimator = this.let {
 	it.alpha = 0.0f
 	it.setVisible()
 	it.animate().alpha(1.0f).setDuration(animTime).setListener(null)
 }
 
-inline fun View.fadeOut(animTime: Long = shortAnimTime): ViewPropertyAnimator = this.animate().alpha(0.0f).setDuration(animTime).setOnEnd { this.setGone();this.alpha = 1.0f }
+inline fun View.fadeOut(animTime: Long = EnvVars.shortAnimTime): ViewPropertyAnimator = this.animate().alpha(0.0f).setDuration(animTime).setOnEnd { this.setGone();this.alpha = 1.0f }
 
 infix fun View.crossfadeTo(to: View): CrossfadeAnimator = CrossfadeAnimator(this.fadeOut(), to.fadeIn())
 

@@ -5,9 +5,9 @@ import andre.debatetimer.timer.DebateBell.Once
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.debug
 
-class TimerOption(val seconds: Int, val bellsSinceStart: Map<Int, DebateBell>) {
+class TimerOption(val seconds: Int, bellsSinceStart: Map<Int, DebateBell>) {
 	companion object : AnkoLogger {
-		private val DEFAULT = TimerOption(420, mapOf(60 to Once, 360 to Once))
+		private val Default = TimerOption(420, mapOf(60 to Once, 360 to Once))
 		private val cache = mutableMapOf<String, TimerOption>()
 		
 		fun parseTag(tag: String): TimerOption {
@@ -31,14 +31,23 @@ class TimerOption(val seconds: Int, val bellsSinceStart: Map<Int, DebateBell>) {
 					TimerOption(seconds, bells)
 				} catch(e: RuntimeException) {
 					debug { "Error occurred while parsing \"$tag\" for TimerOption" }
-					DEFAULT
+					Default
 				}
 			}
 		}
 	}
 	
-	val countUpString = bellsSinceStart.filter { (_, v) -> v == Once }.map { secondsToString(it.key) }.joinToString()
-	val countDownString = bellsSinceStart.filter { (_, v) -> v == Once }.map { secondsToString(seconds - it.key) }.joinToString()
+	val countUpString: String
+	val countDownString: String
+	val bellsSinceStart: Map<Int, DebateBell>
+	
+	init {
+		this.bellsSinceStart = bellsSinceStart.toSortedMap()
+		val sorted = this.bellsSinceStart.filter { (_, v) -> v == Once }.map { it.key }
+		
+		countUpString = sorted.map { secondsToString(it) }.joinToString()
+		countDownString = sorted.map { secondsToString(seconds - it) }.joinToString()
+	}
 	
 	val minutesOnly = seconds / 60
 	val secondsOnly = seconds % 60
