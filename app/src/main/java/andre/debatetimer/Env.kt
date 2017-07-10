@@ -1,8 +1,9 @@
 package andre.debatetimer
 
-import andre.debatetimer.extensions.getColorCompat
+import andre.debatetimer.extensions.abs
 import android.content.ClipboardManager
 import android.content.Context
+import android.support.v4.content.ContextCompat
 import android.util.Log
 
 object EnvVars {
@@ -65,3 +66,16 @@ object EnvVars {
 		}
 	}
 }
+
+fun secondsToString(seconds: Int): String {
+	val abs = seconds.abs()
+	val minutes = abs / 60
+	val secondsOnly = abs % 60
+	return if (seconds >= 0) {
+		""
+	} else {
+		"-"
+	} + "$minutes:${secondsOnly.toString().padStart(2, '0')}"
+}
+
+fun Context.getColorCompat(id: Int) = ContextCompat.getColor(this, id)

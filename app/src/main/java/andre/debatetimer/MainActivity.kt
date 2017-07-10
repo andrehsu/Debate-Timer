@@ -3,7 +3,10 @@ package andre.debatetimer
 import andre.debatetimer.EnvVars.longAnimTime
 import andre.debatetimer.TimerDisplayMode.CountDown
 import andre.debatetimer.TimerDisplayMode.CountUp
-import andre.debatetimer.extensions.*
+import andre.debatetimer.extensions.CrossfadeAnimator.Companion.crossfadeTo
+import andre.debatetimer.extensions.setGone
+import andre.debatetimer.extensions.setInvisible
+import andre.debatetimer.extensions.setVisible
 import andre.debatetimer.timer.DebateBell
 import andre.debatetimer.timer.DebateTimer
 import andre.debatetimer.timer.TimerOption
