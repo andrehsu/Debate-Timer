@@ -27,4 +27,5 @@ class TimerStarted(val view: TimerView, override val timerOption: TimerOption, v
 				}
 			}
 		}
+	var ended: Boolean = false
 }

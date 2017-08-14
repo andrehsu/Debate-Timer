@@ -1,5 +1,5 @@
 package andre.debatetimer
 
-enum class TimerDisplayMode {
+enum class TimerCountMode {
 	CountUp, CountDown
 }

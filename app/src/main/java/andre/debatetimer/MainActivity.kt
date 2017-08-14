@@ -1,8 +1,8 @@
 package andre.debatetimer
 
 import andre.debatetimer.EnvVars.longAnimTime
-import andre.debatetimer.TimerDisplayMode.CountDown
-import andre.debatetimer.TimerDisplayMode.CountUp
+import andre.debatetimer.TimerCountMode.CountDown
+import andre.debatetimer.TimerCountMode.CountUp
 import andre.debatetimer.extensions.CrossfadeAnimator.Companion.crossfadeTo
 import andre.debatetimer.extensions.setGone
 import andre.debatetimer.extensions.setInvisible
@@ -16,7 +16,6 @@ import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.SoundPool
 import android.os.Bundle
-import android.support.constraint.ConstraintLayout
 import android.support.v4.app.DialogFragment
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
@@ -25,9 +24,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.WindowManager
 import android.widget.Button
-import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.timer.*
 import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.forEachChild
 
@@ -79,7 +76,8 @@ class MainActivity : AppCompatActivity(),
 		
 		volumeControlStream = AudioManager.STREAM_MUSIC
 		
-		timerTexts = listOf(tv_timerNegative, tv_timer_m, tv_timer_s, tv_timer_colon)
+		timerBindings = getBindings(this)
+		timerBinding = NullBinding
 		val timeButtons = mutableListOf<Button>()
 		ll_timeButtons.forEachChild { child ->
 			if (child is Button) {
@@ -192,7 +190,7 @@ class MainActivity : AppCompatActivity(),
 	
 	//<editor-fold desc="UI fields and functions">
 	private lateinit var timeButtons: List<Button>
-	private lateinit var timerTexts: List<TextView>
+	private lateinit var timerBindings: Map<TimerDisplayMode, TimerBinding>
 	private var action_debateBell: MenuItem? = null
 	
 	override var timerMinutes: Int = 0
@@ -200,55 +198,50 @@ class MainActivity : AppCompatActivity(),
 			if (field != value) {
 				field = value
 				
-				tv_timer_m.text = value.toString()
+				timerBinding.minutes = value
 			}
 		}
 	override var timerSeconds: Int = 0
 		set(value) {
 			if (field != value) {
 				field = value
-				
-				tv_timer_s.text = value.toString().padStart(2, '0')
-			}
-		}
-	override var timerIsNegative: Boolean = false
-		set(value) {
-			if (field != value) {
-				field = value
-				
-				if (value) {
-					tv_timerNegative.setVisible()
-					tv_timer_m.setGone()
-					tv_timer_colon.setGone()
-					guideline.layoutParams = (guideline.layoutParams as ConstraintLayout.LayoutParams).apply { guidePercent = 0.36f }
-				} else {
-					tv_timerNegative.setGone()
-					tv_timer_m.setVisible()
-					tv_timer_colon.setVisible()
-					guideline.layoutParams = (guideline.layoutParams as ConstraintLayout.LayoutParams).apply { guidePercent = 0.43f }
-				}
+				timerBinding.seconds = value
 			}
 		}
 	override var timerTextColor: Int = -1
 		set(value) {
 			if (field != value) {
 				field = value
-				
-				timerTexts.forEach { it.setTextColor(value) }
+				timerBinding.color = field
 			}
 		}
-	override var timerDisplayMode = TimerDisplayMode.CountDown
+	override var timerCountMode = TimerCountMode.CountDown
 		set(value) {
 			if (field != value) {
 				field = value
 				
-				tv_timerDisplayMode.text = getString(
-						if (timerDisplayMode == CountUp) R.string.timer_display_count_up else R.string.timer_display_count_down
+				tv_timerCountMode.text = getString(
+						if (timerCountMode == CountUp) R.string.timer_display_count_up else R.string.timer_display_count_down
 				)
 				refreshTimer()
 				refreshBells()
+				updateTimerBinding()
 			}
 		}
+	lateinit var timerBinding: TimerBinding
+	
+	fun updateTimerBinding() {
+		val state = state
+		when {
+			state is TimerStarted && state.ended -> timerBinding = timerBindings.getValue(TimerDisplayMode.End)
+			state is TimerStarted && state.timer.isTimeEndNegative -> timerBinding = timerBindings.getValue(TimerDisplayMode.Negative)
+			else -> timerBinding = timerBindings.getValue(TimerDisplayMode.Normal)
+		}
+		for (timerBinding in timerBindings.values) {
+			timerBinding.isVisible = timerBinding.timerDisplayMode == this.timerBinding.timerDisplayMode
+		}
+	}
+	
 	override var buttonsActive: Boolean = false
 		set(value) {
 			field = value
@@ -276,28 +269,26 @@ class MainActivity : AppCompatActivity(),
 	
 	override fun refreshTimer() {
 		val state = state
+		updateTimerBinding()
 		when (state) {
 			is WaitingToStart -> {
-				if (timerDisplayMode == CountUp) {
+				if (timerCountMode == CountUp) {
 					timerMinutes = 0
 					timerSeconds = 0
 				} else {
 					timerMinutes = state.timerOption.minutesOnly
 					timerSeconds = state.timerOption.secondsOnly
 				}
-				timerIsNegative = false
 				timerTextColor = EnvVars.color_timerStart
 			}
 			is TimerStarted -> {
 				val timer = state.timer
-				if (timerDisplayMode == CountUp) {
+				if (timerCountMode == CountUp) {
 					timerMinutes = timer.minutesSinceStart
 					timerSeconds = timer.secondsSinceStart
-					timerIsNegative = false
 				} else {
 					timerMinutes = timer.minutesLeft
 					timerSeconds = timer.secondsLeft
-					timerIsNegative = timer.isTimeEndNegative
 				}
 			}
 		}
@@ -313,7 +304,7 @@ class MainActivity : AppCompatActivity(),
 			} else {
 				tv_bellsAt.setVisible()
 				
-				val bellString = if (timerDisplayMode == CountUp) {
+				val bellString = if (timerCountMode == CountUp) {
 					timerOption.countUpString
 				} else {
 					timerOption.countDownString
@@ -342,48 +333,61 @@ class MainActivity : AppCompatActivity(),
 		val state = state
 		when (state) {
 			is WaitingToStart -> {
-				val timer = object : DebateTimer(state.timerOption) {
-					override fun onSecond() = refreshTimer()
-					
-					override fun onFirstMinuteEnd() {
-						timerTextColor = EnvVars.color_timerNormal
-					}
-					
-					override fun onLastMinuteStart() {
-						timerTextColor = EnvVars.color_timerEnd
-					}
-					
-					override fun onOvertime() {
-						timerTextColor = EnvVars.color_timerEnd
-					}
-					
-					override fun onBell(debateBell: DebateBell) {
-						if (Prefs.debateBellEnabled)
-							soundPool.play(
-									when (debateBell) {
-										DebateBell.Once -> debate_bell_one
-										DebateBell.Twice -> debate_bell_two
-									},
-									1f,
-									1f,
-									1,
-									0,
-									1f)
-					}
-				}
-				
+				val timer = newTimerInstance(state.timerOption)
 				this.state = TimerStarted(this, state.timerOption, timer).also(::timerStarted)
 			}
 			is TimerStarted -> timerStarted(state)
 		}
 	}
 	
+	fun newTimerInstance(timerOption: TimerOption): DebateTimer {
+		return object : DebateTimer(timerOption) {
+			override fun onSecond() = refreshTimer()
+			
+			override fun onFirstMinuteEnd() {
+				timerTextColor = EnvVars.color_timerNormal
+			}
+			
+			override fun onLastMinuteStart() {
+				timerTextColor = EnvVars.color_timerEnd
+			}
+			
+			override fun onOvertime() {
+				timerTextColor = EnvVars.color_timerEnd
+				updateTimerBinding()
+			}
+			
+			override fun onBell(debateBell: DebateBell) {
+				if (Prefs.debateBellEnabled)
+					soundPool.play(
+							when (debateBell) {
+								DebateBell.Once -> debate_bell_one
+								DebateBell.Twice -> debate_bell_two
+							},
+							1f,
+							1f,
+							1,
+							0,
+							1f)
+			}
+			
+			override fun onEnd() {
+				this@MainActivity.state.let {
+					if (it is TimerStarted) {
+						it.ended = true
+					}
+				}
+				updateTimerBinding()
+			}
+		}
+	}
+	
 	@Suppress("UNUSED_PARAMETER")
 	override fun onToggleDisplayMode(view: View) {
-		if (timerDisplayMode == CountUp) {
-			timerDisplayMode = CountDown
+		if (timerCountMode == CountUp) {
+			timerCountMode = CountDown
 		} else {
-			timerDisplayMode = CountUp
+			timerCountMode = CountUp
 		}
 	}
 	
@@ -406,7 +410,7 @@ class MainActivity : AppCompatActivity(),
 	}
 	
 	override fun onFirstTimeButtonSelect() {
-		cl_timer.setVisible()
+		fl_timer.setVisible()
 		bt_startPause.setVisible()
 		tv_startingText.setGone()
 	}

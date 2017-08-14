@@ -7,11 +7,9 @@ interface TimerView {
 	
 	var timerSeconds: Int
 	
-	var timerIsNegative: Boolean
-	
 	var timerTextColor: Int
 	
-	var timerDisplayMode: TimerDisplayMode
+	var timerCountMode: TimerCountMode
 	
 	var buttonsActive: Boolean
 	

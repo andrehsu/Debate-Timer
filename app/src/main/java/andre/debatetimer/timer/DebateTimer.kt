@@ -21,6 +21,7 @@ abstract class DebateTimer(timerOption: TimerOption) {
 	private fun onSecondInternal() {
 		if (countDownSeconds <= -60) {
 			pause()
+			onEnd()
 			return
 		}
 		
@@ -87,6 +88,8 @@ abstract class DebateTimer(timerOption: TimerOption) {
 	open fun onLastMinuteStart() {}
 	
 	open fun onOvertime() {}
+	
+	open fun onEnd() {}
 	
 	open fun onBell(debateBell: DebateBell) {}
 	
