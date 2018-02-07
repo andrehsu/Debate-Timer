@@ -1,6 +1,7 @@
 package andre.debatetimer.timer
 
 import andre.debatetimer.extensions.abs
+import android.util.Log
 
 abstract class DebateTimer(timerOption: TimerOption) {
 	private var countUpSeconds: Int = 0
@@ -24,6 +25,7 @@ abstract class DebateTimer(timerOption: TimerOption) {
 			onEnd()
 			return
 		}
+		Log.d("DebateTimer", "tick")
 		
 		countUpSeconds++
 		countDownSeconds--

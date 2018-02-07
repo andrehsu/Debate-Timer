@@ -2,11 +2,9 @@ package andre.debatetimer.timer
 
 import andre.debatetimer.secondsToString
 import andre.debatetimer.timer.DebateBell.Once
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.debug
 
 class TimerOption(val seconds: Int, bellsSinceStart: Map<Int, DebateBell>) {
-	companion object : AnkoLogger {
+	companion object {
 		private val Default = TimerOption(420, mapOf(60 to Once, 360 to Once))
 		private val cache = mutableMapOf<String, TimerOption>()
 		
@@ -30,7 +28,6 @@ class TimerOption(val seconds: Int, bellsSinceStart: Map<Int, DebateBell>) {
 					
 					TimerOption(seconds, bells)
 				} catch(e: RuntimeException) {
-					debug { "Error occurred while parsing \"$tag\" for TimerOption" }
 					Default
 				}
 			}

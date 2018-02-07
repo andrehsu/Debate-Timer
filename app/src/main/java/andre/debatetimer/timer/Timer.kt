@@ -77,7 +77,7 @@ constructor(
 	private val handler = @SuppressLint("HandlerLeak")
 	object : Handler() {
 		override fun handleMessage(msg: Message) {
-			synchronized(this@Timer) {
+//			synchronized(this@Timer) {
 				if (cancelled) {
 					return
 				}
@@ -98,7 +98,7 @@ constructor(
 				while (delay < 0) delay += timerInterval
 				
 				sendMessageDelayed(obtainMessage(MSG), delay)
-			}
+//			}
 		}
 	}
 	

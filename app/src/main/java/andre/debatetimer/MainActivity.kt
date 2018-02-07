@@ -4,6 +4,7 @@ import andre.debatetimer.EnvVars.longAnimTime
 import andre.debatetimer.TimerCountMode.CountDown
 import andre.debatetimer.TimerCountMode.CountUp
 import andre.debatetimer.extensions.CrossfadeAnimator.Companion.crossfadeTo
+import andre.debatetimer.extensions.defaultSharedPreferences
 import andre.debatetimer.extensions.setGone
 import andre.debatetimer.extensions.setInvisible
 import andre.debatetimer.extensions.setVisible
@@ -24,9 +25,8 @@ import android.view.MenuItem
 import android.view.View
 import android.view.WindowManager
 import android.widget.Button
+import androidx.view.forEach
 import kotlinx.android.synthetic.main.activity_main.*
-import org.jetbrains.anko.defaultSharedPreferences
-import org.jetbrains.anko.forEachChild
 
 class MainActivity : AppCompatActivity(),
 		SharedPreferences.OnSharedPreferenceChangeListener,
@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity(),
 		timerBindings = getBindings(this)
 		timerBinding = NullBinding
 		val timeButtons = mutableListOf<Button>()
-		ll_timeButtons.forEachChild { child ->
+		ll_timeButtons.forEach { child ->
 			if (child is Button) {
 				timeButtons += child
 				
@@ -113,9 +113,9 @@ class MainActivity : AppCompatActivity(),
 	override fun onBackPressed() {
 		class ExitDialogFragment : DialogFragment() {
 			override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-				return AlertDialog.Builder(activity)
+				return AlertDialog.Builder(this@MainActivity)
 						.setTitle(R.string.exit_question)
-						.setPositiveButton(android.R.string.yes, { _, _ -> activity.finish() })
+						.setPositiveButton(android.R.string.yes, { _, _ -> this@MainActivity.finish() })
 						.setNegativeButton(android.R.string.no, { _, _ -> dialog.cancel() })
 						.create()
 			}
@@ -162,13 +162,11 @@ class MainActivity : AppCompatActivity(),
 	
 	//<editor-fold desc="SharedPreference">
 	private fun setupSharedPreference() {
-		val sharedPreference = defaultSharedPreferences
-		
 		Prefs.init(this)
 		
 		updateDebateBellIcon()
 		
-		sharedPreference.registerOnSharedPreferenceChangeListener(this)
+		defaultSharedPreferences.registerOnSharedPreferenceChangeListener(this)
 	}
 	
 	override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
