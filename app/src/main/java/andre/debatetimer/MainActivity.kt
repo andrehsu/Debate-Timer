@@ -25,7 +25,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.WindowManager
 import android.widget.Button
-import androidx.view.forEach
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(),
@@ -78,16 +77,26 @@ class MainActivity : AppCompatActivity(),
 		
 		timerBindings = getBindings(this)
 		timerBinding = NullBinding
-		val timeButtons = mutableListOf<Button>()
-		ll_timeButtons.forEach { child ->
-			if (child is Button) {
-				timeButtons += child
+		
+		val sp = defaultSharedPreferences
+		
+		val timersStr = sp.getStringSet(getString(R.string.pref_timers), mutableSetOf(
+				"180;-1",
+				"240;-1",
+				"300;-1",
+				"360;-1",
+				"420;-1",
+				"480;-1")).toList().sorted()
+		
+		val timerButtons = mutableMapOf<Button, TimerOption>()
+		
+		timersStr.forEach { str ->
+			val timerOption = TimerOption.parseTag(str)
+			
+			if (timerOption != null) {
+				val layout = layoutInflater.inflate(R.layout.timer_button, ll_timeButtons, false) as Button
 				
-				val tag = child.tag as String
-				
-				val timerOption = TimerOption.parseTag(tag)
-				
-				child.text = with(timerOption) {
+				layout.text = with(timerOption) {
 					if (minutesOnly != 0 && secondsOnly != 0) {
 						"${minutesOnly}m${secondsOnly}s"
 					} else if (minutesOnly != 0) {
@@ -98,16 +107,19 @@ class MainActivity : AppCompatActivity(),
 						"nil"
 					}
 				}
-				child.setTextColor(getColorCompat(R.color.buttonUnselected))
 				
-				child.setOnClickListener(this::onTimeButtonSelect)
-			} else {
-				child.setInvisible()
+				layout.setTextColor(getColorCompat(R.color.buttonUnselected))
+				
+				layout.setOnClickListener(this::onTimeButtonSelect)
+				
+				ll_timeButtons.addView(layout)
+				
+				timerButtons[layout] = timerOption
 			}
+			this.timerButtons = timerButtons
+			
+			setupSharedPreference()
 		}
-		this.timeButtons = timeButtons
-		
-		setupSharedPreference()
 	}
 	
 	override fun onBackPressed() {
@@ -158,7 +170,7 @@ class MainActivity : AppCompatActivity(),
 		
 		defaultSharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
 	}
-	//</editor-fold>
+//</editor-fold>
 	
 	//<editor-fold desc="SharedPreference">
 	private fun setupSharedPreference() {
@@ -184,10 +196,10 @@ class MainActivity : AppCompatActivity(),
 				}
 		)
 	}
-	//</editor-fold>
+//</editor-fold>
 	
 	//<editor-fold desc="UI fields and functions">
-	private lateinit var timeButtons: List<Button>
+	private lateinit var timerButtons: Map<Button, TimerOption>
 	private lateinit var timerBindings: Map<TimerDisplayMode, TimerBinding>
 	private var action_debateBell: MenuItem? = null
 	
@@ -244,12 +256,12 @@ class MainActivity : AppCompatActivity(),
 		set(value) {
 			field = value
 			if (value) {
-				timeButtons.forEach {
+				timerButtons.keys.forEach {
 					it.isClickable = false
 					it.alpha = 0.54f
 				}
 			} else {
-				timeButtons.forEach {
+				timerButtons.keys.forEach {
 					it.isClickable = true
 					it.alpha = 1.0f
 				}
@@ -390,7 +402,7 @@ class MainActivity : AppCompatActivity(),
 	}
 	
 	override fun onTimeButtonSelect(view: View) {
-		timeButtons.forEach {
+		timerButtons.keys.forEach {
 			it.setTextColor(getColorCompat(R.color.buttonUnselected))
 		}
 		
@@ -399,9 +411,7 @@ class MainActivity : AppCompatActivity(),
 		
 		bt_startPause.text = getString(R.string.start)
 		
-		val timerOption = TimerOption.parseTag(view.tag as String)
-		
-		this.state = WaitingToStart(timerOption)
+		this.state = WaitingToStart(timerButtons[view]!!)
 		
 		refreshTimer()
 		refreshBells()
@@ -412,6 +422,6 @@ class MainActivity : AppCompatActivity(),
 		bt_startPause.setVisible()
 		tv_startingText.setGone()
 	}
-	
-	//</editor-fold>
+
+//</editor-fold>
 }

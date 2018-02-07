@@ -17,5 +17,6 @@
     <!--Settings-->
     <string name="pref_bell_enabled_key">bell_enabled</string>
     <bool name="pref_bell_enabled_default">true</bool>
+    <string name="pref_timers">pref_timers</string>
     <!--Settings End-->
 </resources>

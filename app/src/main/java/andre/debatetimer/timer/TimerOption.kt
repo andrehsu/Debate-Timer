@@ -8,28 +8,30 @@ class TimerOption(val seconds: Int, bellsSinceStart: Map<Int, DebateBell>) {
 		private val Default = TimerOption(420, mapOf(60 to Once, 360 to Once))
 		private val cache = mutableMapOf<String, TimerOption>()
 		
-		fun parseTag(tag: String): TimerOption {
+		fun parseTag(tag: String): TimerOption? {
 			@Suppress("NAME_SHADOWING")
 			val tag = tag.filterNot { it == ' ' }
-			return cache.getOrPut(tag) {
-				val tokens = tag.split(';')
+			val tokens = tag.split(';')
+			
+			return try {
+				val seconds = tokens[0].toInt()
 				
-				try {
-					val seconds = tokens[0].toInt()
-					
-					val bells = if (tokens[1].isEmpty()) {
-						mapOf()
-					} else if (tokens[1].toIntOrNull() == -1) {
-						mapOf(60 to Once, seconds - 60 to Once)
-					} else {
-						val bellTokens = tokens[1].split(',')
-						bellTokens.map { it.toInt() to Once }.toMap()
-					}
-					
-					TimerOption(seconds, bells)
-				} catch(e: RuntimeException) {
-					Default
+				val bells = if (tokens[1].isEmpty()) {
+					mapOf()
+				} else if (tokens[1].toIntOrNull() == -1) {
+					mapOf(60 to Once, seconds - 60 to Once)
+				} else {
+					val bellTokens = tokens[1].split(',')
+					bellTokens.map { it.toInt() to Once }.toMap()
 				}
+				
+				val ret = TimerOption(seconds, bells)
+				
+				cache.put(tag, ret)
+				
+				ret
+			} catch (e: RuntimeException) {
+				null
 			}
 		}
 	}
