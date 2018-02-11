@@ -1,8 +1,6 @@
 package andre.debatetimer
 
 import andre.debatetimer.EnvVars.longAnimTime
-import andre.debatetimer.TimerCountMode.CountDown
-import andre.debatetimer.TimerCountMode.CountUp
 import andre.debatetimer.extensions.CrossfadeAnimator.Companion.crossfadeTo
 import andre.debatetimer.extensions.defaultSharedPreferences
 import andre.debatetimer.extensions.setGone
@@ -28,8 +26,7 @@ import android.widget.Button
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(),
-		SharedPreferences.OnSharedPreferenceChangeListener,
-		TimerView {
+		SharedPreferences.OnSharedPreferenceChangeListener {
 	private var state: State = WaitingToBegin
 		set(value) {
 			require(value !is WaitingToBegin)
@@ -116,10 +113,10 @@ class MainActivity : AppCompatActivity(),
 				
 				timerButtons[layout] = timerOption
 			}
-			this.timerButtons = timerButtons
-			
-			setupSharedPreference()
 		}
+		
+		this.timerButtons = timerButtons
+		setupSharedPreference()
 	}
 	
 	override fun onBackPressed() {
@@ -152,8 +149,6 @@ class MainActivity : AppCompatActivity(),
 		when (item.itemId) {
 			R.id.action_debate_bell -> {
 				Prefs.debateBellEnabled = !Prefs.debateBellEnabled
-				
-				refreshBells()
 			}
 			else -> return super.onOptionsItemSelected(item)
 		}
@@ -177,13 +172,18 @@ class MainActivity : AppCompatActivity(),
 		Prefs.init(this)
 		
 		updateDebateBellIcon()
+		timerCountMode = Prefs.countMode
 		
 		defaultSharedPreferences.registerOnSharedPreferenceChangeListener(this)
 	}
 	
-	override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
+	override fun onSharedPreferenceChanged(sp: SharedPreferences, key: String) {
 		when (key) {
-			Prefs.pref_bell_enabled_key -> updateDebateBellIcon()
+			Prefs.pref_bell_enabled_key -> {
+				refreshBells()
+				updateDebateBellIcon()
+			}
+			Prefs.pref_count_mode -> timerCountMode = Prefs.countMode
 		}
 	}
 	
@@ -196,14 +196,14 @@ class MainActivity : AppCompatActivity(),
 				}
 		)
 	}
-//</editor-fold>
+	//</editor-fold>
 	
 	//<editor-fold desc="UI fields and functions">
 	private lateinit var timerButtons: Map<Button, TimerOption>
 	private lateinit var timerBindings: Map<TimerDisplayMode, TimerBinding>
 	private var action_debateBell: MenuItem? = null
 	
-	override var timerMinutes: Int = 0
+	var timerMinutes: Int = 0
 		set(value) {
 			if (field != value) {
 				field = value
@@ -211,28 +211,29 @@ class MainActivity : AppCompatActivity(),
 				timerBinding.minutes = value
 			}
 		}
-	override var timerSeconds: Int = 0
+	var timerSeconds: Int = 0
 		set(value) {
 			if (field != value) {
 				field = value
 				timerBinding.seconds = value
 			}
 		}
-	override var timerTextColor: Int = -1
+	var timerTextColor: Int = -1
 		set(value) {
 			if (field != value) {
 				field = value
 				timerBinding.color = field
 			}
 		}
-	override var timerCountMode = TimerCountMode.CountDown
+	var timerCountMode = "count_up"
 		set(value) {
 			if (field != value) {
 				field = value
 				
 				tv_timerCountMode.text = getString(
-						if (timerCountMode == CountUp) R.string.timer_display_count_up else R.string.timer_display_count_down
+						if (timerCountMode == "count_up") R.string.timer_display_count_up else R.string.timer_display_count_down
 				)
+				
 				refreshTimer()
 				refreshBells()
 				updateTimerBinding()
@@ -252,7 +253,7 @@ class MainActivity : AppCompatActivity(),
 		}
 	}
 	
-	override var buttonsActive: Boolean = false
+	var buttonsActive: Boolean = false
 		set(value) {
 			field = value
 			if (value) {
@@ -267,7 +268,7 @@ class MainActivity : AppCompatActivity(),
 				}
 			}
 		}
-	override var keepScreenOn: Boolean = false
+	var keepScreenOn: Boolean = false
 		set(value) {
 			field = value
 			if (value) {
@@ -277,12 +278,12 @@ class MainActivity : AppCompatActivity(),
 			}
 		}
 	
-	override fun refreshTimer() {
+	private fun refreshTimer() {
 		val state = state
 		updateTimerBinding()
 		when (state) {
 			is WaitingToStart -> {
-				if (timerCountMode == CountUp) {
+				if (timerCountMode == "count_up") {
 					timerMinutes = 0
 					timerSeconds = 0
 				} else {
@@ -293,7 +294,7 @@ class MainActivity : AppCompatActivity(),
 			}
 			is TimerStarted -> {
 				val timer = state.timer
-				if (timerCountMode == CountUp) {
+				if (timerCountMode == "count_up") {
 					timerMinutes = timer.minutesSinceStart
 					timerSeconds = timer.secondsSinceStart
 				} else {
@@ -304,7 +305,7 @@ class MainActivity : AppCompatActivity(),
 		}
 	}
 	
-	override fun refreshBells() {
+	private fun refreshBells() {
 		val state = state
 		if (Prefs.debateBellEnabled && state is HasTimerOption) {
 			val timerOption = state.timerOption
@@ -314,7 +315,7 @@ class MainActivity : AppCompatActivity(),
 			} else {
 				tv_bellsAt.setVisible()
 				
-				val bellString = if (timerCountMode == CountUp) {
+				val bellString = if (timerCountMode == "count_up") {
 					timerOption.countUpString
 				} else {
 					timerOption.countDownString
@@ -328,7 +329,7 @@ class MainActivity : AppCompatActivity(),
 	}
 	
 	@Suppress("UNUSED_PARAMETER")
-	override fun onStartPause(view: View) {
+	fun onStartPause(view: View) {
 		fun timerStarted(state: TimerStarted) {
 			if (state.running) {
 				bt_startPause.text = getString(R.string.resume)
@@ -350,7 +351,7 @@ class MainActivity : AppCompatActivity(),
 		}
 	}
 	
-	fun newTimerInstance(timerOption: TimerOption): DebateTimer {
+	private fun newTimerInstance(timerOption: TimerOption): DebateTimer {
 		return object : DebateTimer(timerOption) {
 			override fun onSecond() = refreshTimer()
 			
@@ -393,15 +394,11 @@ class MainActivity : AppCompatActivity(),
 	}
 	
 	@Suppress("UNUSED_PARAMETER")
-	override fun onToggleDisplayMode(view: View) {
-		if (timerCountMode == CountUp) {
-			timerCountMode = CountDown
-		} else {
-			timerCountMode = CountUp
-		}
+	fun onToggleDisplayMode(view: View) {
+		Prefs.countMode = if (Prefs.countMode == "count_up") "countdown" else "count_up"
 	}
 	
-	override fun onTimeButtonSelect(view: View) {
+	private fun onTimeButtonSelect(view: View) {
 		timerButtons.keys.forEach {
 			it.setTextColor(getColorCompat(R.color.buttonUnselected))
 		}
@@ -417,7 +414,7 @@ class MainActivity : AppCompatActivity(),
 		refreshBells()
 	}
 	
-	override fun onFirstTimeButtonSelect() {
+	fun onFirstTimeButtonSelect() {
 		fl_timer.setVisible()
 		bt_startPause.setVisible()
 		tv_startingText.setGone()

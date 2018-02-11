@@ -13,7 +13,7 @@ object WaitingToBegin : State
 
 class WaitingToStart(override val timerOption: TimerOption) : State, HasTimerOption
 
-class TimerStarted(val view: TimerView, override val timerOption: TimerOption, val timer: DebateTimer) : State, HasTimerOption {
+class TimerStarted(val view: MainActivity, override val timerOption: TimerOption, val timer: DebateTimer) : State, HasTimerOption {
 	var running: Boolean = false
 		set(value) {
 			if (field != value) {

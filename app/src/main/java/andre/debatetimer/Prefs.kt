@@ -4,6 +4,7 @@ import andre.debatetimer.extensions.defaultSharedPreferences
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import androidx.content.edit
 import java.util.concurrent.ConcurrentHashMap
 
 object Prefs : SharedPreferences.OnSharedPreferenceChangeListener {
@@ -22,6 +23,11 @@ object Prefs : SharedPreferences.OnSharedPreferenceChangeListener {
 		get() = requireInitialized { return field }
 		private set
 	
+	lateinit var pref_count_mode: String
+		private set
+	lateinit var pref_count_mode_default: String
+		private set
+	
 	private val cache = ConcurrentHashMap<String, Any>()
 	private lateinit var sharedPreferences: SharedPreferences
 	
@@ -30,6 +36,8 @@ object Prefs : SharedPreferences.OnSharedPreferenceChangeListener {
 			with(context.resources) {
 				pref_bell_enabled_key = getString(R.string.pref_bell_enabled_key)
 				pref_bell_enabled_default = getBoolean(R.bool.pref_bell_enabled_default)
+				pref_count_mode = getString(R.string.pref_count_mode)
+				pref_count_mode_default = getString(R.string.pref_count_mode_default)
 			}
 			sharedPreferences = context.defaultSharedPreferences
 			
@@ -50,6 +58,21 @@ object Prefs : SharedPreferences.OnSharedPreferenceChangeListener {
 				sharedPreferences.edit()
 						.putBoolean(pref_bell_enabled_key, value)
 						.apply()
+			}
+		}
+	
+	var countMode: String
+		get() = requireInitialized {
+			return cache.getOrPut(pref_count_mode) {
+				sharedPreferences.getString(pref_count_mode, pref_count_mode_default)
+			} as String
+		}
+		set(value) {
+			requireInitialized {
+				cache[pref_count_mode] = value
+				sharedPreferences.edit {
+					putString(pref_count_mode, value)
+				}
 			}
 		}
 	
