@@ -53,6 +53,68 @@ class MainActivity : AppCompatActivity(),
 	private var action_debateBell: MenuItem? = null
 	private var action_countMode: MenuItem? = null
 	
+	private var timerMinutes: Int = 0
+		set(value) {
+			if (field != value) {
+				field = value
+				
+				timerBinding.minutes = value
+			}
+		}
+	private var timerSeconds: Int = 0
+		set(value) {
+			if (field != value) {
+				field = value
+				timerBinding.seconds = value
+			}
+		}
+	var timerTextColor: Int = -1
+		set(value) {
+			if (field != value) {
+				field = value
+				timerBinding.color = field
+			}
+		}
+	private var timerCountMode = Prefs.CountUp
+		set(value) {
+			if (field != value) {
+				field = value
+				
+				tv_timerCountMode.text = getString(
+						if (timerCountMode == Prefs.CountUp) R.string.timer_display_count_up else R.string.timer_display_count_down
+				)
+				
+				refreshTimer()
+				refreshBells()
+				updateTimerBinding()
+			}
+		}
+	private lateinit var timerBinding: TimerBinding
+	var buttonsActive: Boolean = false
+		set(value) {
+			field = value
+			if (value) {
+				timerButtons.keys.forEach {
+					it.isClickable = false
+					it.alpha = 0.54f
+				}
+			} else {
+				timerButtons.keys.forEach {
+					it.isClickable = true
+					it.alpha = 1.0f
+				}
+			}
+		}
+	var keepScreenOn: Boolean = false
+		set(value) {
+			field = value
+			if (value) {
+				window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+			} else {
+				window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+			}
+		}
+	
 	init {
 		val attributes = AudioAttributes.Builder()
 				.setUsage(AudioAttributes.USAGE_MEDIA)
@@ -224,46 +286,6 @@ class MainActivity : AppCompatActivity(),
 	//</editor-fold>
 	
 	//<editor-fold desc="UI fields and functions">
-	
-	
-	private var timerMinutes: Int = 0
-		set(value) {
-			if (field != value) {
-				field = value
-				
-				timerBinding.minutes = value
-			}
-		}
-	private var timerSeconds: Int = 0
-		set(value) {
-			if (field != value) {
-				field = value
-				timerBinding.seconds = value
-			}
-		}
-	var timerTextColor: Int = -1
-		set(value) {
-			if (field != value) {
-				field = value
-				timerBinding.color = field
-			}
-		}
-	private var timerCountMode = "count_up"
-		set(value) {
-			if (field != value) {
-				field = value
-				
-				tv_timerCountMode.text = getString(
-						if (timerCountMode == "count_up") R.string.timer_display_count_up else R.string.timer_display_count_down
-				)
-				
-				refreshTimer()
-				refreshBells()
-				updateTimerBinding()
-			}
-		}
-	private lateinit var timerBinding: TimerBinding
-	
 	fun updateTimerBinding() {
 		val state = state
 		timerBinding = when {
@@ -275,31 +297,6 @@ class MainActivity : AppCompatActivity(),
 			timerBinding.isVisible = timerBinding.timerDisplayMode == this.timerBinding.timerDisplayMode
 		}
 	}
-	
-	var buttonsActive: Boolean = false
-		set(value) {
-			field = value
-			if (value) {
-				timerButtons.keys.forEach {
-					it.isClickable = false
-					it.alpha = 0.54f
-				}
-			} else {
-				timerButtons.keys.forEach {
-					it.isClickable = true
-					it.alpha = 1.0f
-				}
-			}
-		}
-	var keepScreenOn: Boolean = false
-		set(value) {
-			field = value
-			if (value) {
-				window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-			} else {
-				window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-			}
-		}
 	
 	private fun refreshTimer() {
 		val state = state
