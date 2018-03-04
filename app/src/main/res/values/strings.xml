@@ -4,8 +4,9 @@
     <string name="start">Start</string>
     <string name="pause">Pause</string>
     <string name="resume">Resume</string>
-    <string name="timer_display_count_up">Elapsed (tap for remaining)</string>
-    <string name="timer_display_count_down">Remaining (tap for elapsed)</string>
+    <string name="tap_anywhere_to">Tap anywhere to</string>
+    <string name="timer_display_count_up">Elapsed</string>
+    <string name="timer_display_count_down">Remaining</string>
     <string name="starting_text">Select a time to begin</string>
     <string name="exit_question">Are you sure you want to exit?</string>
     <plurals name="bells_at">
@@ -21,4 +22,6 @@
     <string name="pref_count_mode">count_mode</string>
     <string name="pref_count_mode_default">count_up</string>
     <!--Settings End-->
+    <string name="show_time_remaining">Show time remaining</string>
+    <string name="show_time_elapsed">Show time elapsed</string>
 </resources>

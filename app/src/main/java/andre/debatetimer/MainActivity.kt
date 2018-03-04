@@ -29,12 +29,12 @@ class MainActivity : AppCompatActivity(),
 		SharedPreferences.OnSharedPreferenceChangeListener {
 	private var state: State = WaitingToBegin
 		set(value) {
-			require(value !is WaitingToBegin)
+			require(value !== WaitingToBegin)
 			if (value !== field) {
 				val oldValue = field
 				field = value
 				
-				if (oldValue is WaitingToBegin) {
+				if (oldValue === WaitingToBegin) {
 					onFirstTimeButtonSelect()
 				}
 				
@@ -47,6 +47,11 @@ class MainActivity : AppCompatActivity(),
 	private var soundPool: SoundPool
 	private var debate_bell_one: Int = -1
 	private var debate_bell_two: Int = -1
+	
+	private lateinit var timerButtons: Map<Button, TimerOption>
+	private lateinit var timerBindings: Map<TimerDisplayMode, TimerBinding>
+	private var action_debateBell: MenuItem? = null
+	private var action_countMode: MenuItem? = null
 	
 	init {
 		val attributes = AudioAttributes.Builder()
@@ -64,6 +69,8 @@ class MainActivity : AppCompatActivity(),
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_main)
+		
+		fl_timer.setOnClickListener(this::onStartPause)
 		
 		EnvVars.init(this)
 		
@@ -140,8 +147,10 @@ class MainActivity : AppCompatActivity(),
 	override fun onCreateOptionsMenu(menu: Menu): Boolean {
 		menuInflater.inflate(R.menu.activity_main, menu)
 		action_debateBell = menu.findItem(R.id.action_debate_bell)
+		action_countMode = menu.findItem(R.id.action_count_mode)
 		
 		updateDebateBellIcon()
+		updateCountModeTitle()
 		return true
 	}
 	
@@ -149,6 +158,9 @@ class MainActivity : AppCompatActivity(),
 		when (item.itemId) {
 			R.id.action_debate_bell -> {
 				Prefs.debateBellEnabled = !Prefs.debateBellEnabled
+			}
+			R.id.action_count_mode -> {
+				onToggleDisplayMode()
 			}
 			else -> return super.onOptionsItemSelected(item)
 		}
@@ -183,7 +195,10 @@ class MainActivity : AppCompatActivity(),
 				refreshBells()
 				updateDebateBellIcon()
 			}
-			Prefs.pref_count_mode -> timerCountMode = Prefs.countMode
+			Prefs.pref_count_mode -> {
+				timerCountMode = Prefs.countMode
+				updateCountModeTitle()
+			}
 		}
 	}
 	
@@ -196,14 +211,22 @@ class MainActivity : AppCompatActivity(),
 				}
 		)
 	}
+	
+	private fun updateCountModeTitle() {
+		action_countMode?.title = getString(
+				if (Prefs.countMode == Prefs.CountUp) {
+					R.string.show_time_remaining
+				} else {
+					R.string.show_time_elapsed
+				}
+		)
+	}
 	//</editor-fold>
 	
 	//<editor-fold desc="UI fields and functions">
-	private lateinit var timerButtons: Map<Button, TimerOption>
-	private lateinit var timerBindings: Map<TimerDisplayMode, TimerBinding>
-	private var action_debateBell: MenuItem? = null
 	
-	var timerMinutes: Int = 0
+	
+	private var timerMinutes: Int = 0
 		set(value) {
 			if (field != value) {
 				field = value
@@ -211,7 +234,7 @@ class MainActivity : AppCompatActivity(),
 				timerBinding.minutes = value
 			}
 		}
-	var timerSeconds: Int = 0
+	private var timerSeconds: Int = 0
 		set(value) {
 			if (field != value) {
 				field = value
@@ -225,7 +248,7 @@ class MainActivity : AppCompatActivity(),
 				timerBinding.color = field
 			}
 		}
-	var timerCountMode = "count_up"
+	private var timerCountMode = "count_up"
 		set(value) {
 			if (field != value) {
 				field = value
@@ -239,14 +262,14 @@ class MainActivity : AppCompatActivity(),
 				updateTimerBinding()
 			}
 		}
-	lateinit var timerBinding: TimerBinding
+	private lateinit var timerBinding: TimerBinding
 	
 	fun updateTimerBinding() {
 		val state = state
-		when {
-			state is TimerStarted && state.ended -> timerBinding = timerBindings.getValue(TimerDisplayMode.End)
-			state is TimerStarted && state.timer.isTimeEndNegative -> timerBinding = timerBindings.getValue(TimerDisplayMode.Negative)
-			else -> timerBinding = timerBindings.getValue(TimerDisplayMode.Normal)
+		timerBinding = when {
+			state is TimerStarted && state.ended -> timerBindings.getValue(TimerDisplayMode.End)
+			state is TimerStarted && state.timer.isTimeEndNegative -> timerBindings.getValue(TimerDisplayMode.Negative)
+			else -> timerBindings.getValue(TimerDisplayMode.Normal)
 		}
 		for (timerBinding in timerBindings.values) {
 			timerBinding.isVisible = timerBinding.timerDisplayMode == this.timerBinding.timerDisplayMode
@@ -329,18 +352,18 @@ class MainActivity : AppCompatActivity(),
 	}
 	
 	@Suppress("UNUSED_PARAMETER")
-	fun onStartPause(view: View) {
+	private fun onStartPause(view: View) {
 		fun timerStarted(state: TimerStarted) {
 			if (state.running) {
-				bt_startPause.text = getString(R.string.resume)
+				tv_startPause.text = getString(R.string.resume)
 				state.running = false
 			} else {
-				bt_startPause.text = getString(R.string.pause)
+				tv_startPause.text = getString(R.string.pause)
 				state.running = true
 			}
 		}
 		
-		bt_startPause crossfadeTo bt_startPause withDuration longAnimTime
+		tv_startPause crossfadeTo tv_startPause withDuration longAnimTime
 		val state = state
 		when (state) {
 			is WaitingToStart -> {
@@ -393,9 +416,8 @@ class MainActivity : AppCompatActivity(),
 		}
 	}
 	
-	@Suppress("UNUSED_PARAMETER")
-	fun onToggleDisplayMode(view: View) {
-		Prefs.countMode = if (Prefs.countMode == "count_up") "countdown" else "count_up"
+	private fun onToggleDisplayMode() {
+		Prefs.countMode = if (Prefs.countMode == Prefs.CountUp) Prefs.CountDown else Prefs.CountUp
 	}
 	
 	private fun onTimeButtonSelect(view: View) {
@@ -406,7 +428,7 @@ class MainActivity : AppCompatActivity(),
 		view as Button
 		view.setTextColor(getColorCompat(R.color.buttonSelected))
 		
-		bt_startPause.text = getString(R.string.start)
+		tv_startPause.text = getString(R.string.start)
 		
 		this.state = WaitingToStart(timerButtons[view]!!)
 		
@@ -414,9 +436,11 @@ class MainActivity : AppCompatActivity(),
 		refreshBells()
 	}
 	
-	fun onFirstTimeButtonSelect() {
+	private fun onFirstTimeButtonSelect() {
 		fl_timer.setVisible()
-		bt_startPause.setVisible()
+		tv_startPause.setVisible()
+		tv_tapAnywhereTo.setVisible()
+		tv_timerCountMode.setVisible()
 		tv_startingText.setGone()
 	}
 

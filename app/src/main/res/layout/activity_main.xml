@@ -16,6 +16,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/timer_display_count_up"
+        android:visibility="invisible"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
@@ -34,7 +35,6 @@
         android:id="@+id/fl_timer"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:onClick="onToggleDisplayMode"
         android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/ll_timeButtons"
         app:layout_constraintEnd_toEndOf="parent"
@@ -74,19 +74,30 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"/>
 
-    <Button
-        android:id="@+id/bt_startPause"
+    <TextView
+        android:id="@+id/tv_tapAnywhereTo"
+        style="@style/Base.TextAppearance.AppCompat.Subhead"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/tap_anywhere_to"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/tv_startPause"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"/>
+
+    <TextView
+        android:id="@+id/tv_startPause"
+        style="@style/Base.TextAppearance.AppCompat.Title"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:layout_marginBottom="10dp"
-        android:background="#00FFFFFF"
-        android:onClick="onStartPause"
         android:text="@string/start"
         android:textSize="42sp"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/ll_timeButtons"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"/>
+        app:layout_constraintRight_toRightOf="parent"
+        tools:visibility="visible"/>
 
     <LinearLayout
         android:id="@+id/ll_timeButtons"

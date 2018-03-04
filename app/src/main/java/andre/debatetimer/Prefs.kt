@@ -10,6 +10,8 @@ import java.util.concurrent.ConcurrentHashMap
 object Prefs : SharedPreferences.OnSharedPreferenceChangeListener {
 	private val LogTag = Prefs::class.java.simpleName
 	
+	const val CountUp = "count_up"
+	const val CountDown = "count_down"
 	
 	private var initialized = false
 	private inline fun <R> requireInitialized(block: () -> R): R {

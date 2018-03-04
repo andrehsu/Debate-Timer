@@ -43,7 +43,7 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
 
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'androidx.core:core-ktx:0.1'
+    implementation 'androidx.core:core-ktx:0.2'
 }
 repositories {
     mavenCentral()
