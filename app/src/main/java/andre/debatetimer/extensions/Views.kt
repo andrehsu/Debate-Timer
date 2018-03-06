@@ -28,7 +28,7 @@ inline fun View.fadeOut(animTime: Long = shortAnimTime): ViewPropertyAnimator = 
 
 fun crossFade(from: View, to: View, animTime: Long = -1) {
 	val outAnimator = from.fadeOut()
-	val inAnimator = to.fadeOut()
+	val inAnimator = to.fadeIn()
 	
 	if (animTime != -1L) {
 		outAnimator.duration = animTime
