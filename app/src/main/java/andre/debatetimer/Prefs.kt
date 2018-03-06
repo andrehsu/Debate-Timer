@@ -10,9 +10,6 @@ import java.util.concurrent.ConcurrentHashMap
 object Prefs : SharedPreferences.OnSharedPreferenceChangeListener {
 	private val LogTag = Prefs::class.java.simpleName
 	
-	const val CountUp = "count_up"
-	const val CountDown = "count_down"
-	
 	private var initialized = false
 	private inline fun <R> requireInitialized(block: () -> R): R {
 		require(initialized) { "Prefs not initialized" }
@@ -63,17 +60,17 @@ object Prefs : SharedPreferences.OnSharedPreferenceChangeListener {
 			}
 		}
 	
-	var countMode: String
+	var countMode: CountMode
 		get() = requireInitialized {
 			return cache.getOrPut(pref_count_mode) {
-				sharedPreferences.getString(pref_count_mode, pref_count_mode_default)
-			} as String
+				CountMode.parseString(sharedPreferences.getString(pref_count_mode, pref_count_mode_default))
+			} as CountMode
 		}
 		set(value) {
 			requireInitialized {
 				cache[pref_count_mode] = value
 				sharedPreferences.edit {
-					putString(pref_count_mode, value)
+					putString(pref_count_mode, value.toString())
 				}
 			}
 		}

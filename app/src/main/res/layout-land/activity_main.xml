@@ -16,7 +16,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/timer_display_count_up"
-        android:visibility="invisible"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
@@ -38,8 +37,7 @@
         app:layout_constraintBottom_toTopOf="@+id/ll_timeButtons"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        >
+        app:layout_constraintTop_toTopOf="parent">
 
         <include
             android:id="@+id/timer_normal"
@@ -67,7 +65,7 @@
         android:id="@+id/tv_startingText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/starting_text"
+        android:text="@string/rotate_to_select_time"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintBottom_toTopOf="@+id/ll_timeButtons"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -93,14 +91,13 @@
         android:textSize="42sp"
         app:layout_constraintBottom_toTopOf="@+id/ll_timeButtons"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        />
+        app:layout_constraintRight_toRightOf="parent"/>
 
     <LinearLayout
         android:id="@+id/ll_timeButtons"
         style="@style/Widget.AppCompat.ButtonBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"

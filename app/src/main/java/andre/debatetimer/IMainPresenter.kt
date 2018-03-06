@@ -1,0 +1,22 @@
+package andre.debatetimer
+
+import andre.debatetimer.timer.DebateTimer
+import andre.debatetimer.timer.TimerOption
+import android.content.Context
+import android.view.View
+
+interface IMainPresenter {
+	var view: IMainView
+	
+	var state: State
+	
+	fun newTimerInstance(timerOption: TimerOption): DebateTimer
+	
+	fun onStartPause(view: View)
+	
+	fun onTimeButtonSelect(view: View)
+	
+	fun onToggleDisplayMode()
+	
+	fun onDestroy(context: Context)
+}

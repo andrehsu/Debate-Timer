@@ -1,19 +1,11 @@
 package andre.debatetimer
 
-import andre.debatetimer.EnvVars.longAnimTime
-import andre.debatetimer.extensions.CrossfadeAnimator.Companion.crossfadeTo
-import andre.debatetimer.extensions.defaultSharedPreferences
-import andre.debatetimer.extensions.setGone
-import andre.debatetimer.extensions.setInvisible
-import andre.debatetimer.extensions.setVisible
-import andre.debatetimer.timer.DebateBell
-import andre.debatetimer.timer.DebateTimer
+import andre.debatetimer.CountMode.CountUp
+import andre.debatetimer.extensions.*
 import andre.debatetimer.timer.TimerOption
 import android.app.Dialog
-import android.content.SharedPreferences
-import android.media.AudioAttributes
+import android.content.Context
 import android.media.AudioManager
-import android.media.SoundPool
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.support.v7.app.AlertDialog
@@ -25,35 +17,18 @@ import android.view.WindowManager
 import android.widget.Button
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity(),
-		SharedPreferences.OnSharedPreferenceChangeListener {
-	private var state: State = WaitingToBegin
-		set(value) {
-			require(value !== WaitingToBegin)
-			if (value !== field) {
-				val oldValue = field
-				field = value
-				
-				if (oldValue === WaitingToBegin) {
-					onFirstTimeButtonSelect()
-				}
-				
-				if (oldValue is TimerStarted) {
-					oldValue.running = false
-				}
-			}
-		}
+class MainActivity : IMainView, AppCompatActivity() {
+	override lateinit var presenter: IMainPresenter
 	
-	private var soundPool: SoundPool
-	private var debate_bell_one: Int = -1
-	private var debate_bell_two: Int = -1
+	private lateinit var retainedFragment: RetainedFragment
 	
-	private lateinit var timerButtons: Map<Button, TimerOption>
+	
+	override lateinit var timerButtons: Map<Button, TimerOption>
 	private lateinit var timerBindings: Map<TimerDisplayMode, TimerBinding>
 	private var action_debateBell: MenuItem? = null
 	private var action_countMode: MenuItem? = null
 	
-	private var timerMinutes: Int = 0
+	override var timerMinutes: Int = 0
 		set(value) {
 			if (field != value) {
 				field = value
@@ -61,36 +36,34 @@ class MainActivity : AppCompatActivity(),
 				timerBinding.minutes = value
 			}
 		}
-	private var timerSeconds: Int = 0
+	override var timerSeconds: Int = 0
 		set(value) {
 			if (field != value) {
 				field = value
 				timerBinding.seconds = value
 			}
 		}
-	var timerTextColor: Int = -1
+	override var timerTextColor: Int = -1
 		set(value) {
 			if (field != value) {
 				field = value
 				timerBinding.color = field
 			}
 		}
-	private var timerCountMode = Prefs.CountUp
+	override var timerCountMode: CountMode = CountUp
 		set(value) {
-			if (field != value) {
-				field = value
-				
-				tv_timerCountMode.text = getString(
-						if (timerCountMode == Prefs.CountUp) R.string.timer_display_count_up else R.string.timer_display_count_down
-				)
-				
-				refreshTimer()
-				refreshBells()
-				updateTimerBinding()
-			}
+			field = value
+			
+			tv_timerCountMode.text = getString(
+					if (timerCountMode == CountUp) R.string.timer_display_count_up else R.string.timer_display_count_down
+			)
+			
+			refreshTimer()
+			refreshBells()
+			updateTimerBinding()
 		}
 	private lateinit var timerBinding: TimerBinding
-	var buttonsActive: Boolean = false
+	override var buttonsActive: Boolean = false
 		set(value) {
 			field = value
 			if (value) {
@@ -105,7 +78,7 @@ class MainActivity : AppCompatActivity(),
 				}
 			}
 		}
-	var keepScreenOn: Boolean = false
+	override var keepScreenOn: Boolean = false
 		set(value) {
 			field = value
 			if (value) {
@@ -115,34 +88,18 @@ class MainActivity : AppCompatActivity(),
 			}
 		}
 	
-	init {
-		val attributes = AudioAttributes.Builder()
-				.setUsage(AudioAttributes.USAGE_MEDIA)
-				.setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-				.build()
-		
-		soundPool = SoundPool.Builder()
-				.setMaxStreams(1)
-				.setAudioAttributes(attributes)
-				.build()
+	
+	private fun onStartPause(view: View) {
+		presenter.onStartPause(view)
 	}
 	
-	//<editor-fold desc="Activity callbacks">
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_main)
 		
+		presenter = MainPresenter(this)
+		
 		fl_timer.setOnClickListener(this::onStartPause)
-		
-		EnvVars.init(this)
-		
-		debate_bell_one = soundPool.load(this, R.raw.debate_bell_one, 1)
-		debate_bell_two = soundPool.load(this, R.raw.debate_bell_two, 1)
-		
-		volumeControlStream = AudioManager.STREAM_MUSIC
-		
-		timerBindings = getBindings(this)
-		timerBinding = NullBinding
 		
 		val sp = defaultSharedPreferences
 		
@@ -173,19 +130,26 @@ class MainActivity : AppCompatActivity(),
 						"nil"
 					}
 				}
-				
 				layout.setTextColor(getColorCompat(R.color.buttonUnselected))
-				
 				layout.setOnClickListener(this::onTimeButtonSelect)
-				
 				ll_timeButtons.addView(layout)
-				
 				timerButtons[layout] = timerOption
 			}
 		}
 		
 		this.timerButtons = timerButtons
-		setupSharedPreference()
+		
+		timerBindings = getBindings(this)
+		timerBinding = NullBinding
+		
+		
+		refreshTimer()
+		volumeControlStream = AudioManager.STREAM_MUSIC
+		
+	}
+	
+	fun onTimeButtonSelect(view: View) {
+		presenter.onTimeButtonSelect(view)
 	}
 	
 	override fun onBackPressed() {
@@ -212,7 +176,7 @@ class MainActivity : AppCompatActivity(),
 		action_countMode = menu.findItem(R.id.action_count_mode)
 		
 		updateDebateBellIcon()
-		updateCountModeTitle()
+		refreshUpdateCountModeTitle()
 		return true
 	}
 	
@@ -222,7 +186,7 @@ class MainActivity : AppCompatActivity(),
 				Prefs.debateBellEnabled = !Prefs.debateBellEnabled
 			}
 			R.id.action_count_mode -> {
-				onToggleDisplayMode()
+				presenter.onToggleDisplayMode()
 			}
 			else -> return super.onOptionsItemSelected(item)
 		}
@@ -232,39 +196,16 @@ class MainActivity : AppCompatActivity(),
 	
 	override fun onDestroy() {
 		super.onDestroy()
-		val state = state
+		val state = presenter.state
 		if (state is TimerStarted) {
 			state.timer.pause()
 		}
 		
-		defaultSharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
-	}
-//</editor-fold>
-	
-	//<editor-fold desc="SharedPreference">
-	private fun setupSharedPreference() {
-		Prefs.init(this)
-		
-		updateDebateBellIcon()
-		timerCountMode = Prefs.countMode
-		
-		defaultSharedPreferences.registerOnSharedPreferenceChangeListener(this)
+		presenter.onDestroy(this)
 	}
 	
-	override fun onSharedPreferenceChanged(sp: SharedPreferences, key: String) {
-		when (key) {
-			Prefs.pref_bell_enabled_key -> {
-				refreshBells()
-				updateDebateBellIcon()
-			}
-			Prefs.pref_count_mode -> {
-				timerCountMode = Prefs.countMode
-				updateCountModeTitle()
-			}
-		}
-	}
 	
-	private fun updateDebateBellIcon() {
+	override fun updateDebateBellIcon() {
 		action_debateBell?.icon = getDrawable(
 				if (Prefs.debateBellEnabled) {
 					R.drawable.ic_notifications_active_white_24dp
@@ -274,20 +215,18 @@ class MainActivity : AppCompatActivity(),
 		)
 	}
 	
-	private fun updateCountModeTitle() {
+	override fun refreshUpdateCountModeTitle() {
 		action_countMode?.title = getString(
-				if (Prefs.countMode == Prefs.CountUp) {
+				if (Prefs.countMode == CountUp) {
 					R.string.show_time_remaining
 				} else {
 					R.string.show_time_elapsed
 				}
 		)
 	}
-	//</editor-fold>
 	
-	//<editor-fold desc="UI fields and functions">
-	fun updateTimerBinding() {
-		val state = state
+	override fun updateTimerBinding() {
+		val state = presenter.state
 		timerBinding = when {
 			state is TimerStarted && state.ended -> timerBindings.getValue(TimerDisplayMode.End)
 			state is TimerStarted && state.timer.isTimeEndNegative -> timerBindings.getValue(TimerDisplayMode.Negative)
@@ -298,12 +237,12 @@ class MainActivity : AppCompatActivity(),
 		}
 	}
 	
-	private fun refreshTimer() {
-		val state = state
+	override fun refreshTimer() {
+		val state = presenter.state
 		updateTimerBinding()
 		when (state) {
 			is WaitingToStart -> {
-				if (timerCountMode == "count_up") {
+				if (timerCountMode == CountUp) {
 					timerMinutes = 0
 					timerSeconds = 0
 				} else {
@@ -314,7 +253,7 @@ class MainActivity : AppCompatActivity(),
 			}
 			is TimerStarted -> {
 				val timer = state.timer
-				if (timerCountMode == "count_up") {
+				if (timerCountMode == CountUp) {
 					timerMinutes = timer.minutesSinceStart
 					timerSeconds = timer.secondsSinceStart
 				} else {
@@ -325,8 +264,8 @@ class MainActivity : AppCompatActivity(),
 		}
 	}
 	
-	private fun refreshBells() {
-		val state = state
+	override fun refreshBells() {
+		val state = presenter.state
 		if (Prefs.debateBellEnabled && state is HasTimerOption) {
 			val timerOption = state.timerOption
 			
@@ -335,7 +274,7 @@ class MainActivity : AppCompatActivity(),
 			} else {
 				tv_bellsAt.setVisible()
 				
-				val bellString = if (timerCountMode == "count_up") {
+				val bellString = if (timerCountMode == CountUp) {
 					timerOption.countUpString
 				} else {
 					timerOption.countDownString
@@ -348,98 +287,46 @@ class MainActivity : AppCompatActivity(),
 		}
 	}
 	
-	@Suppress("UNUSED_PARAMETER")
-	private fun onStartPause(view: View) {
-		fun timerStarted(state: TimerStarted) {
-			if (state.running) {
-				tv_startPause.text = getString(R.string.resume)
-				state.running = false
-			} else {
-				tv_startPause.text = getString(R.string.pause)
-				state.running = true
-			}
+	override var tv_startPauseText: String
+		get() = tv_startPause.text.toString()
+		set(value) {
+			tv_startPause.text = value
 		}
-		
-		tv_startPause crossfadeTo tv_startPause withDuration longAnimTime
-		val state = state
-		when (state) {
-			is WaitingToStart -> {
-				val timer = newTimerInstance(state.timerOption)
-				this.state = TimerStarted(this, state.timerOption, timer).also(::timerStarted)
-			}
-			is TimerStarted -> timerStarted(state)
-		}
+	override val context: Context
+		get() = this
+	
+	override fun crossfadeStartPause() {
+		crossFade(tv_startPause, tv_startPause, EnvVars.longAnimTime)
 	}
 	
-	private fun newTimerInstance(timerOption: TimerOption): DebateTimer {
-		return object : DebateTimer(timerOption) {
-			override fun onSecond() = refreshTimer()
-			
-			override fun onFirstMinuteEnd() {
-				timerTextColor = EnvVars.color_timerNormal
-			}
-			
-			override fun onLastMinuteStart() {
-				timerTextColor = EnvVars.color_timerEnd
-			}
-			
-			override fun onOvertime() {
-				timerTextColor = EnvVars.color_timerEnd
-				updateTimerBinding()
-			}
-			
-			override fun onBell(debateBell: DebateBell) {
-				if (Prefs.debateBellEnabled)
-					soundPool.play(
-							when (debateBell) {
-								DebateBell.Once -> debate_bell_one
-								DebateBell.Twice -> debate_bell_two
-							},
-							1f,
-							1f,
-							1,
-							0,
-							1f)
-			}
-			
-			override fun onEnd() {
-				this@MainActivity.state.let {
-					if (it is TimerStarted) {
-						it.ended = true
-					}
-				}
-				updateTimerBinding()
-			}
-		}
-	}
-	
-	private fun onToggleDisplayMode() {
-		Prefs.countMode = if (Prefs.countMode == Prefs.CountUp) Prefs.CountDown else Prefs.CountUp
-	}
-	
-	private fun onTimeButtonSelect(view: View) {
-		timerButtons.keys.forEach {
-			it.setTextColor(getColorCompat(R.color.buttonUnselected))
-		}
-		
-		view as Button
-		view.setTextColor(getColorCompat(R.color.buttonSelected))
-		
-		tv_startPause.text = getString(R.string.start)
-		
-		this.state = WaitingToStart(timerButtons[view]!!)
-		
-		refreshTimer()
-		refreshBells()
-	}
-	
-	private fun onFirstTimeButtonSelect() {
+	override fun setBegan() {
 		fl_timer.setVisible()
 		tv_startPause.setVisible()
 		tv_tapAnywhereTo.setVisible()
 		tv_timerCountMode.setVisible()
+		
 		tv_startingText.setGone()
 	}
-
-//</editor-fold>
+	
+	override fun resetBegan() {
+		fl_timer.setInvisible()
+		tv_startPause.setInvisible()
+		tv_tapAnywhereTo.setInvisible()
+		tv_timerCountMode.setInvisible()
+		
+		tv_startingText.setVisible()
+	}
+	
+	override fun setTimeButtonAsSelected(view: Button) {
+		timerButtons.keys.forEach {
+			it.setTextColor(getColorCompat(R.color.buttonUnselected))
+		}
+		
+		view.setTextColor(getColorCompat(R.color.buttonSelected))
+	}
+	
+	
+	companion object {
+		private const val RetainedFragment = "retained_fragment"
+	}
 }

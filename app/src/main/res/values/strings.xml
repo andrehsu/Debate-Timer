@@ -24,4 +24,6 @@
     <!--Settings End-->
     <string name="show_time_remaining">Show time remaining</string>
     <string name="show_time_elapsed">Show time elapsed</string>
+    <string name="rotate_your_phone_to_begin">Rotate your phone to begin</string>
+    <string name="rotate_to_select_time">Rotate to select time</string>
 </resources>

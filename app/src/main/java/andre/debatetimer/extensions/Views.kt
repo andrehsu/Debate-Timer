@@ -25,21 +25,17 @@ inline fun View.fadeIn(animTime: Long = shortAnimTime): ViewPropertyAnimator = t
 
 inline fun View.fadeOut(animTime: Long = shortAnimTime): ViewPropertyAnimator = this.animate().alpha(0.0f).setDuration(animTime).setOnEnd { this.setGone();this.alpha = 1.0f }
 
-class CrossfadeAnimator private constructor(private val outAnimator: ViewPropertyAnimator,
-                                            private val inAnimator: ViewPropertyAnimator) {
-	companion object {
-		infix fun View.crossfadeTo(to: View): CrossfadeAnimator = CrossfadeAnimator(this.fadeOut(), to.fadeIn())
-	}
+
+fun crossFade(from: View, to: View, animTime: Long = -1) {
+	val outAnimator = from.fadeOut()
+	val inAnimator = to.fadeOut()
 	
-	infix fun withDuration(animTime: Long) {
-		apply { this.duration = animTime }
-	}
-	
-	private inline fun apply(func: ViewPropertyAnimator.() -> Unit) {
-		outAnimator.func()
-		inAnimator.func()
+	if (animTime != -1L) {
+		outAnimator.duration = animTime
+		inAnimator.duration = animTime
 	}
 }
+
 
 inline infix fun View.replaceWith(to: View) {
 	this.setGone()

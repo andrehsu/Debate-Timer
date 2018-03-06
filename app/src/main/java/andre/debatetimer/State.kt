@@ -13,19 +13,22 @@ object WaitingToBegin : State
 
 class WaitingToStart(override val timerOption: TimerOption) : State, HasTimerOption
 
-class TimerStarted(val view: MainActivity, override val timerOption: TimerOption, val timer: DebateTimer) : State, HasTimerOption {
+class TimerStarted(override val timerOption: TimerOption, val timer: DebateTimer) : State, HasTimerOption {
 	var running: Boolean = false
-		set(value) {
-			if (field != value) {
-				field = value
-				view.buttonsActive = value
-				view.keepScreenOn = value
-				if (value) {
-					timer.resume()
-				} else {
-					timer.pause()
-				}
+		private set
+	var ended: Boolean = false
+	
+	
+	fun setRunning(view: IMainView, value: Boolean) {
+		if (running != value) {
+			running = value
+			view.buttonsActive = value
+			view.keepScreenOn = value
+			if (value) {
+				timer.resume()
+			} else {
+				timer.pause()
 			}
 		}
-	var ended: Boolean = false
+	}
 }
