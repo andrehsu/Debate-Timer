@@ -5,8 +5,8 @@
     <string name="pause">Pause</string>
     <string name="resume">Resume</string>
     <string name="tap_anywhere_to">Tap anywhere to</string>
-    <string name="timer_display_count_up">Elapsed</string>
-    <string name="timer_display_count_down">Remaining</string>
+    <string name="timer_display_count_up">Showing time elapsed</string>
+    <string name="timer_display_count_down">Showing time remaining</string>
     <string name="starting_text">Select a time to begin</string>
     <string name="exit_question">Are you sure you want to exit?</string>
     <plurals name="bells_at">

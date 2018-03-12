@@ -1,6 +1,5 @@
 package andre.debatetimer
 
-import andre.debatetimer.timer.TimerOption
 import android.content.Context
 import android.widget.Button
 
@@ -21,7 +20,6 @@ interface IMainView {
 	
 	var tv_startPauseText: String
 	
-	val timerButtons: Map<Button, TimerOption>
 	
 	val context: Context
 	

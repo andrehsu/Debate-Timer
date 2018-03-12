@@ -8,6 +8,8 @@ import android.view.View
 interface IMainPresenter {
 	var view: IMainView
 	
+	var timerMaps: Map<Int, TimerOption>
+	
 	var state: State
 	
 	fun newTimerInstance(timerOption: TimerOption): DebateTimer
@@ -19,4 +21,5 @@ interface IMainPresenter {
 	fun onToggleDisplayMode()
 	
 	fun onDestroy(context: Context)
+	fun subscribe()
 }

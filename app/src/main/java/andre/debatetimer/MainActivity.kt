@@ -18,13 +18,16 @@ import android.widget.Button
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : IMainView, AppCompatActivity() {
-	override lateinit var presenter: IMainPresenter
-	
 	private lateinit var retainedFragment: RetainedFragment
 	
+	override var presenter: IMainPresenter
+		get() = retainedFragment.presenter
+		set(value) {
+			retainedFragment.presenter = value
+		}
 	
-	override lateinit var timerButtons: Map<Button, TimerOption>
 	private lateinit var timerBindings: Map<TimerDisplayMode, TimerBinding>
+	private lateinit var timerButtons: List<Button>
 	private var action_debateBell: MenuItem? = null
 	private var action_countMode: MenuItem? = null
 	
@@ -67,12 +70,12 @@ class MainActivity : IMainView, AppCompatActivity() {
 		set(value) {
 			field = value
 			if (value) {
-				timerButtons.keys.forEach {
+				timerButtons.forEach {
 					it.isClickable = false
 					it.alpha = 0.54f
 				}
 			} else {
-				timerButtons.keys.forEach {
+				timerButtons.forEach {
 					it.isClickable = true
 					it.alpha = 1.0f
 				}
@@ -89,17 +92,29 @@ class MainActivity : IMainView, AppCompatActivity() {
 		}
 	
 	
-	private fun onStartPause(view: View) {
-		presenter.onStartPause(view)
-	}
-	
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_main)
 		
-		presenter = MainPresenter(this)
+		val fm = fragmentManager
+		var retainedFragment = fm.findFragmentByTag(RetainedFragment) as? RetainedFragment
 		
-		fl_timer.setOnClickListener(this::onStartPause)
+		if (retainedFragment == null) {
+			retainedFragment = RetainedFragment()
+			
+			this.retainedFragment = retainedFragment
+			
+			retainedFragment.presenter = MainPresenter(this)
+			
+			fm.beginTransaction().add(retainedFragment, RetainedFragment).commit()
+		} else {
+			this.retainedFragment = retainedFragment
+			
+			presenter.view = this
+		}
+		
+		
+		fl_timer.setOnClickListener(presenter::onStartPause)
 		
 		val sp = defaultSharedPreferences
 		
@@ -111,7 +126,8 @@ class MainActivity : IMainView, AppCompatActivity() {
 				"420;-1",
 				"480;-1")).toList().sorted()
 		
-		val timerButtons = mutableMapOf<Button, TimerOption>()
+		val timerMaps = mutableMapOf<Int, TimerOption>()
+		val timerButtons = mutableListOf<Button>()
 		
 		timersStr.forEach { str ->
 			val timerOption = TimerOption.parseTag(str)
@@ -131,25 +147,30 @@ class MainActivity : IMainView, AppCompatActivity() {
 					}
 				}
 				layout.setTextColor(getColorCompat(R.color.buttonUnselected))
-				layout.setOnClickListener(this::onTimeButtonSelect)
+				layout.setOnClickListener(::onTimeButtonSelect)
 				ll_timeButtons.addView(layout)
-				timerButtons[layout] = timerOption
+				timerMaps[layout.id] = timerOption
+				timerButtons += layout
 			}
 		}
 		
-		this.timerButtons = timerButtons
+		presenter.timerMaps = timerMaps
 		
 		timerBindings = getBindings(this)
 		timerBinding = NullBinding
 		
+		this.timerButtons = timerButtons
 		
 		refreshTimer()
 		volumeControlStream = AudioManager.STREAM_MUSIC
 		
+		presenter.subscribe()
 	}
 	
-	fun onTimeButtonSelect(view: View) {
-		presenter.onTimeButtonSelect(view)
+	private fun onTimeButtonSelect(v: View) {
+		v as Button
+		presenter.onTimeButtonSelect(v)
+		setTimeButtonAsSelected(v)
 	}
 	
 	override fun onBackPressed() {
@@ -318,7 +339,7 @@ class MainActivity : IMainView, AppCompatActivity() {
 	}
 	
 	override fun setTimeButtonAsSelected(view: Button) {
-		timerButtons.keys.forEach {
+		timerButtons.forEach {
 			it.setTextColor(getColorCompat(R.color.buttonUnselected))
 		}
 		

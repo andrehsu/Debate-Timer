@@ -16,18 +16,18 @@ class TimerOption(val seconds: Int, bellsSinceStart: Map<Int, DebateBell>) {
 			return try {
 				val seconds = tokens[0].toInt()
 				
-				val bells = if (tokens[1].isEmpty()) {
-					mapOf()
-				} else if (tokens[1].toIntOrNull() == -1) {
-					mapOf(60 to Once, seconds - 60 to Once)
-				} else {
-					val bellTokens = tokens[1].split(',')
-					bellTokens.map { it.toInt() to Once }.toMap()
+				val bells = when {
+					tokens[1].isEmpty() -> mapOf()
+					tokens[1].toIntOrNull() == -1 -> mapOf(60 to Once, seconds - 60 to Once)
+					else -> {
+						val bellTokens = tokens[1].split(',')
+						bellTokens.map { it.toInt() to Once }.toMap()
+					}
 				}
 				
 				val ret = TimerOption(seconds, bells)
 				
-				cache.put(tag, ret)
+				cache[tag] = ret
 				
 				ret
 			} catch (e: RuntimeException) {
@@ -44,8 +44,8 @@ class TimerOption(val seconds: Int, bellsSinceStart: Map<Int, DebateBell>) {
 		this.bellsSinceStart = bellsSinceStart.toSortedMap()
 		val sorted = this.bellsSinceStart.filter { (_, v) -> v == Once }.map { it.key }
 		
-		countUpString = sorted.map { secondsToString(it) }.joinToString()
-		countDownString = sorted.map { secondsToString(seconds - it) }.joinToString()
+		countUpString = sorted.joinToString { secondsToString(it) }
+		countDownString = sorted.joinToString { secondsToString(seconds - it) }
 	}
 	
 	val minutesOnly = seconds / 60

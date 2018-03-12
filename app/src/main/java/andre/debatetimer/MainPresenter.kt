@@ -22,19 +22,13 @@ class MainPresenter(override var view: IMainView) : IMainPresenter, SharedPrefer
 				view.resetBegan()
 			} else {
 				view.setBegan()
-				val oldValue = field
 				field = value
-				
-				if (oldValue is TimerStarted) {
-					oldValue.setRunning(view, false)
-				}
 			}
 		}
 	
+	override lateinit var timerMaps: Map<Int, TimerOption>
 	
 	init {
-		view.presenter = this
-		
 		val attributes = AudioAttributes.Builder()
 				.setUsage(AudioAttributes.USAGE_MEDIA)
 				.setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -49,6 +43,10 @@ class MainPresenter(override var view: IMainView) : IMainPresenter, SharedPrefer
 		
 		EnvVars.init(view.context)
 		setupSharedPreference(view.context)
+	}
+	
+	override fun subscribe() {
+		state = state
 	}
 	
 	private fun setupSharedPreference(context: Context) {
@@ -133,11 +131,9 @@ class MainPresenter(override var view: IMainView) : IMainPresenter, SharedPrefer
 	override fun onTimeButtonSelect(@Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE") v: View) {
 		v as Button
 		
-		view.setTimeButtonAsSelected(v)
-		
 		view.tv_startPauseText = view.context.getString(R.string.start)
 		
-		state = WaitingToStart(view.timerButtons[v]!!)
+		state = WaitingToStart(timerMaps[v.id]!!)
 		
 		view.refreshTimer()
 		view.refreshBells()
