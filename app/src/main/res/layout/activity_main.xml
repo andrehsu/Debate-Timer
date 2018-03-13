@@ -11,25 +11,6 @@
     android:layout_marginTop="16dp"
     tools:context="andre.debatetimer.MainActivity">
 
-    <TextView
-        android:id="@+id/tv_timerCountMode"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/timer_display_count_up"
-        android:visibility="invisible"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
-
-    <TextView
-        android:id="@+id/tv_bellsAt"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:textSize="16sp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_timerCountMode"/>
 
     <FrameLayout
         android:id="@+id/fl_timer"
@@ -62,6 +43,28 @@
             />
 
     </FrameLayout>
+
+    <TextView
+        android:id="@+id/tv_bellsAt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/tv_timerCountMode"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"/>
+
+
+    <TextView
+        android:id="@+id/tv_timerCountMode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/timer_display_count_up"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/tv_tapAnywhereTo"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"/>
+
 
     <TextView
         android:id="@+id/tv_startingText"
