@@ -5,7 +5,6 @@ import andre.debatetimer.timer.DebateBell.Once
 
 class TimerOption(val seconds: Int, bellsSinceStart: Map<Int, DebateBell>) {
 	companion object {
-		private val Default = TimerOption(420, mapOf(60 to Once, 360 to Once))
 		private val cache = mutableMapOf<String, TimerOption>()
 		
 		fun parseTag(tag: String): TimerOption? {

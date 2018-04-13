@@ -326,7 +326,6 @@ class MainActivity : IMainView, AppCompatActivity() {
 	override fun setBegan() {
 		fl_timer.setVisible()
 		tv_startPause.setVisible()
-		tv_tapAnywhereTo.setVisible()
 		tv_timerCountMode.setVisible()
 		
 		tv_startingText.setGone()
@@ -356,7 +355,6 @@ class MainActivity : IMainView, AppCompatActivity() {
 	override fun resetBegan() {
 		fl_timer.setInvisible()
 		tv_startPause.setInvisible()
-		tv_tapAnywhereTo.setInvisible()
 		tv_timerCountMode.setInvisible()
 		
 		tv_startingText.setVisible()
