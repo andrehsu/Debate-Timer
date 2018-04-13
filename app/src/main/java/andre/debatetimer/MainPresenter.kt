@@ -57,10 +57,6 @@ class MainPresenter(override var view: IMainView) : IMainPresenter, SharedPrefer
 		context.defaultSharedPreferences.registerOnSharedPreferenceChangeListener(this)
 	}
 	
-	override fun onDestroy(context: Context) {
-		context.defaultSharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
-	}
-	
 	override fun newTimerInstance(presenter: IMainPresenter, timerOption: TimerOption): DebateTimer {
 		return object : DebateTimer(timerOption) {
 			override fun onSecond() = presenter.view.updateTimerValue()

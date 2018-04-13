@@ -216,17 +216,6 @@ class MainActivity : IMainView, AppCompatActivity() {
 		return true
 	}
 	
-	override fun onDestroy() {
-		super.onDestroy()
-		val state = presenter.state
-		if (state is TimerStarted) {
-			state.timer.pause()
-		}
-		
-		presenter.onDestroy(this)
-	}
-	
-	
 	override fun updateDebateBellIcon() {
 		action_debateBell?.icon = getDrawable(
 				if (Prefs.debateBellEnabled) {
