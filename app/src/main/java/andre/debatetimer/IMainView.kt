@@ -25,15 +25,17 @@ interface IMainView {
 	
 	fun updateDebateBellIcon()
 	
-	fun refreshTimer()
+	fun updateTimerValue()
+	
+	fun updateTimerColor()
 	
 	fun updateTimerBinding()
 	
 	fun setBegan()
 	
-	fun refreshBells()
+	fun updateBells()
 	
-	fun refreshUpdateCountModeTitle()
+	fun updateCountModeTitle()
 	
 	fun resetBegan()
 	

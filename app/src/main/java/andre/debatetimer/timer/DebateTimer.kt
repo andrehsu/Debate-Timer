@@ -1,6 +1,8 @@
 package andre.debatetimer.timer
 
+import andre.debatetimer.EnvVars
 import andre.debatetimer.extensions.abs
+import android.support.annotation.ColorInt
 import android.util.Log
 
 abstract class DebateTimer(timerOption: TimerOption) {
@@ -25,6 +27,7 @@ abstract class DebateTimer(timerOption: TimerOption) {
 			onEnd()
 			return
 		}
+		
 		Log.d("DebateTimer", "tick")
 		
 		countUpSeconds++
@@ -46,14 +49,17 @@ abstract class DebateTimer(timerOption: TimerOption) {
 		}
 		
 		if (countUpSeconds == 60 && countDownSeconds > 60) {
+			textColor = EnvVars.color_timerNormal
 			onFirstMinuteEnd()
 		}
 		
 		if (countDownSeconds == 60) {
+			textColor = EnvVars.color_timerEnd
 			onLastMinuteStart()
 		}
 		
 		if (countDownSeconds == -1) {
+			textColor = EnvVars.color_timerEnd
 			onOvertime()
 		}
 		
@@ -81,6 +87,10 @@ abstract class DebateTimer(timerOption: TimerOption) {
 	var secondsSinceStart = 0
 		private set
 	var minutesSinceStart = 0
+		private set
+	
+	@ColorInt
+	var textColor: Int = EnvVars.color_timerStart
 		private set
 	
 	abstract fun onSecond()

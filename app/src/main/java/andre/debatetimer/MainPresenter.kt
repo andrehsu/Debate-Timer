@@ -1,5 +1,6 @@
 package andre.debatetimer
 
+import andre.debatetimer.extensions.CustomNotNullVar
 import andre.debatetimer.extensions.defaultSharedPreferences
 import andre.debatetimer.timer.DebateBell
 import andre.debatetimer.timer.DebateTimer
@@ -16,15 +17,16 @@ class MainPresenter(override var view: IMainView) : IMainPresenter, SharedPrefer
 	private var debate_bell_one: Int = -1
 	private var debate_bell_two: Int = -1
 	
-	override var state: State = WaitingToBegin
-		set(value) {
+	override var state: State by object : CustomNotNullVar<State>() {
+		override fun CustomNotNullVar<State>.setter(value: State) {
+			field = value
 			if (value == WaitingToBegin) {
 				view.resetBegan()
 			} else {
 				view.setBegan()
-				field = value
 			}
 		}
+	}
 	
 	override lateinit var timerMaps: Map<Int, TimerOption>
 	
@@ -59,21 +61,21 @@ class MainPresenter(override var view: IMainView) : IMainPresenter, SharedPrefer
 		context.defaultSharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
 	}
 	
-	override fun newTimerInstance(timerOption: TimerOption): DebateTimer {
+	override fun newTimerInstance(presenter: IMainPresenter, timerOption: TimerOption): DebateTimer {
 		return object : DebateTimer(timerOption) {
-			override fun onSecond() = view.refreshTimer()
+			override fun onSecond() = presenter.view.updateTimerValue()
 			
 			override fun onFirstMinuteEnd() {
-				view.timerTextColor = EnvVars.color_timerNormal
+				presenter.view.updateTimerColor()
 			}
 			
 			override fun onLastMinuteStart() {
-				view.timerTextColor = EnvVars.color_timerEnd
+				presenter.view.updateTimerColor()
 			}
 			
 			override fun onOvertime() {
-				view.timerTextColor = EnvVars.color_timerEnd
-				view.updateTimerBinding()
+				presenter.view.updateTimerBinding()
+				presenter.view.updateTimerColor()
 			}
 			
 			override fun onBell(debateBell: DebateBell) {
@@ -116,7 +118,7 @@ class MainPresenter(override var view: IMainView) : IMainPresenter, SharedPrefer
 		val state = state
 		when (state) {
 			is WaitingToStart -> {
-				val timer = newTimerInstance(state.timerOption)
+				val timer = newTimerInstance(this, state.timerOption)
 				this.state = TimerStarted(state.timerOption, timer).also(::timerStarted)
 			}
 			is TimerStarted -> timerStarted(state)
@@ -135,19 +137,19 @@ class MainPresenter(override var view: IMainView) : IMainPresenter, SharedPrefer
 		
 		state = WaitingToStart(timerMaps[v.id]!!)
 		
-		view.refreshTimer()
-		view.refreshBells()
+		view.updateTimerValue()
+		view.updateBells()
 	}
 	
 	override fun onSharedPreferenceChanged(sp: SharedPreferences, key: String) {
 		when (key) {
 			Prefs.pref_bell_enabled_key -> {
-				view.refreshBells()
+				view.updateBells()
 				view.updateDebateBellIcon()
 			}
 			Prefs.pref_count_mode -> {
 				view.timerCountMode = Prefs.countMode
-				view.refreshUpdateCountModeTitle()
+				view.updateCountModeTitle()
 			}
 		}
 	}

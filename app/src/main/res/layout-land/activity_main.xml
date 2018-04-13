@@ -76,12 +76,11 @@
         style="@style/Base.TextAppearance.AppCompat.Subhead"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
         android:text="@string/tap_anywhere_to"
-        app:layout_constraintBottom_toTopOf="@+id/ll_timeButtons"
-        app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@+id/tv_startPause"
-        />
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/tv_startPause" />
 
     <TextView
         android:id="@+id/tv_startPause"
@@ -91,8 +90,7 @@
         android:text="@string/start"
         android:textSize="42sp"
         app:layout_constraintBottom_toTopOf="@+id/ll_timeButtons"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintLeft_toRightOf="@id/tv_tapAnywhereTo"
+        app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         />
 

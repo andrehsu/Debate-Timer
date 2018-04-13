@@ -4,7 +4,7 @@ import andre.debatetimer.extensions.defaultSharedPreferences
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
-import androidx.content.edit
+import androidx.core.content.edit
 import java.util.concurrent.ConcurrentHashMap
 
 object Prefs : SharedPreferences.OnSharedPreferenceChangeListener {

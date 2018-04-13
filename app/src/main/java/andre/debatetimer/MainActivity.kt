@@ -61,8 +61,8 @@ class MainActivity : IMainView, AppCompatActivity() {
 					if (timerCountMode == CountUp) R.string.timer_display_count_up else R.string.timer_display_count_down
 			)
 			
-			refreshTimer()
-			refreshBells()
+			updateTimerValue()
+			updateBells()
 			updateTimerBinding()
 		}
 	private lateinit var timerBinding: TimerBinding
@@ -107,12 +107,12 @@ class MainActivity : IMainView, AppCompatActivity() {
 			retainedFragment.presenter = MainPresenter(this)
 			
 			fm.beginTransaction().add(retainedFragment, RetainedFragment).commit()
+			
+			presenter.state = WaitingToBegin
 		} else {
 			this.retainedFragment = retainedFragment
-			
 			presenter.view = this
 		}
-		
 		
 		fl_timer.setOnClickListener(presenter::onStartPause)
 		
@@ -157,11 +157,12 @@ class MainActivity : IMainView, AppCompatActivity() {
 		presenter.timerMaps = timerMaps
 		
 		timerBindings = getBindings(this)
-		timerBinding = NullBinding
+		updateTimerBinding()
 		
 		this.timerButtons = timerButtons
 		
-		refreshTimer()
+		updateTimerValue()
+		updateTimerColor()
 		volumeControlStream = AudioManager.STREAM_MUSIC
 		
 		presenter.subscribe()
@@ -197,7 +198,7 @@ class MainActivity : IMainView, AppCompatActivity() {
 		action_countMode = menu.findItem(R.id.action_count_mode)
 		
 		updateDebateBellIcon()
-		refreshUpdateCountModeTitle()
+		updateCountModeTitle()
 		return true
 	}
 	
@@ -236,7 +237,7 @@ class MainActivity : IMainView, AppCompatActivity() {
 		)
 	}
 	
-	override fun refreshUpdateCountModeTitle() {
+	override fun updateCountModeTitle() {
 		action_countMode?.title = getString(
 				if (Prefs.countMode == CountUp) {
 					R.string.show_time_remaining
@@ -251,6 +252,7 @@ class MainActivity : IMainView, AppCompatActivity() {
 		timerBinding = when {
 			state is TimerStarted && state.ended -> timerBindings.getValue(TimerDisplayMode.End)
 			state is TimerStarted && state.timer.isTimeEndNegative -> timerBindings.getValue(TimerDisplayMode.Negative)
+			state === WaitingToBegin -> NullBinding
 			else -> timerBindings.getValue(TimerDisplayMode.Normal)
 		}
 		for (timerBinding in timerBindings.values) {
@@ -258,7 +260,7 @@ class MainActivity : IMainView, AppCompatActivity() {
 		}
 	}
 	
-	override fun refreshTimer() {
+	override fun updateTimerValue() {
 		val state = presenter.state
 		updateTimerBinding()
 		when (state) {
@@ -270,7 +272,6 @@ class MainActivity : IMainView, AppCompatActivity() {
 					timerMinutes = state.timerOption.minutesOnly
 					timerSeconds = state.timerOption.secondsOnly
 				}
-				timerTextColor = EnvVars.color_timerStart
 			}
 			is TimerStarted -> {
 				val timer = state.timer
@@ -285,7 +286,20 @@ class MainActivity : IMainView, AppCompatActivity() {
 		}
 	}
 	
-	override fun refreshBells() {
+	override fun updateTimerColor() {
+		val state = presenter.state
+		updateTimerBinding()
+		when (state) {
+			is WaitingToStart -> {
+				timerTextColor = EnvVars.color_timerStart
+			}
+			is TimerStarted -> {
+				timerTextColor = state.timer.textColor
+			}
+		}
+	}
+	
+	override fun updateBells() {
 		val state = presenter.state
 		if (Prefs.debateBellEnabled && state is HasTimerOption) {
 			val timerOption = state.timerOption
@@ -327,6 +341,15 @@ class MainActivity : IMainView, AppCompatActivity() {
 		tv_timerCountMode.setVisible()
 		
 		tv_startingText.setGone()
+		val state = presenter.state
+		tv_startPauseText = if (state is TimerStarted && state.running) {
+			getString(R.string.pause)
+		} else {
+			getString(R.string.resume)
+		}
+		
+		updateTimerValue()
+		updateTimerColor()
 	}
 	
 	override fun resetBegan() {
@@ -336,6 +359,7 @@ class MainActivity : IMainView, AppCompatActivity() {
 		tv_timerCountMode.setInvisible()
 		
 		tv_startingText.setVisible()
+		tv_startPauseText = getString(R.string.start)
 	}
 	
 	override fun setTimeButtonAsSelected(view: Button) {

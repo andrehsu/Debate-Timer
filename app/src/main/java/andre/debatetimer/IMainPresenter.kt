@@ -12,7 +12,7 @@ interface IMainPresenter {
 	
 	var state: State
 	
-	fun newTimerInstance(timerOption: TimerOption): DebateTimer
+	fun newTimerInstance(presenter: IMainPresenter, timerOption: TimerOption): DebateTimer
 	
 	fun onStartPause(view: View)
 	
