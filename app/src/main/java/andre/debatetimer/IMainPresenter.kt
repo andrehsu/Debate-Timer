@@ -7,7 +7,7 @@ import android.view.View
 interface IMainPresenter {
 	var view: IMainView
 	
-	var timerMaps: Map<Int, TimerOption>
+	var timerMaps: Map<String, TimerOption>
 	
 	var state: State
 	

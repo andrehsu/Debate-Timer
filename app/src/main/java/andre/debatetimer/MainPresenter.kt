@@ -28,7 +28,7 @@ class MainPresenter(override var view: IMainView) : IMainPresenter, SharedPrefer
 		}
 	}
 	
-	override lateinit var timerMaps: Map<Int, TimerOption>
+	override lateinit var timerMaps: Map<String, TimerOption>
 	
 	init {
 		val attributes = AudioAttributes.Builder()
@@ -131,7 +131,7 @@ class MainPresenter(override var view: IMainView) : IMainPresenter, SharedPrefer
 		
 		view.tv_startPauseText = view.context.getString(R.string.start)
 		
-		state = WaitingToStart(timerMaps[v.id]!!)
+		state = WaitingToStart(timerMaps[v.text.toString()]!!)
 		
 		view.updateTimerValue()
 		view.updateBells()

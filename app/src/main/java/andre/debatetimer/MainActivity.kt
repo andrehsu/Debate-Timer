@@ -126,7 +126,7 @@ class MainActivity : IMainView, AppCompatActivity() {
 				"420;-1",
 				"480;-1")).toList().sorted()
 		
-		val timerMaps = mutableMapOf<Int, TimerOption>()
+		val timerMaps = mutableMapOf<String, TimerOption>()
 		val timerButtons = mutableListOf<Button>()
 		
 		timersStr.forEach { str ->
@@ -149,7 +149,7 @@ class MainActivity : IMainView, AppCompatActivity() {
 				layout.setTextColor(getColorCompat(R.color.buttonUnselected))
 				layout.setOnClickListener(::onTimeButtonSelect)
 				ll_timeButtons.addView(layout)
-				timerMaps[layout.id] = timerOption
+				timerMaps[layout.text.toString()] = timerOption
 				timerButtons += layout
 			}
 		}
@@ -331,7 +331,19 @@ class MainActivity : IMainView, AppCompatActivity() {
 		
 		tv_startingText.setGone()
 		val state = presenter.state
-		tv_startPauseText = if (state is TimerStarted && state.running) {
+		tv_startPauseText = when (state) {
+			is WaitingToStart -> getString(R.string.start)
+			is TimerStarted -> if (state.running) {
+				getString(R.string.pause)
+			} else {
+				getString(R.string.resume)
+			}
+			else -> {
+				"Error"
+			}
+		}
+		
+		if (state is TimerStarted && state.running) {
 			getString(R.string.pause)
 		} else {
 			getString(R.string.resume)
