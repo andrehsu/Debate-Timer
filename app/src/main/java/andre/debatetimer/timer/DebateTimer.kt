@@ -75,7 +75,7 @@ abstract class DebateTimer(timerOption: TimerOption) {
 		timer.start()
 	}
 	
-	val bellsSinceStart = timerOption.bellsSinceStart
+	private val bellsSinceStart = timerOption.bellsSinceStart
 	
 	var isTimeEndNegative = BooleanLiveData()
 		private set

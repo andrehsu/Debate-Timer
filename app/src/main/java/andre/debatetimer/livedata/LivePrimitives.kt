@@ -9,11 +9,15 @@ abstract class NLiveData<T>(init: T) : LiveData<T>() {
 		value = init
 	}
 	
-	public override fun setValue(value: T) {
+	public final override fun postValue(value: T) {
+		super.postValue(value)
+	}
+	
+	public final override fun setValue(value: T) {
 		super.setValue(value)
 	}
 	
-	override fun getValue(): T {
+	final override fun getValue(): T {
 		return super.getValue()!!
 	}
 	

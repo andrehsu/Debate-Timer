@@ -7,7 +7,6 @@ import andre.debatetimer.timer.TimerOption
 import android.app.Application
 import android.media.AudioAttributes
 import android.media.SoundPool
-import android.view.View
 import android.widget.Button
 import androidx.lifecycle.AndroidViewModel
 
@@ -16,7 +15,7 @@ class MainModel(application: Application) : AndroidViewModel(application) {
 	private var debate_bell_one: Int = -1
 	private var debate_bell_two: Int = -1
 	
-	var selectedButton = StringLiveData();
+	var selectedButton = StringLiveData()
 	
 	val state = LiveState(InitState)
 	
@@ -69,7 +68,7 @@ class MainModel(application: Application) : AndroidViewModel(application) {
 		}
 	}
 	
-	fun onStartPause(@Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE") v: View) {
+	fun onStartPause() {
 		fun toggleRunning(state: TimerStarted) {
 			if (state.running.value) {
 				state.setRunning(false)
@@ -89,12 +88,7 @@ class MainModel(application: Application) : AndroidViewModel(application) {
 	}
 	
 	
-	fun onToggleDisplayMode() {
-		Prefs.countMode.apply(if (Prefs.countMode.value == CountMode.CountUp) CountMode.CountDown else CountMode.CountUp)
-	}
-	
-	fun onTimeButtonSelect(@Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE") v: View) {
-		v as Button
+	fun onTimeButtonSelect(v: Button) {
 		selectedButton.value = v.text.toString()
 		state.value = WaitingToStart(timerMaps[v.text.toString()]!!)
 	}
