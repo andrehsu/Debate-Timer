@@ -25,4 +25,6 @@
     <string name="rotate_your_phone_to_begin">Rotate your phone to begin</string>
     <string name="rotate_to_select_time">Rotate to select time</string>
     <string name="bells">Bells</string>
+    <string name="space">#x0020</string>
+    <string name="off">Off</string>
 </resources>

@@ -137,10 +137,10 @@ class MainActivity : AppCompatActivity() {
 		
 		Prefs.debateBellEnabled.observe(this) { debateBellEnabled ->
 			if (debateBellEnabled) {
-				tv_bellsAt.setVisible()
+				updateBellsText()
 				bt_debateBell.icon = getDrawable(R.drawable.ic_notifications_active_white_24dp)
 			} else {
-				tv_bellsAt.setInvisible()
+				updateBellsText()
 				bt_debateBell.icon = getDrawable(R.drawable.ic_notifications_off_white_24dp)
 			}
 			
@@ -165,13 +165,11 @@ class MainActivity : AppCompatActivity() {
 					fl_timer.setInvisible()
 					tv_startPause.setInvisible()
 					tv_startingText.setVisible()
-					tv_bellsAt.setGone()
 				}
 				else -> {
 					fl_timer.setVisible()
 					tv_startPause.setVisible()
 					tv_startingText.setGone()
-					tv_bellsAt.setVisible()
 				}
 			}
 			
@@ -273,17 +271,21 @@ class MainActivity : AppCompatActivity() {
 	
 	private fun updateBellsText() {
 		val state = model.state.value
-		tv_bellsAt.text = when (state) {
-			is InitState -> ""
-			is HasTimerOption -> {
-				val bellString = if (Prefs.countMode.value == CountUp) {
-					state.timerOption.countUpString
-				} else {
-					state.timerOption.countDownString
+		if (Prefs.debateBellEnabled.value) {
+			bt_debateBell.text = when (state) {
+				is InitState -> ""
+				is HasTimerOption -> {
+					val bellString = if (Prefs.countMode.value == CountUp) {
+						state.timerOption.countUpString
+					} else {
+						state.timerOption.countDownString
+					}
+					resources.getQuantityString(R.plurals.bells_at, state.timerOption.bellsSinceStart.count(), bellString)
 				}
-				resources.getQuantityString(R.plurals.bells_at, state.timerOption.bellsSinceStart.count(), bellString)
+				else -> "--Error--"
 			}
-			else -> "--Error--"
+		} else {
+			bt_debateBell.text = getString(R.string.off)
 		}
 	}
 	
