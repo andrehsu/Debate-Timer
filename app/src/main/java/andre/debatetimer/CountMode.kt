@@ -11,7 +11,7 @@ enum class CountMode {
 	}
 	
 	companion object {
-		fun parseString(string: String): CountMode {
+		fun fromString(string: String): CountMode {
 			return if (string == "count_down") CountDown else CountUp
 		}
 	}

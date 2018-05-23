@@ -1,5 +1,7 @@
 package andre.debatetimer
 
+import andre.debatetimer.livedata.BooleanLiveData
+import andre.debatetimer.livedata.NLiveData
 import andre.debatetimer.timer.DebateTimer
 import andre.debatetimer.timer.TimerOption
 
@@ -9,21 +11,18 @@ interface HasTimerOption : State {
 	val timerOption: TimerOption
 }
 
-object WaitingToBegin : State
+object InitState : State
 
 class WaitingToStart(override val timerOption: TimerOption) : State, HasTimerOption
 
 class TimerStarted(override val timerOption: TimerOption, val timer: DebateTimer) : State, HasTimerOption {
-	var running: Boolean = false
-		private set
-	var ended: Boolean = false
+	var running = BooleanLiveData(false)
+	var ended = BooleanLiveData(false)
 	
 	
-	fun setRunning(view: IMainView, value: Boolean) {
-		if (running != value) {
-			running = value
-			view.buttonsActive = value
-			view.keepScreenOn = value
+	fun setRunning(value: Boolean) {
+		if (running.value != value) {
+			running.value = value
 			if (value) {
 				timer.resume()
 			} else {
@@ -32,3 +31,8 @@ class TimerStarted(override val timerOption: TimerOption, val timer: DebateTimer
 		}
 	}
 }
+
+
+class LiveState(state: State) : NLiveData<State>(state)
+
+class LiveDebateTimer(debateTimer: DebateTimer) : NLiveData<DebateTimer>(debateTimer)

@@ -3,8 +3,8 @@ package andre.debatetimer
 import andre.debatetimer.extensions.abs
 import android.content.ClipboardManager
 import android.content.Context
-import android.support.v4.content.ContextCompat
 import android.util.Log
+import androidx.core.content.ContextCompat
 
 object EnvVars {
 	private val LogTag = EnvVars::class.java.simpleName

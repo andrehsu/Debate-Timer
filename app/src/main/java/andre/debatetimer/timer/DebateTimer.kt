@@ -2,7 +2,8 @@ package andre.debatetimer.timer
 
 import andre.debatetimer.EnvVars
 import andre.debatetimer.extensions.abs
-import android.support.annotation.ColorInt
+import andre.debatetimer.livedata.BooleanLiveData
+import andre.debatetimer.livedata.IntLiveData
 import android.util.Log
 
 abstract class DebateTimer(timerOption: TimerOption) {
@@ -35,12 +36,12 @@ abstract class DebateTimer(timerOption: TimerOption) {
 		
 		val absVal = countDownSeconds.abs()
 		
-		isTimeEndNegative = countDownSeconds < 0
-		secondsLeft = absVal % 60
-		minutesLeft = absVal / 60
+		isTimeEndNegative.value = countDownSeconds < 0
+		secondsLeft.value = absVal % 60
+		minutesLeft.value = absVal / 60
 		
-		secondsSinceStart = countUpSeconds % 60
-		minutesSinceStart = countUpSeconds / 60
+		secondsSinceStart.value = countUpSeconds % 60
+		minutesSinceStart.value = countUpSeconds / 60
 		
 		bellsSinceStart[countUpSeconds]?.let { onBell(it) }
 		
@@ -49,21 +50,20 @@ abstract class DebateTimer(timerOption: TimerOption) {
 		}
 		
 		if (countUpSeconds == 60 && countDownSeconds > 60) {
-			textColor = EnvVars.color_timerNormal
+			textColor.value = EnvVars.color_timerNormal
 			onFirstMinuteEnd()
 		}
 		
 		if (countDownSeconds == 60) {
-			textColor = EnvVars.color_timerEnd
+			textColor.value = EnvVars.color_timerEnd
 			onLastMinuteStart()
 		}
 		
 		if (countDownSeconds == -1) {
-			textColor = EnvVars.color_timerEnd
+			textColor.value = EnvVars.color_timerEnd
 			onOvertime()
 		}
 		
-		onSecond()
 	}
 	
 	fun pause() {
@@ -77,23 +77,21 @@ abstract class DebateTimer(timerOption: TimerOption) {
 	
 	val bellsSinceStart = timerOption.bellsSinceStart
 	
-	var isTimeEndNegative = false
+	var isTimeEndNegative = BooleanLiveData()
 		private set
-	var secondsLeft = 0
+	var secondsLeft = IntLiveData()
 		private set
-	var minutesLeft = 0
-		private set
-	
-	var secondsSinceStart = 0
-		private set
-	var minutesSinceStart = 0
+	var minutesLeft = IntLiveData()
 		private set
 	
-	@ColorInt
-	var textColor: Int = EnvVars.color_timerStart
+	var secondsSinceStart = IntLiveData()
+		private set
+	var minutesSinceStart = IntLiveData()
 		private set
 	
-	abstract fun onSecond()
+	var textColor = IntLiveData(EnvVars.color_timerStart)
+		private set
+	
 	
 	open fun onFirstMinuteEnd() {}
 	
