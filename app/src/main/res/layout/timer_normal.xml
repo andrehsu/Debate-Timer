@@ -14,29 +14,12 @@
         app:layout_constraintGuide_percent="0.43"/>
 
     <TextView
-        android:id="@+id/tv_timer_negSign"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="&#8211;"
-        android:textAlignment="center"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
-        android:textColor="@color/timerNormal"
-        android:textSize="140dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintRight_toLeftOf="@+id/tv_timer_m"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="HardcodedText,SpUsage"/>
-
-    <TextView
         android:id="@+id/tv_timer_m"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="0"
         android:textAlignment="center"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
         android:textColor="@color/timerNormal"
         android:textSize="180dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -51,7 +34,6 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
         android:text=":"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
         android:textColor="@color/timerNormal"
         android:textSize="180dp"
         app:layout_constraintBottom_toBottomOf="@id/tv_timer_m"
@@ -66,7 +48,6 @@
         android:gravity="center"
         android:text="00"
         android:textAlignment="center"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
         android:textColor="@color/timerNormal"
         android:textSize="180dp"
         app:layout_constraintBottom_toBottomOf="parent"

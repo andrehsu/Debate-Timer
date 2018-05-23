@@ -20,7 +20,6 @@
         android:gravity="center"
         android:text="&#8211;"
         android:textAlignment="center"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
         android:textColor="@color/timerOvertime"
         android:textSize="140dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -35,12 +34,11 @@
         android:gravity="center"
         android:text="00"
         android:textAlignment="center"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
         android:textColor="@color/timerOvertime"
         android:textSize="180dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toRightOf="@id/guideline"
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="HardcodedText,SpUsage"
-        tools:text="00"/>
+        tools:text="00" />
 </androidx.constraintlayout.widget.ConstraintLayout>

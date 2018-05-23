@@ -13,7 +13,6 @@
         android:gravity="center"
         android:text="&#8211;&#8211;"
         android:textAlignment="center"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
         android:textColor="@color/timerOvertime"
         android:textSize="140dp"
         app:layout_constraintBottom_toBottomOf="parent"
