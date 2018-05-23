@@ -4,11 +4,29 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginBottom="16dp"
     android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp"
     android:layout_marginTop="16dp"
+    android:layout_marginRight="16dp"
+    android:layout_marginBottom="16dp"
     tools:context="andre.debatetimer.MainActivity">
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/bt_debateBell"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:text="@string/bells"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/ic_notifications_active_white_24dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/bt_countMode"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 
     <FrameLayout
@@ -18,7 +36,7 @@
         app:layout_constraintBottom_toTopOf="@+id/ll_timeButtons"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/bt_debateBell">
 
         <include
             android:id="@+id/timer_normal"
@@ -49,18 +67,6 @@
         app:layout_constraintBottom_toTopOf="@+id/tv_startPause"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
-
-
-    <TextView
-        android:id="@+id/tv_timerCountMode"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/timer_display_count_up"
-        android:visibility="invisible"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
 
     <TextView
         android:id="@+id/tv_startingText"

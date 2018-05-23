@@ -5,17 +5,17 @@ import andre.debatetimer.livedata.NLiveData
 import andre.debatetimer.timer.DebateTimer
 import andre.debatetimer.timer.TimerOption
 
-interface State
+sealed class State()
 
-interface HasTimerOption : State {
+interface HasTimerOption {
 	val timerOption: TimerOption
 }
 
-object InitState : State
+object InitState : State()
 
-class WaitingToStart(override val timerOption: TimerOption) : State, HasTimerOption
+class WaitingToStart(override val timerOption: TimerOption) : State(), HasTimerOption
 
-class TimerStarted(override val timerOption: TimerOption, val timer: DebateTimer) : State, HasTimerOption {
+class TimerStarted(override val timerOption: TimerOption, val timer: DebateTimer) : State(), HasTimerOption {
 	var running = BooleanLiveData(false)
 	var ended = BooleanLiveData(false)
 	
@@ -32,7 +32,4 @@ class TimerStarted(override val timerOption: TimerOption, val timer: DebateTimer
 	}
 }
 
-
 class LiveState(state: State) : NLiveData<State>(state)
-
-class LiveDebateTimer(debateTimer: DebateTimer) : NLiveData<DebateTimer>(debateTimer)

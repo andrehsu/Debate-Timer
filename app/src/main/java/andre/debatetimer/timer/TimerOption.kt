@@ -3,7 +3,7 @@ package andre.debatetimer.timer
 import andre.debatetimer.secondsToString
 import andre.debatetimer.timer.DebateBell.Once
 
-class TimerOption(val seconds: Int, bellsSinceStart: Map<Int, DebateBell>) {
+class TimerOption(val totalSeconds: Int, bellsSinceStart: Map<Int, DebateBell>) {
 	companion object {
 		private val cache = mutableMapOf<String, TimerOption>()
 		
@@ -44,9 +44,9 @@ class TimerOption(val seconds: Int, bellsSinceStart: Map<Int, DebateBell>) {
 		val sorted = this.bellsSinceStart.filter { (_, v) -> v == Once }.map { it.key }
 		
 		countUpString = sorted.joinToString { secondsToString(it) }
-		countDownString = sorted.joinToString { secondsToString(seconds - it) }
+		countDownString = sorted.joinToString { secondsToString(totalSeconds - it) }
 	}
 	
-	val minutesOnly = seconds / 60
-	val secondsOnly = seconds % 60
+	val minutes = totalSeconds / 60
+	val seconds = totalSeconds % 60
 }

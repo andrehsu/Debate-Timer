@@ -29,7 +29,6 @@ abstract class NLiveData<T>(init: T) : LiveData<T>() {
 
 class BooleanLiveData(boolean: Boolean = false) : NLiveData<Boolean>(boolean)
 
-
 class IntLiveData(int: Int = 0) : NLiveData<Int>(int)
 
 class StringLiveData(string: String = "") : NLiveData<String>(string)

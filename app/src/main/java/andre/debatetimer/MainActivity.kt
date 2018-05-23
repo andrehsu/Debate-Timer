@@ -1,19 +1,17 @@
 package andre.debatetimer
 
+import andre.debatetimer.CountMode.CountDown
 import andre.debatetimer.CountMode.CountUp
 import andre.debatetimer.extensions.*
 import andre.debatetimer.timer.TimerOption
 import android.app.Dialog
 import android.media.AudioManager
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.view.WindowManager
 import android.widget.Button
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -22,8 +20,6 @@ class MainActivity : AppCompatActivity() {
 	
 	private lateinit var timerBindings: Map<TimerDisplayMode, TimerBinding>
 	private lateinit var timerButtons: List<Button>
-	private var action_debateBell: MenuItem? = null
-	private var action_countMode: MenuItem? = null
 	
 	private var timerMinutes: Int = 0
 		set(value) {
@@ -40,13 +36,6 @@ class MainActivity : AppCompatActivity() {
 			field = value
 			timerBinding.color = value
 		}
-	private var timerCountMode: CountMode = CountUp
-		set(value) {
-			field = value
-			tv_timerCountMode.text = getString(
-					if (timerCountMode == CountUp) R.string.timer_display_count_up else R.string.timer_display_count_down
-			)
-		}
 	private var timerBinding: TimerBinding = NullBinding
 		set(value) {
 			field = value
@@ -61,7 +50,7 @@ class MainActivity : AppCompatActivity() {
 			if (value) {
 				timerButtons.forEach {
 					it.isClickable = false
-					it.alpha = 0.54f
+					it.alpha = 0.38f
 				}
 			} else {
 				timerButtons.forEach {
@@ -95,6 +84,14 @@ class MainActivity : AppCompatActivity() {
 			tv_startPause.fadeIn(EnvVars.longAnimTime)
 		})
 		
+		bt_countMode.setOnClickListener { _ ->
+			Prefs.countMode.apply(if (Prefs.countMode.value == CountUp) CountDown else CountUp)
+		}
+		
+		bt_debateBell.setOnClickListener { _ ->
+			Prefs.debateBellEnabled.apply(!Prefs.debateBellEnabled.value)
+		}
+		
 		val sp = defaultSharedPreferences
 		
 		val timersStr = sp.getStringSet(getString(R.string.pref_timers), mutableSetOf(
@@ -115,12 +112,12 @@ class MainActivity : AppCompatActivity() {
 				val layout = layoutInflater.inflate(R.layout.timer_button, ll_timeButtons, false) as Button
 				
 				layout.text = with(timerOption) {
-					if (minutesOnly != 0 && secondsOnly != 0) {
-						"${minutesOnly}m${secondsOnly}s"
-					} else if (minutesOnly != 0) {
-						"${minutesOnly}m"
-					} else if (secondsOnly != 0) {
-						"${secondsOnly}s"
+					if (minutes != 0 && seconds != 0) {
+						"${minutes}m${seconds}s"
+					} else if (minutes != 0) {
+						"${minutes}m"
+					} else if (seconds != 0) {
+						"${seconds}s"
 					} else {
 						"nil"
 					}
@@ -138,111 +135,106 @@ class MainActivity : AppCompatActivity() {
 		
 		volumeControlStream = AudioManager.STREAM_MUSIC
 		
-		model.state.observe(this, Observer { state ->
+		Prefs.debateBellEnabled.observe(this) { debateBellEnabled ->
+			if (debateBellEnabled) {
+				tv_bellsAt.setVisible()
+				bt_debateBell.icon = getDrawable(R.drawable.ic_notifications_active_white_24dp)
+			} else {
+				tv_bellsAt.setInvisible()
+				bt_debateBell.icon = getDrawable(R.drawable.ic_notifications_off_white_24dp)
+			}
+			
+		}
+		Prefs.countMode.observe(this) { countMode ->
+			bt_countMode.text = getString(
+					if (countMode == CountUp) {
+						R.string.count_down
+					} else {
+						R.string.count_up
+					}
+			)
+			
+			updateBellsText()
+			updateMinutes()
+			updateSeconds()
+		}
+		
+		model.state.observe(this) { state ->
 			when (state) {
-				is InitState -> resetBegan()
-				else -> setBegan()
+				is InitState -> {
+					fl_timer.setInvisible()
+					tv_startPause.setInvisible()
+					tv_startingText.setVisible()
+					tv_bellsAt.setGone()
+				}
+				else -> {
+					fl_timer.setVisible()
+					tv_startPause.setVisible()
+					tv_startingText.setGone()
+					tv_bellsAt.setVisible()
+				}
 			}
 			
 			when (state) {
 				is InitState -> {
 					timerBinding = NullBinding
 				}
-				is HasTimerOption -> {
-					val bellString = if (timerCountMode == CountUp) {
-						state.timerOption.countUpString
-					} else {
-						state.timerOption.countDownString
-					}
-					tv_bellsAt.text = resources.getQuantityString(R.plurals.bells_at, state.timerOption.bellsSinceStart.count(), bellString)
+				
+				is WaitingToStart -> {
+					tv_startPause.text = getString(R.string.start)
+					timerBinding = timerBindings[TimerDisplayMode.Normal]!!
+					timerTextColor = EnvVars.color_timerStart
 					
-					when (state) {
-						is WaitingToStart -> {
-							tv_startPause.text = getString(R.string.start)
-							timerBinding = timerBindings[TimerDisplayMode.Normal]!!
-							timerTextColor = EnvVars.color_timerStart
-							
-							if (timerCountMode == CountUp) {
-								timerMinutes = 0
-								timerSeconds = 0
-							} else {
-								timerMinutes = state.timerOption.minutesOnly
-								timerSeconds = state.timerOption.secondsOnly
-							}
+					updateBellsText()
+					updateMinutes()
+					updateSeconds()
+				}
+				is TimerStarted -> {
+					updateBellsText()
+					
+					state.timer.isTimeEndNegative.observe(this) { isTimeEndNegative ->
+						timerBinding = if (isTimeEndNegative) {
+							timerBindings.getValue(TimerDisplayMode.Negative)
+						} else {
+							timerBindings.getValue(TimerDisplayMode.Normal)
 						}
-						is TimerStarted -> {
-							state.timer.isTimeEndNegative.observe(this) { isTimeEndNegative ->
-								timerBinding = if (isTimeEndNegative) {
-									timerBindings.getValue(TimerDisplayMode.Negative)
-								} else {
-									timerBindings.getValue(TimerDisplayMode.Normal)
-								}
-							}
-							
-							state.ended.observe(this) { ended ->
-								timerBinding = if (ended) {
-									timerBindings.getValue(TimerDisplayMode.End)
-								} else {
-									timerBindings.getValue(TimerDisplayMode.Normal)
-								}
-							}
-							
-							state.timer.minutesSinceStart.observe(this) {
-								timerMinutes = if (timerCountMode == CountUp) {
-									state.timer.minutesSinceStart.value
-								} else {
-									state.timer.minutesLeft.value
-								}
-							}
-							
-							state.timer.secondsSinceStart.observe(this) {
-								timerSeconds = if (timerCountMode == CountUp) {
-									state.timer.secondsSinceStart.value
-								} else {
-									state.timer.secondsLeft.value
-								}
-							}
-							
-							state.timer.textColor.observe(this) { textColor ->
-								timerTextColor = textColor
-							}
-							
-							state.running.observe(this) { running ->
-								tv_startPause.text = if (running) {
-									getString(R.string.pause)
-								} else {
-									getString(R.string.resume)
-								}
-								buttonsActive = running
-								keepScreenOn = running
-							}
+					}
+					
+					state.ended.observe(this) { ended ->
+						timerBinding = if (ended) {
+							timerBindings.getValue(TimerDisplayMode.End)
+						} else {
+							timerBindings.getValue(TimerDisplayMode.Normal)
 						}
+					}
+					
+					state.timer.minutesCountUp.observe(this) {
+						updateMinutes()
+					}
+					
+					state.timer.secondsCountUp.observe(this) {
+						updateSeconds()
+					}
+					
+					state.timer.textColor.observe(this) { textColor ->
+						timerTextColor = textColor
+					}
+					
+					state.running.observe(this) { running ->
+						tv_startPause.text = if (running) {
+							getString(R.string.pause)
+						} else {
+							getString(R.string.resume)
+						}
+						buttonsActive = running
+						keepScreenOn = running
 					}
 				}
 			}
 			
 			Prefs.countMode.observe(this) { countMode ->
-				timerCountMode = countMode
+				bt_countMode.text = if (countMode == CountUp) getString(R.string.count_up) else getString(R.string.count_down)
 			}
-		})
-		Prefs.debateBellEnabled.observe(this) { debateBellEnabled ->
-			if (debateBellEnabled) {
-				tv_bellsAt.setVisible()
-				action_debateBell?.icon = getDrawable(R.drawable.ic_notifications_active_white_24dp)
-			} else {
-				tv_bellsAt.setInvisible()
-				action_debateBell?.icon = getDrawable(R.drawable.ic_notifications_off_white_24dp)
-			}
-			
-		}
-		Prefs.countMode.observe(this) { countMode ->
-			action_countMode?.title = getString(
-					if (countMode == CountUp) {
-						R.string.show_time_remaining
-					} else {
-						R.string.show_time_elapsed
-					}
-			)
 		}
 		
 		model.selectedButton.observe(this) { txt ->
@@ -253,7 +245,6 @@ class MainActivity : AppCompatActivity() {
 					it.setTextColor(getColorCompat(R.color.buttonUnselected))
 				}
 			}
-			
 		}
 	}
 	
@@ -280,42 +271,58 @@ class MainActivity : AppCompatActivity() {
 		}
 	}
 	
-	override fun onCreateOptionsMenu(menu: Menu): Boolean {
-		menuInflater.inflate(R.menu.activity_main, menu)
-		action_debateBell = menu.findItem(R.id.action_debate_bell)
-		action_countMode = menu.findItem(R.id.action_count_mode)
-		
-		return true
-	}
-	
-	override fun onOptionsItemSelected(item: MenuItem): Boolean {
-		when (item.itemId) {
-			R.id.action_debate_bell -> {
-				Prefs.debateBellEnabled.apply(!Prefs.debateBellEnabled.value)
+	private fun updateBellsText() {
+		val state = model.state.value
+		tv_bellsAt.text = when (state) {
+			is InitState -> ""
+			is HasTimerOption -> {
+				val bellString = if (Prefs.countMode.value == CountUp) {
+					state.timerOption.countUpString
+				} else {
+					state.timerOption.countDownString
+				}
+				resources.getQuantityString(R.plurals.bells_at, state.timerOption.bellsSinceStart.count(), bellString)
 			}
-			R.id.action_count_mode -> {
-				Prefs.countMode.apply(if (Prefs.countMode.value == CountUp) CountMode.CountDown else CountUp)
-			}
-			else -> return super.onOptionsItemSelected(item)
+			else -> "--Error--"
 		}
-		
-		return true
 	}
 	
-	private fun setBegan() {
-		fl_timer.setVisible()
-		tv_startPause.setVisible()
-		tv_timerCountMode.setVisible()
-		tv_startingText.setGone()
+	private fun updateMinutes() {
+		val state = model.state.value
+		timerMinutes = when (state) {
+			is InitState -> 0
+			is WaitingToStart ->
+				if (Prefs.countMode.value == CountUp) {
+					0
+				} else {
+					state.timerOption.minutes
+				}
+			is TimerStarted ->
+				if (Prefs.countMode.value == CountUp) {
+					state.timer.minutesCountUp.value
+				} else {
+					state.timer.minutesCountDown.value
+				}
+		}
 	}
 	
-	private fun resetBegan() {
-		fl_timer.setInvisible()
-		tv_startPause.setInvisible()
-		tv_timerCountMode.setInvisible()
-		
-		tv_startingText.setVisible()
-		
-		tv_startPause.text = getString(R.string.start)
+	private fun updateSeconds() {
+		val state = model.state.value
+		timerSeconds = when (state) {
+			is InitState -> 0
+			is WaitingToStart ->
+				if (Prefs.countMode.value == CountUp) {
+					0
+				} else {
+					state.timerOption.seconds
+				}
+			is TimerStarted ->
+				if (Prefs.countMode.value == CountUp) {
+					state.timer.secondsCountUp.value
+				} else {
+					state.timer.secondsCountDown.value
+				}
+		}
 	}
+	
 }

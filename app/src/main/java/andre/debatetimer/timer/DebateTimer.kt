@@ -4,15 +4,14 @@ import andre.debatetimer.EnvVars
 import andre.debatetimer.extensions.abs
 import andre.debatetimer.livedata.BooleanLiveData
 import andre.debatetimer.livedata.IntLiveData
-import android.util.Log
 
 abstract class DebateTimer(timerOption: TimerOption) {
 	private var countUpSeconds: Int = 0
-	private var countDownSeconds: Int = timerOption.seconds
+	private var countDownSeconds: Int = timerOption.totalSeconds
 	private var timer: Timer = newTimerInstance()
 	private var deciseconds: Int = 0
 	
-	fun newTimerInstance() = object : Timer(100) {
+	private fun newTimerInstance() = object : Timer(100) {
 		override fun onTick() {
 			deciseconds++
 			if (deciseconds == 10) {
@@ -29,19 +28,17 @@ abstract class DebateTimer(timerOption: TimerOption) {
 			return
 		}
 		
-		Log.d("DebateTimer", "tick")
-		
 		countUpSeconds++
 		countDownSeconds--
 		
 		val absVal = countDownSeconds.abs()
 		
 		isTimeEndNegative.value = countDownSeconds < 0
-		secondsLeft.value = absVal % 60
-		minutesLeft.value = absVal / 60
+		secondsCountDown.value = absVal % 60
+		minutesCountDown.value = absVal / 60
 		
-		secondsSinceStart.value = countUpSeconds % 60
-		minutesSinceStart.value = countUpSeconds / 60
+		secondsCountUp.value = countUpSeconds % 60
+		minutesCountUp.value = countUpSeconds / 60
 		
 		bellsSinceStart[countUpSeconds]?.let { onBell(it) }
 		
@@ -79,14 +76,14 @@ abstract class DebateTimer(timerOption: TimerOption) {
 	
 	var isTimeEndNegative = BooleanLiveData()
 		private set
-	var secondsLeft = IntLiveData()
+	var secondsCountDown = IntLiveData()
 		private set
-	var minutesLeft = IntLiveData()
+	var minutesCountDown = IntLiveData()
 		private set
 	
-	var secondsSinceStart = IntLiveData()
+	var secondsCountUp = IntLiveData()
 		private set
-	var minutesSinceStart = IntLiveData()
+	var minutesCountUp = IntLiveData()
 		private set
 	
 	var textColor = IntLiveData(EnvVars.color_timerStart)

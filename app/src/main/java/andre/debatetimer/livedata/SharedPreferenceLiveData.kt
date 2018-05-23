@@ -5,9 +5,9 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 
-abstract class SharedPreferenceLiveData<T>(protected val sp: SharedPreferences,
-                                           protected val key: String,
-                                           protected val default: T,
+abstract class SharedPreferenceLiveData<T>(private val sp: SharedPreferences,
+                                           private val key: String,
+                                           private val default: T,
                                            private val getFunction: SharedPreferences.(key: String, default: T) -> T,
                                            private val setFunction: SharedPreferences.Editor.(key: String, value: T) -> SharedPreferences.Editor) : LiveData<T>(), SharedPreferences.OnSharedPreferenceChangeListener {
 	init {
