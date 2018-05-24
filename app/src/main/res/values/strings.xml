@@ -11,11 +11,12 @@
     <string name="debate_bell_on_off">Debate Bell On/Off</string>
 
     <!--Settings-->
-    <string name="pref_bell_enabled_key">bell_enabled</string>
+    <string name="pref_bell_enabled_key" translatable="false">bell_enabled</string>
     <bool name="pref_bell_enabled_default">true</bool>
-    <string name="pref_timers">pref_timers</string>
-    <string name="pref_count_mode">count_mode</string>
-    <string name="pref_count_mode_default">count_up</string>
+    <string name="pref_timers" translatable="false">pref_timers</string>
+    <string name="pref_count_mode" translatable="false">count_mode</string>
+    <string name="pref_count_mode_default" translatable="false">count_up</string>
+
     <!--Settings End-->
     <string name="count_down">Count Down</string>
     <string name="count_up">Count up</string>
