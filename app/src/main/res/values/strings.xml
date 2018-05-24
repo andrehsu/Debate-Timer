@@ -7,10 +7,7 @@
     <string name="tap_anywhere_to">Tap anywhere to</string>
     <string name="starting_text">Select a time to begin</string>
     <string name="exit_question">Are you sure you want to exit?</string>
-    <plurals name="bells_at">
-        <item quantity="one">Bell at %s</item>
-        <item quantity="other">Bells at %s</item>
-    </plurals>
+    <string name="bells_at">At %s</string>
     <string name="debate_bell_on_off">Debate Bell On/Off</string>
 
     <!--Settings-->
@@ -24,7 +21,5 @@
     <string name="count_up">Count up</string>
     <string name="rotate_your_phone_to_begin">Rotate your phone to begin</string>
     <string name="rotate_to_select_time">Rotate to select time</string>
-    <string name="bells">Bells</string>
-    <string name="space">#x0020</string>
     <string name="off">Off</string>
 </resources>
