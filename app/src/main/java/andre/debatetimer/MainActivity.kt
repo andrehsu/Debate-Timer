@@ -280,7 +280,7 @@ class MainActivity : AppCompatActivity() {
 					} else {
 						state.timerOption.countDownString
 					}
-					resources.getQuantityString(R.plurals.bells_at, state.timerOption.bellsSinceStart.count(), bellString)
+					resources.getString(R.string.bells_at, bellString)
 				}
 				else -> "--Error--"
 			}
