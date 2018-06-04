@@ -1,19 +1,19 @@
 package andre.debatetimer.livedata
 
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 
-abstract class NLiveData<T>(init: T) : LiveData<T>() {
+abstract class NLiveData<T>(init: T) : MutableLiveData<T>() {
 	init {
 		value = init
 	}
 	
-	public final override fun postValue(value: T) {
+	final override fun postValue(value: T) {
 		super.postValue(value)
 	}
 	
-	public final override fun setValue(value: T) {
+	final override fun setValue(value: T) {
 		super.setValue(value)
 	}
 	
@@ -24,6 +24,10 @@ abstract class NLiveData<T>(init: T) : LiveData<T>() {
 	fun observe(owner: LifecycleOwner, observer: (T) -> Unit) {
 		val obv = Observer<T> { observer(it!!) }
 		super.observe(owner, obv)
+	}
+	
+	override fun toString(): String {
+		return value.toString()
 	}
 }
 
