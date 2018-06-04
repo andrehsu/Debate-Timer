@@ -76,9 +76,9 @@ abstract class DebateTimer(timerOption: TimerOption) {
 	
 	var isTimeEndNegative = BooleanLiveData()
 		private set
-	var secondsCountDown = IntLiveData()
+	var secondsCountDown = IntLiveData(timerOption.seconds)
 		private set
-	var minutesCountDown = IntLiveData()
+	var minutesCountDown = IntLiveData(timerOption.minutes)
 		private set
 	
 	var secondsCountUp = IntLiveData()
