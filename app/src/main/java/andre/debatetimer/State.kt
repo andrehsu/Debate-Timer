@@ -17,8 +17,6 @@ class WaitingToStart(override val timerOption: TimerOption) : State(), HasTimerO
 
 class TimerStarted(override val timerOption: TimerOption, val timer: DebateTimer) : State(), HasTimerOption {
 	var running = BooleanLiveData(false)
-	var ended = BooleanLiveData(false)
-	
 	
 	fun setRunning(value: Boolean) {
 		if (running.value != value) {

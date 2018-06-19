@@ -1,9 +1,6 @@
 package andre.debatetimer
 
-import andre.debatetimer.extensions.setGone
-import andre.debatetimer.extensions.setVisible
 import android.widget.TextView
-import kotlinx.android.synthetic.main.activity_main.*
 
 interface TimerBinding {
 	val timerDisplayMode: TimerDisplayMode
@@ -18,7 +15,7 @@ interface TimerBinding {
 }
 
 enum class TimerDisplayMode {
-	Normal, Negative, End
+	Normal, Negative, End, Null
 }
 
 object NullBinding : TimerBinding {
@@ -113,6 +110,8 @@ fun getBindings(mainActivity: MainActivity): Map<TimerDisplayMode, TimerBinding>
 			override var color: Int = 0
 		}
 		
-		return mapOf(TimerDisplayMode.Normal to normal, TimerDisplayMode.End to end, TimerDisplayMode.Negative to negative).withDefault { NullBinding }
+		return mapOf(TimerDisplayMode.Normal to normal,
+				TimerDisplayMode.End to end,
+				TimerDisplayMode.Negative to negative).withDefault { NullBinding }
 	}
 }

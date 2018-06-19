@@ -2,7 +2,7 @@ package andre.debatetimer
 
 import andre.debatetimer.CountMode.CountDown
 import andre.debatetimer.CountMode.CountUp
-import andre.debatetimer.extensions.*
+import andre.debatetimer.extensions.defaultSharedPreferences
 import andre.debatetimer.timer.TimerOption
 import android.app.Dialog
 import android.media.AudioManager
@@ -17,7 +17,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.forEach
 import androidx.lifecycle.ViewModelProviders
-import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -44,6 +43,9 @@ class MainActivity : AppCompatActivity() {
 	private var timerBinding: TimerBinding = NullBinding
 		set(value) {
 			field = value
+			updateBellsText()
+			updateMinutes()
+			updateSeconds()
 			for (timerBinding in timerBindings.values) {
 				timerBinding.isVisible = timerBinding.timerDisplayMode == this.timerBinding.timerDisplayMode
 			}
@@ -81,7 +83,7 @@ class MainActivity : AppCompatActivity() {
 		fl_timer.viewTreeObserver.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
 			override fun onGlobalLayout() {
 				fl_timer.viewTreeObserver.removeOnGlobalLayoutListener(this)
-				autosizeTimerText()
+				autoSizeTimerText()
 			}
 		})
 		
@@ -164,10 +166,6 @@ class MainActivity : AppCompatActivity() {
 						R.string.count_up
 					}
 			)
-			
-			updateBellsText()
-			updateMinutes()
-			updateSeconds()
 		}
 		
 		model.state.observe(this) { state ->
@@ -191,9 +189,9 @@ class MainActivity : AppCompatActivity() {
 				
 				is WaitingToStart -> {
 					tv_startPause.text = getString(R.string.start)
-					timerBinding = timerBindings[TimerDisplayMode.Normal]!!
 					timerTextColor = EnvVars.color_timerStart
 					
+					updateLayoutBinding()
 					updateBellsText()
 					updateMinutes()
 					updateSeconds()
@@ -201,20 +199,12 @@ class MainActivity : AppCompatActivity() {
 				is TimerStarted -> {
 					updateBellsText()
 					
-					state.timer.isTimeEndNegative.observe(this) { isTimeEndNegative ->
-						timerBinding = if (isTimeEndNegative) {
-							timerBindings.getValue(TimerDisplayMode.Negative)
-						} else {
-							timerBindings.getValue(TimerDisplayMode.Normal)
-						}
+					state.timer.negative.observe(this) {
+						updateLayoutBinding()
 					}
 					
-					state.ended.observe(this) { ended ->
-						timerBinding = if (ended) {
-							timerBindings.getValue(TimerDisplayMode.End)
-						} else {
-							timerBindings.getValue(TimerDisplayMode.Normal)
-						}
+					state.timer.ended.observe(this) {
+						updateLayoutBinding()
 					}
 					
 					state.timer.minutesCountUp.observe(this) {
@@ -240,10 +230,6 @@ class MainActivity : AppCompatActivity() {
 					}
 				}
 			}
-			
-			Prefs.countMode.observe(this) { countMode ->
-				bt_countMode.text = if (countMode == CountUp) getString(R.string.count_up) else getString(R.string.count_down)
-			}
 		}
 		
 		model.selectedButton.observe(this) { txt ->
@@ -257,7 +243,7 @@ class MainActivity : AppCompatActivity() {
 		}
 	}
 	
-	private fun autosizeTimerText() {
+	private fun autoSizeTimerText() {
 		val frameWidth = fl_timer.width
 		
 		val width = timer_normal.width
@@ -265,12 +251,10 @@ class MainActivity : AppCompatActivity() {
 		val scale = (frameWidth.toDouble() / width).toFloat()
 		
 		fl_timer.forEach {
-			if (it is ViewGroup) {
-				it.forEach {
-					if (it is TextView) {
-						it.textScaleX = scale
-						it.scaleY = scale
-					}
+			(it as? ViewGroup)?.forEach {
+				(it as? TextView)?.let {
+					it.textScaleX = scale
+					it.scaleY = scale
 				}
 			}
 		}
@@ -297,6 +281,26 @@ class MainActivity : AppCompatActivity() {
 		} else {
 			super.onBackPressed()
 		}
+	}
+	
+	private fun updateLayoutBinding() {
+		val state = model.state.value
+		timerBinding = timerBindings.getValue(
+				when (state) {
+					is InitState -> TimerDisplayMode.Null
+					is WaitingToStart -> TimerDisplayMode.Normal
+					is TimerStarted -> {
+						val timer = state.timer
+						if (timer.ended.value) {
+							TimerDisplayMode.End
+						} else if (timer.negative.value && Prefs.countMode.value == CountDown) {
+							TimerDisplayMode.Negative
+						} else {
+							TimerDisplayMode.Normal
+						}
+					}
+				}
+		)
 	}
 	
 	private fun updateBellsText() {

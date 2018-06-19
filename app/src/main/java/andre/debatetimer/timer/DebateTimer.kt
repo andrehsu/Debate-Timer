@@ -24,7 +24,7 @@ abstract class DebateTimer(timerOption: TimerOption) {
 	private fun onSecondInternal() {
 		if (countDownSeconds <= -60) {
 			pause()
-			onEnd()
+			ended.value = true
 			return
 		}
 		
@@ -33,7 +33,7 @@ abstract class DebateTimer(timerOption: TimerOption) {
 		
 		val absVal = countDownSeconds.abs()
 		
-		isTimeEndNegative.value = countDownSeconds < 0
+		negative.value = countDownSeconds < 0
 		secondsCountDown.value = absVal % 60
 		minutesCountDown.value = absVal / 60
 		
@@ -74,7 +74,9 @@ abstract class DebateTimer(timerOption: TimerOption) {
 	
 	private val bellsSinceStart = timerOption.bellsSinceStart
 	
-	var isTimeEndNegative = BooleanLiveData()
+	var negative = BooleanLiveData()
+		private set
+	var ended = BooleanLiveData()
 		private set
 	var secondsCountDown = IntLiveData(timerOption.seconds)
 		private set
@@ -95,8 +97,6 @@ abstract class DebateTimer(timerOption: TimerOption) {
 	open fun onLastMinuteStart() {}
 	
 	open fun onOvertime() {}
-	
-	open fun onEnd() {}
 	
 	open fun onBell(debateBell: DebateBell) {}
 	

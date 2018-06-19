@@ -56,15 +56,6 @@ class MainModel(application: Application) : AndroidViewModel(application) {
 							0,
 							1f)
 			}
-			
-			override fun onEnd() {
-				state.let {
-					val value = it.value
-					if (value is TimerStarted) {
-						value.ended.value = true
-					}
-				}
-			}
 		}
 	}
 	
