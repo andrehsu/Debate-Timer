@@ -1,6 +1,9 @@
 package andre.debatetimer
 
+import andre.debatetimer.extensions.setGone
+import andre.debatetimer.extensions.setVisible
 import android.widget.TextView
+import kotlinx.android.synthetic.main.activity_main.*
 
 interface TimerBinding {
 	val timerDisplayMode: TimerDisplayMode
@@ -68,10 +71,6 @@ fun getBindings(mainActivity: MainActivity): Map<TimerDisplayMode, TimerBinding>
 			
 			override val timerDisplayMode: TimerDisplayMode = TimerDisplayMode.Negative
 			override var minutes: Int = 0
-				set(value) {
-					field = value
-					secondsView.text = (minutes * 60 + seconds).toString()
-				}
 			override var seconds: Int = 0
 				set(value) {
 					field = value

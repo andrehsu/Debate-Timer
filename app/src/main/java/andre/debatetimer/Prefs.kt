@@ -16,7 +16,6 @@ object Prefs {
 	lateinit var pref_count_mode: String
 		private set
 	
-	
 	fun init(context: Context) {
 		if (!initialized) {
 			var pref_bell_enabled_default: Boolean = false
@@ -29,8 +28,8 @@ object Prefs {
 			}
 			
 			val sp = context.defaultSharedPreferences
-			debateBellEnabled = SharedPreferenceLiveData.Companion.of(sp, pref_bell_enabled_key, pref_bell_enabled_default)
-			countMode = SharedPreferenceLiveData.Companion.of(sp, pref_count_mode, pref_count_mode_default, CountMode::toString, CountMode.Companion::fromString)
+			debateBellEnabled = SharedPreferenceLiveData.of(sp, pref_bell_enabled_key, pref_bell_enabled_default)
+			countMode = SharedPreferenceLiveData.of(sp, pref_count_mode, pref_count_mode_default, CountMode::toString, CountMode.Companion::fromString)
 			
 			initialized = true
 		} else {

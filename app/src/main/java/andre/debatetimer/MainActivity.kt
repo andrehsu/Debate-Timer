@@ -2,7 +2,7 @@ package andre.debatetimer
 
 import andre.debatetimer.CountMode.CountDown
 import andre.debatetimer.CountMode.CountUp
-import andre.debatetimer.extensions.defaultSharedPreferences
+import andre.debatetimer.extensions.*
 import andre.debatetimer.timer.TimerOption
 import android.app.Dialog
 import android.media.AudioManager
@@ -16,7 +16,10 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.forEach
+import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -43,10 +46,11 @@ class MainActivity : AppCompatActivity() {
 	private var timerBinding: TimerBinding = NullBinding
 		set(value) {
 			field = value
+			
 			updateBellsText()
+			updateTextColor()
 			updateMinutes()
 			updateSeconds()
-			updateTextColor()
 			for (timerBinding in timerBindings.values) {
 				timerBinding.isVisible = timerBinding.timerDisplayMode == this.timerBinding.timerDisplayMode
 			}
@@ -149,43 +153,16 @@ class MainActivity : AppCompatActivity() {
 		
 		volumeControlStream = AudioManager.STREAM_MUSIC
 		
-		Prefs.debateBellEnabled.observe(this) { debateBellEnabled ->
-			if (debateBellEnabled) {
-				updateBellsText()
-				bt_debateBell.icon = getDrawable(R.drawable.ic_notifications_active_white_24dp)
-			} else {
-				updateBellsText()
-				bt_debateBell.icon = getDrawable(R.drawable.ic_notifications_off_white_24dp)
-			}
-			
-		}
-		Prefs.countMode.observe(this) { countMode ->
-			bt_countMode.text = getString(
-					if (countMode == CountUp) {
-						R.string.count_down
-					} else {
-						R.string.count_up
-					}
-			)
-		}
+		Prefs.debateBellEnabled.observe(this, debateBellObserver)
+		
+		Prefs.countMode.observe(this, countModeObserver)
+		
+		model.state.observe(this, initUninitObserver)
 		
 		model.state.observe(this) { state ->
 			when (state) {
 				is InitState -> {
-					fl_timer.setInvisible()
-					tv_startPause.setInvisible()
-					tv_startingText.setVisible()
-				}
-				else -> {
-					fl_timer.setVisible()
-					tv_startPause.setVisible()
-					tv_startingText.setGone()
-				}
-			}
-			
-			when (state) {
-				is InitState -> {
-					timerBinding = NullBinding
+					updateLayoutBinding()
 				}
 				
 				is WaitingToStart -> {
@@ -193,9 +170,6 @@ class MainActivity : AppCompatActivity() {
 					timerTextColor = EnvVars.color_timerStart
 					
 					updateLayoutBinding()
-					updateBellsText()
-					updateMinutes()
-					updateSeconds()
 				}
 				is TimerStarted -> {
 					updateBellsText()
@@ -216,7 +190,7 @@ class MainActivity : AppCompatActivity() {
 						updateSeconds()
 					}
 					
-					state.timer.textColor.observe(this) { textColor ->
+					state.timer.textColor.observe(this) {
 						updateTextColor()
 					}
 					
@@ -244,6 +218,15 @@ class MainActivity : AppCompatActivity() {
 		}
 	}
 	
+	private fun updateTextColor() {
+		val state = model.state.value
+		if (state is TimerStarted) {
+			timerTextColor = state.timer.textColor.value
+		} else {
+			timerTextColor = EnvVars.color_timerStart
+		}
+	}
+	
 	private fun autoSizeTimerText() {
 		val frameWidth = fl_timer.width
 		
@@ -267,7 +250,7 @@ class MainActivity : AppCompatActivity() {
 	}
 	
 	override fun onBackPressed() {
-		class ExitDialogFragment : androidx.fragment.app.DialogFragment() {
+		class ExitDialogFragment : DialogFragment() {
 			override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 				return AlertDialog.Builder(this@MainActivity)
 						.setTitle(R.string.exit_question)
@@ -362,12 +345,40 @@ class MainActivity : AppCompatActivity() {
 		}
 	}
 	
-	private fun updateTextColor() {
-		val state = model.state.value
-		if (state is TimerStarted) {
-			timerTextColor = state.timer.textColor.value
+	private val debateBellObserver = Observer<Boolean> { debateBellEnabled ->
+		updateBellsText()
+		
+		if (debateBellEnabled!!) {
+			bt_debateBell.icon = getDrawable(R.drawable.ic_notifications_active_white_24dp)
+		} else {
+			bt_debateBell.icon = getDrawable(R.drawable.ic_notifications_off_white_24dp)
 		}
 	}
 	
+	private val countModeObserver = Observer<CountMode> { countMode ->
+		updateLayoutBinding()
+		
+		bt_countMode.text = getString(
+				if (countMode == CountDown) {
+					R.string.count_down
+				} else {
+					R.string.count_up
+				}
+		)
+	}
 	
+	private val initUninitObserver = Observer<State> { state ->
+		when (state) {
+			is InitState -> {
+				fl_timer.setInvisible()
+				tv_startPause.setInvisible()
+				tv_startingText.setVisible()
+			}
+			else -> {
+				fl_timer.setVisible()
+				tv_startPause.setVisible()
+				tv_startingText.setGone()
+			}
+		}
+	}
 }
