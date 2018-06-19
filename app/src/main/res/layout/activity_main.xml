@@ -40,19 +40,19 @@
         <include
             android:id="@+id/timer_normal"
             layout="@layout/timer_normal"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent" />
 
         <include
             android:id="@+id/timer_negative"
             layout="@layout/timer_negative"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent" />
 
         <include
             android:id="@+id/timer_end"
             layout="@layout/timer_end"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent" />
 
     </FrameLayout>

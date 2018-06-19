@@ -8,12 +8,17 @@ import android.app.Dialog
 import android.media.AudioManager
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
+import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.WindowManager
 import android.widget.Button
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.forEach
 import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.activity_main.*
+
 
 class MainActivity : AppCompatActivity() {
 	private lateinit var model: MainModel
@@ -69,20 +74,26 @@ class MainActivity : AppCompatActivity() {
 			}
 		}
 	
-	
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_main)
+		
+		fl_timer.viewTreeObserver.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
+			override fun onGlobalLayout() {
+				fl_timer.viewTreeObserver.removeOnGlobalLayoutListener(this)
+				autosizeTimerText()
+			}
+		})
 		
 		model = ViewModelProviders.of(this).get(MainModel::class.java)
 		
 		timerBindings = getBindings(this)
 		
-		fl_timer.setOnClickListener({
+		fl_timer.setOnClickListener {
 			tv_startPause.fadeOut(EnvVars.longAnimTime)
 			model.onStartPause()
 			tv_startPause.fadeIn(EnvVars.longAnimTime)
-		})
+		}
 		
 		bt_countMode.setOnClickListener { _ ->
 			Prefs.countMode.apply(if (Prefs.countMode.value == CountUp) CountDown else CountUp)
@@ -246,6 +257,25 @@ class MainActivity : AppCompatActivity() {
 		}
 	}
 	
+	private fun autosizeTimerText() {
+		val frameWidth = fl_timer.width
+		
+		val width = timer_normal.width
+		
+		val scale = (frameWidth.toDouble() / width).toFloat()
+		
+		fl_timer.forEach {
+			if (it is ViewGroup) {
+				it.forEach {
+					if (it is TextView) {
+						it.textScaleX = scale
+						it.scaleY = scale
+					}
+				}
+			}
+		}
+	}
+	
 	private fun onTimeButtonSelect(v: View) {
 		v as Button
 		model.onTimeButtonSelect(v)
@@ -256,8 +286,8 @@ class MainActivity : AppCompatActivity() {
 			override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 				return AlertDialog.Builder(this@MainActivity)
 						.setTitle(R.string.exit_question)
-						.setPositiveButton(android.R.string.yes, { _, _ -> this@MainActivity.finish() })
-						.setNegativeButton(android.R.string.no, { _, _ -> dialog.cancel() })
+						.setPositiveButton(android.R.string.yes) { _, _ -> this@MainActivity.finish() }
+						.setNegativeButton(android.R.string.no) { _, _ -> dialog.cancel() }
 						.create()
 			}
 		}
@@ -326,5 +356,6 @@ class MainActivity : AppCompatActivity() {
 				}
 		}
 	}
+	
 	
 }
