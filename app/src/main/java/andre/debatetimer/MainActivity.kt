@@ -46,6 +46,7 @@ class MainActivity : AppCompatActivity() {
 			updateBellsText()
 			updateMinutes()
 			updateSeconds()
+			updateTextColor()
 			for (timerBinding in timerBindings.values) {
 				timerBinding.isVisible = timerBinding.timerDisplayMode == this.timerBinding.timerDisplayMode
 			}
@@ -216,7 +217,7 @@ class MainActivity : AppCompatActivity() {
 					}
 					
 					state.timer.textColor.observe(this) { textColor ->
-						timerTextColor = textColor
+						updateTextColor()
 					}
 					
 					state.running.observe(this) { running ->
@@ -358,6 +359,13 @@ class MainActivity : AppCompatActivity() {
 				} else {
 					state.timer.secondsCountDown.value
 				}
+		}
+	}
+	
+	private fun updateTextColor() {
+		val state = model.state.value
+		if (state is TimerStarted) {
+			timerTextColor = state.timer.textColor.value
 		}
 	}
 	
