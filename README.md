@@ -1,6 +1,6 @@
 # Debate-Timer
 Timer for primarily parliamentary debate
 
-Requires Android Studio 3.2
+Built with Android Studio 3.2
 
 All Rights Reserved.
