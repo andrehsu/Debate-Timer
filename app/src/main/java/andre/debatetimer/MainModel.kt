@@ -79,8 +79,8 @@ class MainModel(application: Application) : AndroidViewModel(application) {
 	}
 	
 	
-	fun onTimeButtonSelect(v: Button) {
-		selectedButton.value = v.text.toString()
-		state.value = WaitingToStart(timerMaps[v.text.toString()]!!)
+	fun onTimeButtonSelect(buttonStr:String) {
+		selectedButton.value = buttonStr
+		state.value = WaitingToStart(timerMaps.getValue(buttonStr))
 	}
 }

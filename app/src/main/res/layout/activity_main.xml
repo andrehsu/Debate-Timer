@@ -12,10 +12,9 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/bt_debateBell"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
+        style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="14dp"
         app:icon="@drawable/ic_notifications_active_white_24dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -25,16 +24,14 @@
         style="@style/Widget.MaterialComponents.Button.TextButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="14dp"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
 
     <FrameLayout
         android:id="@+id/fl_timer"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/ll_timeButtons"
+        app:layout_constraintBottom_toTopOf="@+id/tv_startPause"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/bt_debateBell">
@@ -43,19 +40,22 @@
             android:id="@+id/timer_normal"
             layout="@layout/timer_normal"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent" />
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
 
         <include
             android:id="@+id/timer_negative"
             layout="@layout/timer_negative"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent" />
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
 
         <include
             android:id="@+id/timer_end"
             layout="@layout/timer_end"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
 
     </FrameLayout>
 
@@ -69,12 +69,12 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 
-    <TextView
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/tv_startPause"
-        style="@style/Base.TextAppearance.AppCompat.Title"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_width="wrap_content"
-        android:layout_height="48dp"
-        android:layout_marginBottom="10dp"
+        android:layout_height="wrap_content"
+        android:onClick="onStartPause"
         android:text="@string/start"
         android:textSize="42dp"
         app:layout_constraintBottom_toTopOf="@+id/ll_timeButtons"
@@ -87,6 +87,7 @@
         style="@style/Widget.AppCompat.ButtonBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:minHeight="20dp"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
