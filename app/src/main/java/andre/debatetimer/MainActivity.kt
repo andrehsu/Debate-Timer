@@ -2,7 +2,10 @@ package andre.debatetimer
 
 import andre.debatetimer.CountMode.CountDown
 import andre.debatetimer.CountMode.CountUp
-import andre.debatetimer.extensions.*
+import andre.debatetimer.extensions.defaultSharedPreferences
+import andre.debatetimer.extensions.setGone
+import andre.debatetimer.extensions.setInvisible
+import andre.debatetimer.extensions.setVisible
 import andre.debatetimer.timer.TimerOption
 import android.app.Dialog
 import android.media.AudioManager
@@ -15,33 +18,44 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.MarginLayoutParamsCompat
 import androidx.core.view.forEach
 import androidx.core.view.marginBottom
-import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.transition.TransitionManager
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlin.math.min
 
 
 class MainActivity : AppCompatActivity() {
+    companion object {
+        val Tag = "MainActivity"
+    }
+    
     private lateinit var model: MainModel
-
+    
     private lateinit var timerBindings: Map<TimerDisplayMode, TimerBinding>
     private lateinit var timerButtons: List<Button>
-
+    
+    /**
+     * Property for setting the minute in the UI
+     */
     private var timerMinutes: Int = 0
         set(value) {
             field = value
             timerBinding.minutes = value
         }
+    /**
+     * Property for setting the second in the UI
+     */
     private var timerSeconds: Int = 0
         set(value) {
             field = value
             timerBinding.seconds = value
         }
+    /**
+     * Property for setting
+     */
     private var timerTextColor: Int = 0
         set(value) {
             field = value
@@ -50,7 +64,7 @@ class MainActivity : AppCompatActivity() {
     private var timerBinding: TimerBinding = NullBinding
         set(value) {
             field = value
-
+    
             updateBellsText()
             updateTextColor()
             updateMinutes()
@@ -59,7 +73,7 @@ class MainActivity : AppCompatActivity() {
                 timerBinding.isVisible = timerBinding.timerDisplayMode == this.timerBinding.timerDisplayMode
             }
         }
-
+    
     private var buttonsActive: Boolean = false
         set(value) {
             field = value
@@ -84,32 +98,24 @@ class MainActivity : AppCompatActivity() {
                 window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             }
         }
-
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
+        
         model = ViewModelProviders.of(this).get(MainModel::class.java)
-
+        
         timerBindings = getBindings(this)
-
+        
         fl_timer.viewTreeObserver.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 fl_timer.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                autoSizeTimerText()
+                fitTimerTextSize()
             }
         })
-
-        bt_countMode.setOnClickListener { _ ->
-            Prefs.countMode.apply(if (Prefs.countMode.value == CountUp) CountDown else CountUp)
-        }
-
-        bt_debateBell.setOnClickListener { _ ->
-            Prefs.debateBellEnabled.apply(!Prefs.debateBellEnabled.value)
-        }
-
+        
         val sp = defaultSharedPreferences
-
+        
         val timersStr = sp.getStringSet(getString(R.string.pref_timers), mutableSetOf(
                 "180;-1",
                 "240;-1",
@@ -117,16 +123,16 @@ class MainActivity : AppCompatActivity() {
                 "360;-1",
                 "420;-1",
                 "480;-1"))!!.sorted()
-
+        
         val timerMaps = mutableMapOf<String, TimerOption>()
         val timerButtons = mutableListOf<Button>()
-
+        
         timersStr.forEach { str ->
             val timerOption = TimerOption.parseTag(str)
-
+            
             if (timerOption != null) {
                 val layout = layoutInflater.inflate(R.layout.timer_button, ll_timeButtons, false) as Button
-
+                
                 layout.text = with(timerOption) {
                     if (minutes != 0 && seconds != 0) {
                         "${minutes}m${seconds}s"
@@ -139,63 +145,63 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 layout.setTextColor(getColorCompat(R.color.buttonUnselected))
-                layout.setOnClickListener { v ->
-                    model.onTimeButtonSelect((v as Button).text.toString())
-                }
                 ll_timeButtons.addView(layout)
                 timerMaps[layout.text.toString()] = timerOption
                 timerButtons += layout
             }
         }
         model.timerMaps = timerMaps
-
+        
         this.timerButtons = timerButtons
-
+        
         volumeControlStream = AudioManager.STREAM_MUSIC
-
+        
         Prefs.debateBellEnabled.observe(this, debateBellObserver)
-
+        
         Prefs.countMode.observe(this, countModeObserver)
-
+        
         model.state.observe(this, initUninitObserver)
-
+        
+        model.state.observe(this, resetButtonObserver)
+        
         model.state.observe(this) { state ->
             when (state) {
                 is InitState -> {
                     updateLayoutBinding()
                 }
-
+    
                 is WaitingToStart -> {
-                    tv_startPause.text = getString(R.string.start)
+                    bt_startPause.text = getString(R.string.start)
                     timerTextColor = EnvVars.color_timerStart
-
+        
                     updateLayoutBinding()
                 }
                 is TimerStarted -> {
                     updateBellsText()
-
+    
                     state.timer.negative.observe(this) {
                         updateLayoutBinding()
                     }
-
+    
                     state.timer.ended.observe(this) {
                         updateLayoutBinding()
                     }
-
+    
                     state.timer.minutesCountUp.observe(this) {
                         updateMinutes()
                     }
-
+    
                     state.timer.secondsCountUp.observe(this) {
                         updateSeconds()
                     }
-
-                    state.timer.textColor.observe(this) {
-                        updateTextColor()
+    
+                    state.timer.textColor.observe(this) { textColor ->
+                        timerTextColor = textColor
                     }
-
+    
                     state.running.observe(this) { running ->
-                        tv_startPause.text = if (running) {
+                        TransitionManager.beginDelayedTransition(root_activity_main)
+                        bt_startPause.text = if (running) {
                             getString(R.string.pause)
                         } else {
                             getString(R.string.resume)
@@ -206,8 +212,8 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-
-        model.selectedButton.observe(this) { txt ->
+        
+        model.selectedButtonStr.observe(this) { txt ->
             timerButtons.forEach {
                 if (it.text == txt) {
                     it.setTextColor(getColorCompat(R.color.buttonSelected))
@@ -217,7 +223,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
+    
     private fun updateTextColor() {
         val state = model.state.value
         if (state is TimerStarted) {
@@ -226,18 +232,18 @@ class MainActivity : AppCompatActivity() {
             timerTextColor = EnvVars.color_timerStart
         }
     }
-
-    private fun autoSizeTimerText() {
+    
+    private fun fitTimerTextSize() {
         val frameWidth = fl_timer.width.toFloat()
         val width = timer_normal.width
         val widthScale = (frameWidth / width)
-
+        
         val frameHeight = fl_timer.height.toFloat()
         val height = timer_normal.height
         val heightScale = (frameHeight / height)
-
+        
         val scale = minOf(widthScale, heightScale)
-
+        
         fl_timer.forEach { viewGroup ->
             viewGroup.scaleX = scale
             viewGroup.scaleY = scale
@@ -248,25 +254,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
-    override fun onBackPressed() {
-        class ExitDialogFragment : DialogFragment() {
-            override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-                return AlertDialog.Builder(this@MainActivity)
-                        .setTitle(R.string.exit_question)
-                        .setPositiveButton(android.R.string.yes) { _, _ -> this@MainActivity.finish() }
-                        .setNegativeButton(android.R.string.no) { _, _ -> dialog.cancel() }
-                        .create()
-            }
-        }
-
-        if (isTaskRoot) {
-            ExitDialogFragment().show(supportFragmentManager, null)
-        } else {
-            super.onBackPressed()
-        }
-    }
-
+    
     private fun updateLayoutBinding() {
         val state = model.state.value
         timerBinding = timerBindings.getValue(
@@ -286,12 +274,12 @@ class MainActivity : AppCompatActivity() {
                 }
         )
     }
-
+    
     private fun updateBellsText() {
         val state = model.state.value
         if (Prefs.debateBellEnabled.value) {
             bt_debateBell.text = when (state) {
-                is InitState -> ""
+                is InitState -> "On"
                 is HasTimerOption -> {
                     val bellString = if (Prefs.countMode.value == CountUp) {
                         state.timerOption.countUpString
@@ -306,7 +294,7 @@ class MainActivity : AppCompatActivity() {
             bt_debateBell.text = getString(R.string.off)
         }
     }
-
+    
     private fun updateMinutes() {
         val state = model.state.value
         timerMinutes = when (state) {
@@ -325,7 +313,7 @@ class MainActivity : AppCompatActivity() {
                 }
         }
     }
-
+    
     private fun updateSeconds() {
         val state = model.state.value
         timerSeconds = when (state) {
@@ -344,20 +332,20 @@ class MainActivity : AppCompatActivity() {
                 }
         }
     }
-
+    
     private val debateBellObserver = Observer<Boolean> { debateBellEnabled ->
         updateBellsText()
-
+        
         if (debateBellEnabled!!) {
             bt_debateBell.icon = getDrawable(R.drawable.ic_notifications_active_white_24dp)
         } else {
             bt_debateBell.icon = getDrawable(R.drawable.ic_notifications_off_white_24dp)
         }
     }
-
+    
     private val countModeObserver = Observer<CountMode> { countMode ->
         updateLayoutBinding()
-
+        
         bt_countMode.text = getString(
                 if (countMode == CountDown) {
                     R.string.count_down
@@ -366,23 +354,84 @@ class MainActivity : AppCompatActivity() {
                 }
         )
     }
-
+    
+    private val resetButtonObserver = Observer<State> { state ->
+        val rootView = root_activity_main
+        
+        TransitionManager.beginDelayedTransition(rootView)
+        if (state is TimerStarted) {
+            bt_resetTime.setVisible()
+        } else {
+            bt_resetTime.setGone()
+        }
+    }
+    
     private val initUninitObserver = Observer<State> { state ->
         when (state) {
             is InitState -> {
                 fl_timer.setInvisible()
-                tv_startPause.setInvisible()
+                bt_startPause.setGone()
+                bt_resetTime.setGone()
+                
                 tv_startingText.setVisible()
             }
             else -> {
+                TransitionManager.beginDelayedTransition(root_activity_main)
                 fl_timer.setVisible()
-                tv_startPause.setVisible()
+                bt_startPause.setVisible()
+                
                 tv_startingText.setGone()
             }
         }
     }
-
-    fun onStartPause(@Suppress("UNUSED_PARAMETER") v: View) {
+    
+    override fun onBackPressed() {
+        class ExitDialogFragment : DialogFragment() {
+            override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+                return AlertDialog.Builder(this@MainActivity)
+                        .setTitle(R.string.exit_question)
+                        .setPositiveButton(android.R.string.yes) { _, _ -> this@MainActivity.finish() }
+                        .setNegativeButton(android.R.string.no) { _, _ -> dialog.cancel() }
+                        .create()
+            }
+        }
+        
+        if (isTaskRoot) {
+            ExitDialogFragment().show(supportFragmentManager, null)
+        } else {
+            super.onBackPressed()
+        }
+    }
+    
+    
+    fun onDebateBellClick(v: View) {
+        require(v.id == R.id.bt_debateBell)
+        
+        Prefs.debateBellEnabled.apply(!Prefs.debateBellEnabled.value)
+    }
+    
+    fun onCountModeClick(v: View) {
+        require(v.id == R.id.bt_countMode)
+        
+        Prefs.countMode.apply(if (Prefs.countMode.value == CountUp) CountDown else CountUp)
+    }
+    
+    fun onTimerButtonClick(v: View) {
+        require(v.id == R.id.bt_timerButton)
+        
+        v as Button
+        model.onTimeButtonSelect(v.text.toString())
+    }
+    
+    fun onStartPause(v: View) {
+        require(v.id == R.id.bt_startPause)
+        
         model.onStartPause()
+    }
+    
+    fun onResetTimeClick(v: View) {
+        require(v.id == R.id.bt_resetTime)
+        
+        model.onResetTime()
     }
 }
