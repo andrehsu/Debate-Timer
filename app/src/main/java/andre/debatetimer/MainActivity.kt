@@ -28,40 +28,15 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : AppCompatActivity() {
-    companion object {
-        val Tag = "MainActivity"
-    }
-    
     private lateinit var model: MainModel
     
     private lateinit var timerBindings: Map<TimerDisplayMode, TimerBinding>
     private lateinit var timerButtons: List<Button>
     
     /**
-     * Property for setting the minute in the UI
+     * Property holding the current binding for views
      */
-    private var timerMinutes: Int = 0
-        set(value) {
-            field = value
-            timerBinding.minutes = value
-        }
-    /**
-     * Property for setting the second in the UI
-     */
-    private var timerSeconds: Int = 0
-        set(value) {
-            field = value
-            timerBinding.seconds = value
-        }
-    /**
-     * Property for setting
-     */
-    private var timerTextColor: Int = 0
-        set(value) {
-            field = value
-            timerBinding.color = value
-        }
-    private var timerBinding: TimerBinding = NullBinding
+    private var timerView: TimerBinding = NullBinding
         set(value) {
             field = value
     
@@ -70,11 +45,13 @@ class MainActivity : AppCompatActivity() {
             updateMinutes()
             updateSeconds()
             for (timerBinding in timerBindings.values) {
-                timerBinding.isVisible = timerBinding.timerDisplayMode == this.timerBinding.timerDisplayMode
+                timerBinding.isVisible = timerBinding.timerDisplayMode == this.timerView.timerDisplayMode
             }
         }
-    
-    private var buttonsActive: Boolean = false
+    /**
+     * Property that controls whether the timer option buttons are selectable
+     */
+    private var timerOptionButtonsSelectable: Boolean = false
         set(value) {
             field = value
             if (value) {
@@ -89,6 +66,9 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    /**
+     * Property that controls whether the screen is kept on
+     */
     private var keepScreenOn: Boolean = false
         set(value) {
             field = value
@@ -99,6 +79,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
     
+    /**
+     * onCreate method
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -156,49 +139,93 @@ class MainActivity : AppCompatActivity() {
         
         volumeControlStream = AudioManager.STREAM_MUSIC
         
-        Prefs.debateBellEnabled.observe(this, debateBellObserver)
+        Prefs.debateBellEnabled.observe(this, Observer { debateBellEnabled ->
+            updateBellsText()
+            
+            if (debateBellEnabled!!) {
+                bt_debateBell.icon = getDrawable(R.drawable.ic_notifications_active_white_24dp)
+            } else {
+                bt_debateBell.icon = getDrawable(R.drawable.ic_notifications_off_white_24dp)
+            }
+        })
         
-        Prefs.countMode.observe(this, countModeObserver)
+        Prefs.countMode.observe(this, Observer { countMode ->
+            updateLayoutBinding()
+            
+            bt_countMode.text = getString(
+                    if (countMode == CountDown) {
+                        R.string.count_down
+                    } else {
+                        R.string.count_up
+                    }
+            )
+        })
         
-        model.state.observe(this, initUninitObserver)
+        model.state.observe(this, Observer { state ->
+            when (state) {
+                is InitState -> {
+                    fl_timer.setInvisible()
+                    bt_startPause.setGone()
+                    bt_resetTime.setGone()
+                    
+                    tv_startingText.setVisible()
+                }
+                else -> {
+                    TransitionManager.beginDelayedTransition(root_activity_main)
+                    fl_timer.setVisible()
+                    bt_startPause.setVisible()
+                    
+                    tv_startingText.setGone()
+                }
+            }
+        })
         
-        model.state.observe(this, resetButtonObserver)
+        model.state.observe(this, Observer { state ->
+            val rootView = root_activity_main
+            
+            TransitionManager.beginDelayedTransition(rootView)
+            if (state is TimerStarted) {
+                bt_resetTime.setVisible()
+            } else {
+                bt_resetTime.setGone()
+            }
+        })
         
         model.state.observe(this) { state ->
             when (state) {
                 is InitState -> {
                     updateLayoutBinding()
                 }
-    
+                
                 is WaitingToStart -> {
                     bt_startPause.text = getString(R.string.start)
-                    timerTextColor = EnvVars.color_timerStart
-        
+                    timerView.color = EnvVars.color_timerStart
+                    
                     updateLayoutBinding()
                 }
                 is TimerStarted -> {
                     updateBellsText()
-    
+                    
                     state.timer.negative.observe(this) {
                         updateLayoutBinding()
                     }
-    
+                    
                     state.timer.ended.observe(this) {
                         updateLayoutBinding()
                     }
-    
+                    
                     state.timer.minutesCountUp.observe(this) {
                         updateMinutes()
                     }
-    
+                    
                     state.timer.secondsCountUp.observe(this) {
                         updateSeconds()
                     }
-    
+                    
                     state.timer.textColor.observe(this) { textColor ->
-                        timerTextColor = textColor
+                        timerView.color = textColor
                     }
-    
+                    
                     state.running.observe(this) { running ->
                         TransitionManager.beginDelayedTransition(root_activity_main)
                         bt_startPause.text = if (running) {
@@ -206,7 +233,7 @@ class MainActivity : AppCompatActivity() {
                         } else {
                             getString(R.string.resume)
                         }
-                        buttonsActive = running
+                        timerOptionButtonsSelectable = running
                         keepScreenOn = running
                     }
                 }
@@ -224,15 +251,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
     
+    /**
+     * Updates the timer text color
+     */
     private fun updateTextColor() {
         val state = model.state.value
-        if (state is TimerStarted) {
-            timerTextColor = state.timer.textColor.value
+        timerView.color = if (state is TimerStarted) {
+            state.timer.textColor.value
         } else {
-            timerTextColor = EnvVars.color_timerStart
+            EnvVars.color_timerStart
         }
     }
     
+    /**
+     * Fits the timer text size to the given device
+     */
     private fun fitTimerTextSize() {
         val frameWidth = fl_timer.width.toFloat()
         val width = timer_normal.width
@@ -255,9 +288,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
     
+    /**
+     * Updates the layout binding
+     */
     private fun updateLayoutBinding() {
         val state = model.state.value
-        timerBinding = timerBindings.getValue(
+        timerView = timerBindings.getValue(
                 when (state) {
                     is InitState -> TimerDisplayMode.Null
                     is WaitingToStart -> TimerDisplayMode.Normal
@@ -275,6 +311,9 @@ class MainActivity : AppCompatActivity() {
         )
     }
     
+    /**
+     * Updates the bell text shown on the toggle bell button
+     */
     private fun updateBellsText() {
         val state = model.state.value
         if (Prefs.debateBellEnabled.value) {
@@ -295,9 +334,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
     
+    /**
+     * Updates the minutes of the timer
+     */
     private fun updateMinutes() {
         val state = model.state.value
-        timerMinutes = when (state) {
+        timerView.minutes = when (state) {
             is InitState -> 0
             is WaitingToStart ->
                 if (Prefs.countMode.value == CountUp) {
@@ -314,9 +356,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
     
+    /**
+     * Updates the seconds of the timer
+     */
     private fun updateSeconds() {
         val state = model.state.value
-        timerSeconds = when (state) {
+        timerView.seconds = when (state) {
             is InitState -> 0
             is WaitingToStart ->
                 if (Prefs.countMode.value == CountUp) {
@@ -330,58 +375,6 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     state.timer.secondsCountDown.value
                 }
-        }
-    }
-    
-    private val debateBellObserver = Observer<Boolean> { debateBellEnabled ->
-        updateBellsText()
-        
-        if (debateBellEnabled!!) {
-            bt_debateBell.icon = getDrawable(R.drawable.ic_notifications_active_white_24dp)
-        } else {
-            bt_debateBell.icon = getDrawable(R.drawable.ic_notifications_off_white_24dp)
-        }
-    }
-    
-    private val countModeObserver = Observer<CountMode> { countMode ->
-        updateLayoutBinding()
-        
-        bt_countMode.text = getString(
-                if (countMode == CountDown) {
-                    R.string.count_down
-                } else {
-                    R.string.count_up
-                }
-        )
-    }
-    
-    private val resetButtonObserver = Observer<State> { state ->
-        val rootView = root_activity_main
-        
-        TransitionManager.beginDelayedTransition(rootView)
-        if (state is TimerStarted) {
-            bt_resetTime.setVisible()
-        } else {
-            bt_resetTime.setGone()
-        }
-    }
-    
-    private val initUninitObserver = Observer<State> { state ->
-        when (state) {
-            is InitState -> {
-                fl_timer.setInvisible()
-                bt_startPause.setGone()
-                bt_resetTime.setGone()
-                
-                tv_startingText.setVisible()
-            }
-            else -> {
-                TransitionManager.beginDelayedTransition(root_activity_main)
-                fl_timer.setVisible()
-                bt_startPause.setVisible()
-                
-                tv_startingText.setGone()
-            }
         }
     }
     
