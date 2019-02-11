@@ -39,7 +39,6 @@ class MainActivity : AppCompatActivity() {
     private var timerView: TimerBinding = NullBinding
         set(value) {
             field = value
-    
             updateBellsText()
             updateTextColor()
             updateMinutes()
@@ -85,7 +84,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        
         model = ViewModelProviders.of(this).get(MainModel::class.java)
         
         timerBindings = getBindings(this)
