@@ -3,12 +3,12 @@ apply plugin: 'kotlin-android'
 apply plugin: "kotlin-android-extensions"
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 'android-Q'
 
     defaultConfig {
         applicationId "andre.debatetimer"
         minSdkVersion 21
-        targetSdkVersion 28
+        targetSdkVersion 'Q'
         versionCode 22
         versionName "1.4"
     }
