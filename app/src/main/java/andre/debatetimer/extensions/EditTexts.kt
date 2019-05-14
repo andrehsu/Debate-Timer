@@ -5,8 +5,8 @@ package andre.debatetimer.extensions
 import android.widget.EditText
 
 inline var EditText.textStr: String
-	get() = this.text.toString()
-	set(value) = this.setText(value)
+    get() = this.text.toString()
+    set(value) = this.setText(value)
 
 inline fun EditText.clearText() = this.setText("")
 
