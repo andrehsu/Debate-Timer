@@ -58,7 +58,7 @@ abstract class DebateTimer(timerOption: TimerOption) {
         
         if (countDownSeconds == -1) {
             textColor.value = EnvVars.color_timerEnd
-            onOvertime()
+            overtime.value = true
         }
         
     }
@@ -74,33 +74,22 @@ abstract class DebateTimer(timerOption: TimerOption) {
     
     private val bellsSinceStart = timerOption.bellsSinceStart
     
-    var negative = BooleanLiveData()
-        private set
-    var ended = BooleanLiveData()
-        private set
-    var secondsCountDown = IntLiveData(timerOption.seconds)
-        private set
-    var minutesCountDown = IntLiveData(timerOption.minutes)
-        private set
+    val negative = BooleanLiveData()
+    val ended = BooleanLiveData()
+    val secondsCountDown = IntLiveData(timerOption.seconds)
+    val minutesCountDown = IntLiveData(timerOption.minutes)
+    val overtime = BooleanLiveData()
     
-    var secondsCountUp = IntLiveData()
-        private set
-    var minutesCountUp = IntLiveData()
-        private set
+    val secondsCountUp = IntLiveData()
+    val minutesCountUp = IntLiveData()
     
-    var textColor = IntLiveData(EnvVars.color_timerStart)
-        private set
-    
+    val textColor = IntLiveData(EnvVars.color_timerStart)
     
     open fun onFirstMinuteEnd() {}
     
     open fun onLastMinuteStart() {}
     
-    open fun onOvertime() {}
-    
     open fun onBell(debateBell: DebateBell) {}
-    
-    override fun toString(): String = "DebateTimer"
 }
 
 enum class DebateBell {
