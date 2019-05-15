@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="timer_text_size">140dp</dimen>
+    <dimen name="timer_text_size">190dp</dimen>
 </resources>
