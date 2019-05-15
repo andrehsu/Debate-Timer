@@ -10,26 +10,21 @@ object Prefs {
     
     private var initialized = false
     
-    lateinit var pref_bell_enabled_key: String
-        private set
-    
-    lateinit var pref_count_mode: String
-        private set
-    
     fun init(context: Context) {
         if (!initialized) {
-            var pref_bell_enabled_default: Boolean
-            var pref_count_mode_default: String
-            with(context.resources) {
-                pref_bell_enabled_key = getString(R.string.pref_bell_enabled_key)
-                pref_bell_enabled_default = getBoolean(R.bool.pref_bell_enabled_default)
-                pref_count_mode = getString(R.string.pref_count_mode)
-                pref_count_mode_default = getString(R.string.pref_count_mode_default)
-            }
-            
             val sp = context.defaultSharedPreferences
-            debateBellEnabled = SharedPreferenceLiveData.of(sp, pref_bell_enabled_key, pref_bell_enabled_default)
-            countMode = SharedPreferenceLiveData.of(sp, pref_count_mode, pref_count_mode_default, CountMode::toString, CountMode.Companion::fromString)
+            debateBellEnabled = SharedPreferenceLiveData.ofBoolean(
+                    sp,
+                    context.getString(R.string.pref_bell_enabled_key),
+                    context.resources.getBoolean(R.bool.pref_bell_enabled_default).toString()
+            )
+            countMode = SharedPreferenceLiveData.of(
+                    sp,
+                    context.getString(R.string.pref_count_mode),
+                    context.getString(R.string.pref_count_mode_default),
+                    { CountMode.fromString(it) },
+                    { it.toString() }
+            )
             
             initialized = true
         } else {

@@ -1,11 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.button.MaterialButton xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/bt_timerButton"
-    style="@style/Widget.MaterialComponents.Button.TextButton"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_weight="1"
-    android:onClick="onTimerButtonClick"
-    android:textAllCaps="false"
-    tools:text="1m" />
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="selectable"
+            type="boolean" />
+
+        <variable
+            name="textColor"
+            type="int" />
+
+        <variable
+            name="text"
+            type="String" />
+
+        <variable
+            name="viewmodel"
+            type="andre.debatetimer.MainModel" />
+    </data>
+
+    <com.google.android.material.button.MaterialButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight='1'
+        android:id="@+id/bt_timerButton"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:alpha="@{selectable?1.0f:0.38f}"
+        android:clickable="@{selectable? true:false}"
+        android:onClick="@{() -> viewmodel.onTimeButtonSelect(text)}"
+        android:text="@{text}"
+        android:textAllCaps="false"
+        tools:text='1m'
+        android:textColor="@{textColor}"
+        tools:ignore="ObsoleteLayoutParam" />
+</layout>

@@ -4,23 +4,13 @@
     <string name="start">Start</string>
     <string name="pause">Pause</string>
     <string name="resume">Resume</string>
-    <string name="tap_anywhere_to">Tap anywhere to</string>
     <string name="starting_text">Select a time to begin</string>
     <string name="exit_question">Are you sure you want to exit?</string>
     <string name="bells_at">At %s</string>
-    <string name="debate_bell_on_off">Debate Bell On/Off</string>
-
-    <!--Settings-->
-    <string name="pref_bell_enabled_key" translatable="false">bell_enabled</string>
-    <bool name="pref_bell_enabled_default">true</bool>
-    <string name="pref_timers" translatable="false">pref_timers</string>
-    <string name="pref_count_mode" translatable="false">count_mode</string>
-    <string name="pref_count_mode_default" translatable="false">count_up</string>
-
-    <!--Settings End-->
     <string name="count_down">Count Down</string>
     <string name="count_up">Count up</string>
-    <string name="rotate_your_phone_to_begin">Rotate your phone to begin</string>
-    <string name="rotate_to_select_time">Rotate to select time</string>
     <string name="off">Off</string>
+    <string name="padded_seconds">%02d</string>
+    <string name="overtime">Overtime by</string>
+    <string name="overtime_with_time">Overtime by %d:%02d</string>
 </resources>

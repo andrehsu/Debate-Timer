@@ -1,4 +1,4 @@
-@file:Suppress("NOTHING_TO_INLINE")
+@file:Suppress("NOTHING_TO_INLINE", "unused")
 
 package andre.debatetimer.extensions
 
@@ -25,23 +25,6 @@ inline fun View.fadeIn(animTime: Long = shortAnimTime): ViewPropertyAnimator = t
 
 inline fun View.fadeOut(animTime: Long = shortAnimTime): ViewPropertyAnimator = this.animate().alpha(0.0f).setDuration(animTime).setOnEnd { this.setGone();this.alpha = 1.0f }
 
-
-fun crossFade(from: View, to: View, animTime: Long = -1) {
-    val outAnimator = from.fadeOut()
-    val inAnimator = to.fadeIn()
-    
-    if (animTime != -1L) {
-        outAnimator.duration = animTime
-        inAnimator.duration = animTime
-    }
-}
-
-
-inline infix fun View.replaceWith(to: View) {
-    this.setGone()
-    to.setVisible()
-}
-
 inline fun View.setVisible() {
     this.visibility = View.VISIBLE
 }
@@ -52,22 +35,4 @@ inline fun View.setInvisible() {
 
 inline fun View.setGone() {
     this.visibility = View.GONE
-}
-
-inline fun View.ifVisible(block: (View) -> Unit): View {
-    if (visibility == View.VISIBLE)
-        block(this)
-    return this
-}
-
-inline fun View.ifInvisible(block: (View) -> Unit): View {
-    if (visibility == View.INVISIBLE)
-        block(this)
-    return this
-}
-
-inline fun View.ifGone(block: (View) -> Unit): View {
-    if (visibility == View.GONE)
-        block(this)
-    return this
 }

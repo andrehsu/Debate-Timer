@@ -5,42 +5,8 @@ import android.os.Handler
 import android.os.Message
 import android.os.SystemClock
 
-/**
- * Schedule a countdown until a time in the future, with
- * regular notifications on intervals along the way.
- 
- * Example of showing a 30 second countdown in a text field:
- 
- * <pre class="prettyprint">
- * new Timer(30000, 1000) {
- 
- * public void onTick(long millisUntilFinished) {
- * mTextField.setText("seconds remaining: " + millisUntilFinished / 1000);
- * }
- 
- * public void onFinish() {
- * mTextField.setText("done!");
- * }
- * }.start();
-</pre> *
- 
- * The calls to [.onTick] are synchronized to this object so that
- * one call to [.onTick] won't ever occur before the previous
- * callback is complete.  This is only relevant when the implementation of
- * [.onTick] takes an amount of time to execute that is significant
- * compared to the countdown interval.
- */
 abstract class Timer
-/**
- * @param timerInterval The interval along the way to receive
- * *   [.onTick] callbacks.
- */
-constructor(
-        /**
-         * The interval in millis that the user receives callbacks
-         */
-        private val timerInterval: Long
-) {
+constructor(private val timerInterval: Long) {
     private var firstTickPast = false
     
     /**

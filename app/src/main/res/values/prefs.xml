@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pref_bell_enabled_key" translatable="false">bell_enabled</string>
+    <bool name="pref_bell_enabled_default">true</bool>
+    <string name="pref_count_mode" translatable="false">count_mode</string>
+    <string name="pref_count_mode_default" translatable="false">count_up</string>
+    <string name="pref_timers" translatable="false">pref_timers</string>
+</resources>

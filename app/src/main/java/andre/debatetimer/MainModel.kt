@@ -14,7 +14,7 @@ class MainModel(application: Application) : AndroidViewModel(application) {
     private var debateBellOnce: Int = -1
     private var debateBellTwice: Int = -1
     
-    var selectedButtonStr = StringLiveData()
+    val selectedButtonStr = StringLiveData()
     
     val state = LiveState(InitState)
     
@@ -66,9 +66,8 @@ class MainModel(application: Application) : AndroidViewModel(application) {
                 state.setRunning(true)
             }
         }
-        
-        val state = state.value
-        when (state) {
+    
+        when (val state = state.value) {
             is WaitingToStart -> {
                 val timer = newTimerInstance(state.timerOption)
                 this.state.value = TimerStarted(state.timerOption, timer).also(::toggleRunning)
@@ -82,7 +81,6 @@ class MainModel(application: Application) : AndroidViewModel(application) {
     }
     
     fun onTimeButtonSelect(buttonStr: String) {
-        selectedButtonStr.value = buttonStr
         state.value.let { state ->
             if (state is TimerStarted) {
                 state.setRunning(false)
@@ -90,5 +88,15 @@ class MainModel(application: Application) : AndroidViewModel(application) {
         }
         
         state.value = WaitingToStart(timerMaps.getValue(buttonStr))
+    
+        selectedButtonStr.value = buttonStr
+    }
+    
+    fun onToggleCountMode() {
+        Prefs.countMode.value = (if (Prefs.countMode.value == CountMode.CountUp) CountMode.CountDown else CountMode.CountUp)
+    }
+    
+    fun onToggleDebateBells() {
+        Prefs.debateBellEnabled.value = !Prefs.debateBellEnabled.value
     }
 }
