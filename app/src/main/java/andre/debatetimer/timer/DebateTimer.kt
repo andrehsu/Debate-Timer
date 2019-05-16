@@ -33,7 +33,6 @@ abstract class DebateTimer(timerOption: TimerOption) {
         
         val absVal = countDownSeconds.absoluteValue
         
-        negative.value = countDownSeconds < 0
         minutesCountDown.value = absVal / 60
         secondsCountDown.value = absVal % 60
         
@@ -57,7 +56,7 @@ abstract class DebateTimer(timerOption: TimerOption) {
         }
         
         if (countDownSeconds == -1) {
-            textColor.value = EnvVars.color_timerEnd
+            textColor.value = EnvVars.color_timerOvertime
             overtime.value = true
         }
         
@@ -74,7 +73,6 @@ abstract class DebateTimer(timerOption: TimerOption) {
     
     private val bellsSinceStart = timerOption.bellsSinceStart
     
-    val negative = BooleanLiveData(false)
     val ended = BooleanLiveData(false)
     val secondsCountDown = IntLiveData(timerOption.seconds)
     val minutesCountDown = IntLiveData(timerOption.minutes)
