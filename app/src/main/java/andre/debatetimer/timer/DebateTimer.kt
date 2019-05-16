@@ -34,11 +34,11 @@ abstract class DebateTimer(timerOption: TimerOption) {
         val absVal = countDownSeconds.absoluteValue
         
         negative.value = countDownSeconds < 0
-        secondsCountDown.value = absVal % 60
         minutesCountDown.value = absVal / 60
+        secondsCountDown.value = absVal % 60
         
-        secondsCountUp.value = countUpSeconds % 60
         minutesCountUp.value = countUpSeconds / 60
+        secondsCountUp.value = countUpSeconds % 60
         
         bellsSinceStart[countUpSeconds]?.let { onBell(it) }
         

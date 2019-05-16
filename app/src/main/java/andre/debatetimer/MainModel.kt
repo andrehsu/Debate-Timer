@@ -1,5 +1,6 @@
 package andre.debatetimer
 
+import andre.debatetimer.livedata.NLiveData
 import andre.debatetimer.livedata.StringLiveData
 import andre.debatetimer.timer.DebateBell
 import andre.debatetimer.timer.DebateTimer
@@ -8,6 +9,7 @@ import android.app.Application
 import android.media.AudioAttributes
 import android.media.SoundPool
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 
 class MainModel(application: Application) : AndroidViewModel(application) {
     private var soundPool: SoundPool
@@ -15,6 +17,8 @@ class MainModel(application: Application) : AndroidViewModel(application) {
     private var debateBellTwice: Int = -1
     
     val selectedButtonStr = StringLiveData()
+    val countMode: LiveData<CountMode>
+    val enableBells: NLiveData<Boolean>
     
     val state = LiveState(InitState)
     
@@ -37,6 +41,9 @@ class MainModel(application: Application) : AndroidViewModel(application) {
         
         debateBellOnce = soundPool.load(context, R.raw.debate_bell_one, 1)
         debateBellTwice = soundPool.load(context, R.raw.debate_bell_two, 1)
+    
+        countMode = Prefs.countMode
+        enableBells = Prefs.debateBellEnabled
     }
     
     

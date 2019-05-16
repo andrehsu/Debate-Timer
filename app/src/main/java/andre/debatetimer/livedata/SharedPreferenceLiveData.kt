@@ -1,24 +1,21 @@
 package andre.debatetimer.livedata
 
 import android.content.SharedPreferences
-import androidx.lifecycle.LiveData
 
-abstract class SharedPreferenceLiveData<T>(private val sp: SharedPreferences,
-                                           private val key: String,
-                                           private val default: String,
-                                           private val spGetter: (sp: SharedPreferences, key: String, default: String) -> T,
-                                           private val spSetter: (editor: SharedPreferences.Editor, key: String, value: T) -> SharedPreferences.Editor) : LiveData<T>(), SharedPreferences.OnSharedPreferenceChangeListener {
-    init {
-        super.setValue(spGetter(sp, key, default)!!)
-    }
-    
+abstract class SharedPreferenceLiveData<T>(
+        private val sp: SharedPreferences,
+        private val key: String,
+        private val default: String,
+        private val spGetter: (sp: SharedPreferences, key: String, default: String) -> T,
+        private val spSetter: (editor: SharedPreferences.Editor, key: String, value: T) -> SharedPreferences.Editor
+) : NLiveData<T>(spGetter(sp, key, default)), SharedPreferences.OnSharedPreferenceChangeListener {
     override fun onSharedPreferenceChanged(sp: SharedPreferences, key: String) {
         if (key == this.key) {
             value = spGetter(sp, key, default)
         }
     }
     
-    public override fun setValue(value: T) {
+    override fun setValue(value: T) {
         super.setValue(value)
         val editor = sp.edit()
         spSetter(editor, key, value)

@@ -6,18 +6,10 @@ import androidx.lifecycle.Observer
 
 abstract class NLiveData<T>(init: T) : MutableLiveData<T>() {
     init {
-        value = init
+        super.setValue(init)
     }
     
-    final override fun postValue(value: T) {
-        super.postValue(value)
-    }
-    
-    final override fun setValue(value: T) {
-        super.setValue(value)
-    }
-    
-    final override fun getValue(): T {
+    override fun getValue(): T {
         return super.getValue()!!
     }
     

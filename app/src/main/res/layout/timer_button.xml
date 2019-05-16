@@ -9,30 +9,26 @@
             type="boolean" />
 
         <variable
-            name="textColor"
-            type="int" />
-
-        <variable
             name="text"
             type="String" />
 
         <variable
-            name="viewmodel"
+            name="viewModel"
             type="andre.debatetimer.MainModel" />
     </data>
 
     <com.google.android.material.button.MaterialButton
+        android:id="@+id/bt_timerButton"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight='1'
-        android:id="@+id/bt_timerButton"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
         android:alpha="@{selectable?1.0f:0.38f}"
         android:clickable="@{selectable? true:false}"
-        android:onClick="@{() -> viewmodel.onTimeButtonSelect(text)}"
+        android:onClick="@{() -> viewModel.onTimeButtonSelect(text)}"
         android:text="@{text}"
         android:textAllCaps="false"
-        tools:text='1m'
-        android:textColor="@{textColor}"
-        tools:ignore="ObsoleteLayoutParam" />
+        android:textColor="@{viewModel.selectedButtonStr == text ? @color/buttonSelected : @color/buttonUnselected }"
+        tools:ignore="ObsoleteLayoutParam"
+        tools:text='1m' />
 </layout>

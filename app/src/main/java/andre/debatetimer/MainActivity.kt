@@ -58,7 +58,8 @@ class MainActivity : AppCompatActivity() {
     
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
     
-        binding.viewmodel = model
+        binding.viewModel = model
+        binding.lifecycleOwner = this
         
         val sp = defaultSharedPreferences
         
@@ -79,8 +80,9 @@ class MainActivity : AppCompatActivity() {
             if (timerOption != null) {
                 val timerButtonBinding: TimerButtonBinding = DataBindingUtil.inflate(layoutInflater, R.layout.timer_button, ll_timeButtons, true)
     
-                timerButtonBinding.viewmodel = model
-    
+                timerButtonBinding.viewModel = model
+                timerButtonBinding.lifecycleOwner = this
+                
                 val buttonTextSb = StringBuilder()
                 with(timerOption) {
                     if (minutes != 0) {
@@ -92,7 +94,6 @@ class MainActivity : AppCompatActivity() {
                 }
                 timerButtonBinding.text = buttonTextSb.toString()
     
-                timerButtonBinding.textColor = getColorCompat(R.color.buttonUnselected)
                 timerMaps[timerButtonBinding.text!!] = timerOption
                 timerButtons += timerButtonBinding.root as Button
             }
@@ -100,29 +101,22 @@ class MainActivity : AppCompatActivity() {
         model.timerMaps = timerMaps
         
         this.timerButtons = timerButtons
-        
-        Prefs.debateBellEnabled.observe(this, Observer { debateBellEnabled ->
+    
+        model.enableBells.observe(this, Observer { enableBells ->
             updateBellsText()
-            binding.enableBells = debateBellEnabled
+            binding.enableBells = enableBells
         })
-        
-        Prefs.countMode.observe(this, Observer { countMode ->
+    
+        model.countMode.observe(this, Observer { countMode ->
             updateBellsText()
             updateTime()
             binding.countMode = countMode
         })
     
         model.state.observe(this, stateObserver)
-        
-        model.selectedButtonStr.observe(this) { txt ->
+    
+        model.selectedButtonStr.observe(this) {
             updateTime()
-            timerButtons.forEach {
-                if (it.text == txt) {
-                    it.setTextColor(getColorCompat(R.color.buttonSelected))
-                } else {
-                    it.setTextColor(getColorCompat(R.color.buttonUnselected))
-                }
-            }
         }
     }
     
@@ -132,12 +126,12 @@ class MainActivity : AppCompatActivity() {
     private fun updateBellsText() {
         val state = model.state.value
         bt_debateBell.text = when {
-            Prefs.debateBellEnabled.value && state is InitState -> "On"
-            Prefs.debateBellEnabled.value && state is HasTimerOption -> getString(
+            model.enableBells.value && state is InitState -> getString(R.string.on)
+            model.enableBells.value && state is HasTimerOption -> getString(
                     R.string.bells_at,
-                    if (Prefs.countMode.value == CountUp) state.timerOption.countUpString else state.timerOption.countDownString
+                    if (model.countMode.value == CountUp) state.timerOption.countUpString else state.timerOption.countDownString
             )
-            else -> "Off"
+            else -> getString(R.string.off)
         }
     }
     
@@ -145,53 +139,38 @@ class MainActivity : AppCompatActivity() {
      * Updates timer time
      */
     private fun updateTime() {
-        val state = model.state.value
-        binding.minutes = when (state) {
-            is InitState -> 0
-            is WaitingToStart ->
-                if (Prefs.countMode.value == CountUp) {
-                    0
+        when (val state = model.state.value) {
+            is InitState -> {
+                binding.minutes = 0
+                binding.seconds = 0
+                binding.overtimeText = getString(R.string.error)
+            }
+            is WaitingToStart -> {
+                if (model.countMode.value == CountUp) {
+                    binding.minutes = 0
+                    binding.seconds = 0
                 } else {
-                    state.timerOption.minutes
+                    binding.minutes = state.timerOption.minutes
+                    binding.seconds = state.timerOption.seconds
                 }
-            is TimerStarted ->
-                if (Prefs.countMode.value == CountUp) {
-                    state.timer.minutesCountUp.value
-                } else {
-                    state.timer.minutesCountDown.value
-                }
-        }
-        binding.seconds = when (state) {
-            is InitState -> 0
-            is WaitingToStart ->
-                if (Prefs.countMode.value == CountUp) {
-                    0
-                } else {
-                    state.timerOption.seconds
-                }
-            is TimerStarted ->
-                if (Prefs.countMode.value == CountUp) {
-                    state.timer.secondsCountUp.value
-                } else {
-                    state.timer.secondsCountDown.value
-                }
-        }
-        tv_overtime.text = when (state) {
-            is InitState -> "Error"
-            is WaitingToStart -> "Error"
+                binding.overtimeText = getString(R.string.error)
+            }
             is TimerStarted -> {
-                if (Prefs.countMode.value == CountUp) {
-                    getString(
+                if (model.countMode.value == CountUp) {
+                    binding.minutes = state.timer.minutesCountUp.value
+                    binding.seconds = state.timer.secondsCountUp.value
+                    binding.overtimeText = getString(
                             R.string.overtime_with_time,
                             state.timer.minutesCountUp.value - state.timerOption.minutes,
                             state.timer.secondsCountUp.value - state.timerOption.seconds
                     )
                 } else {
-                    getString(
-                            R.string.overtime
-                    )
+                    binding.minutes = state.timer.minutesCountDown.value
+                    binding.seconds = state.timer.secondsCountDown.value
+                    binding.overtimeText = getString(R.string.overtime)
                 }
             }
+    
         }
     }
     

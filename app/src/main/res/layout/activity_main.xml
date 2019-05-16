@@ -18,7 +18,7 @@
             type="boolean" />
 
         <variable
-            name="viewmodel"
+            name="viewModel"
             type="andre.debatetimer.MainModel" />
 
         <variable
@@ -40,6 +40,10 @@
         <variable
             name="overtime"
             type="boolean" />
+
+        <variable
+            name="overtimeText"
+            type="String" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -57,7 +61,7 @@
             style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="@{() -> viewmodel.onToggleDebateBells()}"
+            android:onClick="@{() -> viewModel.onToggleDebateBells()}"
             app:icon="@{ enableBells ? @drawable/ic_bells_active : @drawable/ic_bells_off }"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -67,7 +71,7 @@
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="@{() -> viewmodel.onToggleCountMode()}"
+            android:onClick="@{() -> viewModel.onToggleCountMode()}"
             android:text="@{countMode == CountMode.CountUp ? @string/count_up : @string/count_down}"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -76,7 +80,7 @@
             android:id="@+id/tv_overtime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/overtime"
+            android:text="@{overtimeText}"
             android:textColor="@{color}"
             android:textSize="20sp"
             android:visibility="@{overtime ? View.VISIBLE : View.GONE}"
@@ -153,7 +157,7 @@
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="@{() -> viewmodel.onStartPause()}"
+            android:onClick="@{() -> viewModel.onStartPause()}"
             android:text="@string/start"
             android:textSize="42sp"
             app:layout_constraintBottom_toTopOf="@+id/ll_timeButtons"
@@ -166,7 +170,7 @@
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="@{()->viewmodel.onResetTime()}"
+            android:onClick="@{() -> viewModel.onResetTime()}"
             android:text="@string/reset"
             android:textSize="24sp"
             app:iconSize="24dp"
