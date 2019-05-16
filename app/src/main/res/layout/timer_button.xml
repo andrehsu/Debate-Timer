@@ -5,6 +5,10 @@
     <data>
 
         <variable
+            name="selectedBindingString"
+            type="String" />
+
+        <variable
             name="selectable"
             type="boolean" />
 
@@ -28,7 +32,7 @@
         android:onClick="@{() -> viewModel.onTimeButtonSelect(text)}"
         android:text="@{text}"
         android:textAllCaps="false"
-        android:textColor="@{viewModel.selectedButtonStr == text ? @color/buttonSelected : @color/buttonUnselected }"
+        android:textColor="@{selectedBindingString == text ? @color/buttonSelected : @color/buttonUnselected }"
         tools:ignore="ObsoleteLayoutParam"
         tools:text='1m' />
 </layout>

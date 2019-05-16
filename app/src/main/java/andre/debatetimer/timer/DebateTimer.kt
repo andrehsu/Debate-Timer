@@ -74,14 +74,14 @@ abstract class DebateTimer(timerOption: TimerOption) {
     
     private val bellsSinceStart = timerOption.bellsSinceStart
     
-    val negative = BooleanLiveData()
-    val ended = BooleanLiveData()
+    val negative = BooleanLiveData(false)
+    val ended = BooleanLiveData(false)
     val secondsCountDown = IntLiveData(timerOption.seconds)
     val minutesCountDown = IntLiveData(timerOption.minutes)
-    val overtime = BooleanLiveData()
+    val overtime = BooleanLiveData(false)
     
-    val secondsCountUp = IntLiveData()
-    val minutesCountUp = IntLiveData()
+    val secondsCountUp = IntLiveData(0)
+    val minutesCountUp = IntLiveData(0)
     
     val textColor = IntLiveData(EnvVars.color_timerStart)
     

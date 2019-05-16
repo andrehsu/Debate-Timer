@@ -13,6 +13,7 @@ import android.view.WindowManager
 import android.widget.Button
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.forEach
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Observer
@@ -102,22 +103,7 @@ class MainActivity : AppCompatActivity() {
         
         this.timerButtons = timerButtons
     
-        model.enableBells.observe(this, Observer { enableBells ->
-            updateBellsText()
-            binding.enableBells = enableBells
-        })
-    
-        model.countMode.observe(this, Observer { countMode ->
-            updateBellsText()
-            updateTime()
-            binding.countMode = countMode
-        })
-    
         model.state.observe(this, stateObserver)
-    
-        model.selectedButtonStr.observe(this) {
-            updateTime()
-        }
     }
     
     /**
@@ -126,10 +112,10 @@ class MainActivity : AppCompatActivity() {
     private fun updateBellsText() {
         val state = model.state.value
         bt_debateBell.text = when {
-            model.enableBells.value && state is InitState -> getString(R.string.on)
-            model.enableBells.value && state is HasTimerOption -> getString(
+            state.enableBells.value && state is InitState -> getString(R.string.on)
+            state.enableBells.value && state is HasTimerOption -> getString(
                     R.string.bells_at,
-                    if (model.countMode.value == CountUp) state.timerOption.countUpString else state.timerOption.countDownString
+                    if (state.countMode.value == CountUp) state.timerOption.countUpString else state.timerOption.countDownString
             )
             else -> getString(R.string.off)
         }
@@ -146,7 +132,7 @@ class MainActivity : AppCompatActivity() {
                 binding.overtimeText = getString(R.string.error)
             }
             is WaitingToStart -> {
-                if (model.countMode.value == CountUp) {
+                if (state.countMode.value == CountUp) {
                     binding.minutes = 0
                     binding.seconds = 0
                 } else {
@@ -156,7 +142,7 @@ class MainActivity : AppCompatActivity() {
                 binding.overtimeText = getString(R.string.error)
             }
             is TimerStarted -> {
-                if (model.countMode.value == CountUp) {
+                if (state.countMode.value == CountUp) {
                     binding.minutes = state.timer.minutesCountUp.value
                     binding.seconds = state.timer.secondsCountUp.value
                     binding.overtimeText = getString(
@@ -194,6 +180,26 @@ class MainActivity : AppCompatActivity() {
     
     private val stateObserver = Observer<State> { state ->
         TransitionManager.beginDelayedTransition(root_activity_main)
+    
+        state.enableBells.observe(this, Observer { enableBells ->
+            updateBellsText()
+            binding.enableBells = enableBells
+        })
+    
+        state.selectedButtonStr.observe(this) { selectedButtonString ->
+            updateTime()
+            ll_timeButtons.forEach { view ->
+                val binding: TimerButtonBinding = DataBindingUtil.getBinding(view)!!
+                binding.selectedBindingString = selectedButtonString
+            }
+        }
+    
+        state.countMode.observe(this, Observer { countMode ->
+            updateBellsText()
+            updateTime()
+            binding.countMode = countMode
+        })
+        
         when (state) {
             is InitState -> {
                 binding.timerVisible = false

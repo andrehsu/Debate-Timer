@@ -1,6 +1,7 @@
 package andre.debatetimer
 
-import andre.debatetimer.livedata.NLiveData
+import andre.debatetimer.livedata.NonNullLiveData
+import andre.debatetimer.livedata.StateLiveData
 import andre.debatetimer.livedata.StringLiveData
 import andre.debatetimer.timer.DebateBell
 import andre.debatetimer.timer.DebateTimer
@@ -9,18 +10,13 @@ import android.app.Application
 import android.media.AudioAttributes
 import android.media.SoundPool
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
 
 class MainModel(application: Application) : AndroidViewModel(application) {
     private var soundPool: SoundPool
     private var debateBellOnce: Int = -1
     private var debateBellTwice: Int = -1
     
-    val selectedButtonStr = StringLiveData()
-    val countMode: LiveData<CountMode>
-    val enableBells: NLiveData<Boolean>
-    
-    val state = LiveState(InitState)
+    val state: StateLiveData
     
     lateinit var timerMaps: Map<String, TimerOption>
     
@@ -29,6 +25,7 @@ class MainModel(application: Application) : AndroidViewModel(application) {
         
         EnvVars.init(context)
         Prefs.init(context)
+        state = NonNullLiveData(InitState(Prefs.countMode, Prefs.debateBellEnabled, StringLiveData("")))
         
         val attributes = AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_MEDIA)
@@ -41,9 +38,6 @@ class MainModel(application: Application) : AndroidViewModel(application) {
         
         debateBellOnce = soundPool.load(context, R.raw.debate_bell_one, 1)
         debateBellTwice = soundPool.load(context, R.raw.debate_bell_two, 1)
-    
-        countMode = Prefs.countMode
-        enableBells = Prefs.debateBellEnabled
     }
     
     
@@ -77,26 +71,25 @@ class MainModel(application: Application) : AndroidViewModel(application) {
         when (val state = state.value) {
             is WaitingToStart -> {
                 val timer = newTimerInstance(state.timerOption)
-                this.state.value = TimerStarted(state.timerOption, timer).also(::toggleRunning)
+                this.state.value = state.toTimerStarted(timerOption = state.timerOption, debateTimer = timer).also(::toggleRunning)
             }
             is TimerStarted -> toggleRunning(state)
         }
     }
     
     fun onResetTime() {
-        onTimeButtonSelect(selectedButtonStr.value)
+        onTimeButtonSelect(state.value.selectedButtonStr.value)
     }
     
     fun onTimeButtonSelect(buttonStr: String) {
-        state.value.let { state ->
-            if (state is TimerStarted) {
-                state.setRunning(false)
-            }
+        val state = state.value
+        if (state is TimerStarted) {
+            state.setRunning(false)
         }
-        
-        state.value = WaitingToStart(timerMaps.getValue(buttonStr))
     
-        selectedButtonStr.value = buttonStr
+        this.state.value = state.toWaitingToStart(timerOption = timerMaps.getValue(buttonStr))
+    
+        state.selectedButtonStr.value = buttonStr
     }
     
     fun onToggleCountMode() {

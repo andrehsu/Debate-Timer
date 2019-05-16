@@ -8,7 +8,7 @@ abstract class SharedPreferenceLiveData<T>(
         private val default: String,
         private val spGetter: (sp: SharedPreferences, key: String, default: String) -> T,
         private val spSetter: (editor: SharedPreferences.Editor, key: String, value: T) -> SharedPreferences.Editor
-) : NLiveData<T>(spGetter(sp, key, default)), SharedPreferences.OnSharedPreferenceChangeListener {
+) : NonNullLiveData<T>(spGetter(sp, key, default)), SharedPreferences.OnSharedPreferenceChangeListener {
     override fun onSharedPreferenceChanged(sp: SharedPreferences, key: String) {
         if (key == this.key) {
             value = spGetter(sp, key, default)

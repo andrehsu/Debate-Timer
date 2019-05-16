@@ -1,10 +1,11 @@
 package andre.debatetimer.livedata
 
+import andre.debatetimer.State
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 
-abstract class NLiveData<T>(init: T) : MutableLiveData<T>() {
+open class NonNullLiveData<T>(init: T) : MutableLiveData<T>() {
     init {
         super.setValue(init)
     }
@@ -23,8 +24,10 @@ abstract class NLiveData<T>(init: T) : MutableLiveData<T>() {
     }
 }
 
-class BooleanLiveData(boolean: Boolean = false) : NLiveData<Boolean>(boolean)
+typealias BooleanLiveData = NonNullLiveData<Boolean>
 
-class IntLiveData(int: Int = 0) : NLiveData<Int>(int)
+typealias StringLiveData = NonNullLiveData<String>
 
-class StringLiveData(string: String = "") : NLiveData<String>(string)
+typealias IntLiveData = NonNullLiveData<Int>
+
+typealias StateLiveData = NonNullLiveData<State>
