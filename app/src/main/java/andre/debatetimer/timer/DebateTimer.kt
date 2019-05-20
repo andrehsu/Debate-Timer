@@ -1,8 +1,8 @@
 package andre.debatetimer.timer
 
-import andre.debatetimer.EnvVars
-import andre.debatetimer.livedata.BooleanLiveData
-import andre.debatetimer.livedata.IntLiveData
+import andre.debatetimer.Res
+import andre.debatetimer.livedata.MutableBooleanLiveData
+import andre.debatetimer.livedata.MutableIntLiveData
 import kotlin.math.absoluteValue
 
 abstract class DebateTimer(timerOption: TimerOption) {
@@ -46,17 +46,17 @@ abstract class DebateTimer(timerOption: TimerOption) {
         }
         
         if (countUpSeconds == 60 && countDownSeconds > 60) {
-            textColor.value = EnvVars.color_timerNormal
+            textColor.value = Res.color.timerNormal
             onFirstMinuteEnd()
         }
         
         if (countDownSeconds == 60) {
-            textColor.value = EnvVars.color_timerEnd
+            textColor.value = Res.color.timerEnd
             onLastMinuteStart()
         }
         
         if (countDownSeconds == -1) {
-            textColor.value = EnvVars.color_timerOvertime
+            textColor.value = Res.color.timerOvertime
             overtime.value = true
         }
         
@@ -73,15 +73,16 @@ abstract class DebateTimer(timerOption: TimerOption) {
     
     private val bellsSinceStart = timerOption.bellsSinceStart
     
-    val ended = BooleanLiveData(false)
-    val secondsCountDown = IntLiveData(timerOption.seconds)
-    val minutesCountDown = IntLiveData(timerOption.minutes)
-    val overtime = BooleanLiveData(false)
+    @Suppress("MemberVisibilityCanBePrivate")
+    val ended = MutableBooleanLiveData(false)
+    val secondsCountDown = MutableIntLiveData(timerOption.seconds)
+    val minutesCountDown = MutableIntLiveData(timerOption.minutes)
+    val overtime = MutableBooleanLiveData(false)
     
-    val secondsCountUp = IntLiveData(0)
-    val minutesCountUp = IntLiveData(0)
+    val secondsCountUp = MutableIntLiveData(0)
+    val minutesCountUp = MutableIntLiveData(0)
     
-    val textColor = IntLiveData(EnvVars.color_timerStart)
+    val textColor = MutableIntLiveData(Res.color.timerStart)
     
     open fun onFirstMinuteEnd() {}
     

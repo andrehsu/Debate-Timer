@@ -18,7 +18,7 @@ object Prefs {
                     context.getString(R.string.pref_bell_enabled_key),
                     context.resources.getBoolean(R.bool.pref_bell_enabled_default).toString()
             )
-            countMode = SharedPreferenceLiveData.of(
+            countMode = SharedPreferenceLiveData.ofString(
                     sp,
                     context.getString(R.string.pref_count_mode),
                     context.getString(R.string.pref_count_mode_default),

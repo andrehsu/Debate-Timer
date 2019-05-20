@@ -6,13 +6,10 @@
     <string name="resume">Resume</string>
     <string name="starting_text">Select a time to begin</string>
     <string name="exit_question">Are you sure you want to exit?</string>
-    <string name="bells_at">At %s</string>
     <string name="count_down">Count Down</string>
     <string name="count_up">Count up</string>
     <string name="padded_seconds">%02d</string>
     <string name="overtime">Overtime by</string>
-    <string name="overtime_with_time">Overtime by %d:%02d</string>
-    <string name="error">Error</string>
     <string name="on">On</string>
     <string name="off">Off</string>
 </resources>

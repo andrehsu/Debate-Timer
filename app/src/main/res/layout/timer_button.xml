@@ -28,7 +28,7 @@
         android:layout_height="wrap_content"
         android:layout_weight='1'
         android:alpha="@{selectable?1.0f:0.38f}"
-        android:clickable="@{selectable? true:false}"
+        android:clickable="@{selectable? true : false}"
         android:onClick="@{() -> viewModel.onTimeButtonSelect(text)}"
         android:text="@{text}"
         android:textAllCaps="false"

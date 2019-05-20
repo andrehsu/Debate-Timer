@@ -1,7 +1,7 @@
 package andre.debatetimer.timer
 
-import andre.debatetimer.secondsToString
 import andre.debatetimer.timer.DebateBell.Once
+import kotlin.math.absoluteValue
 
 class TimerOption(val totalSeconds: Int, bellsSinceStart: Map<Int, DebateBell>) {
     companion object {
@@ -33,20 +33,63 @@ class TimerOption(val totalSeconds: Int, bellsSinceStart: Map<Int, DebateBell>) 
                 null
             }
         }
+    
+        val Default = TimerOption(0, mapOf())
     }
     
-    val countUpString: String
-    val countDownString: String
+    val countUpBellsText: String
+    val countDownBellsText: String
     val bellsSinceStart: Map<Int, DebateBell>
     
     init {
         this.bellsSinceStart = bellsSinceStart.toSortedMap()
         val sorted = this.bellsSinceStart.filter { (_, v) -> v == Once }.map { it.key }
-        
-        countUpString = sorted.joinToString { secondsToString(it) }
-        countDownString = sorted.joinToString { secondsToString(totalSeconds - it) }
+    
+        countUpBellsText = sorted.joinToString { secondsToString(it) }
+        countDownBellsText = sorted.joinToString { secondsToString(totalSeconds - it) }
     }
     
     val minutes = totalSeconds / 60
     val seconds = totalSeconds % 60
+    
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        
+        other as TimerOption
+        
+        if (totalSeconds != other.totalSeconds) return false
+        if (countUpBellsText != other.countUpBellsText) return false
+        if (countDownBellsText != other.countDownBellsText) return false
+        if (bellsSinceStart != other.bellsSinceStart) return false
+        if (minutes != other.minutes) return false
+        if (seconds != other.seconds) return false
+        
+        return true
+    }
+    
+    override fun hashCode(): Int {
+        var result = totalSeconds
+        result = 31 * result + countUpBellsText.hashCode()
+        result = 31 * result + countDownBellsText.hashCode()
+        result = 31 * result + bellsSinceStart.hashCode()
+        result = 31 * result + minutes
+        result = 31 * result + seconds
+        return result
+    }
+    
+    override fun toString(): String {
+        return "TimerOption(totalSeconds=$totalSeconds, countUpBellsText='$countUpBellsText', countDownBellsText='$countDownBellsText', bellsSinceStart=$bellsSinceStart, minutes=$minutes, seconds=$seconds)"
+    }
+}
+
+private fun secondsToString(seconds: Int): String {
+    val abs = seconds.absoluteValue
+    val minutes = abs / 60
+    val secondsOnly = abs % 60
+    return if (seconds >= 0) {
+        ""
+    } else {
+        "-"
+    } + "$minutes:${secondsOnly.toString().padStart(2, '0')}"
 }
