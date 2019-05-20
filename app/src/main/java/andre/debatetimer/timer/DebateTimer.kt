@@ -62,12 +62,12 @@ abstract class DebateTimer(timerOption: TimerOption) {
         
     }
     
-    fun pause() {
+    private fun pause() {
         timer.cancel()
         timer = newTimerInstance()
     }
     
-    fun resume() {
+    private fun resume() {
         timer.start()
     }
     
@@ -83,6 +83,12 @@ abstract class DebateTimer(timerOption: TimerOption) {
     val minutesCountUp = MutableIntLiveData(0)
     
     val textColor = MutableIntLiveData(Res.color.timerStart)
+    
+    val running = MutableBooleanLiveData(false)
+    
+    init {
+        running.observeForever { running -> if (running) resume() else pause() }
+    }
     
     open fun onFirstMinuteEnd() {}
     

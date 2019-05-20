@@ -85,22 +85,10 @@ class TimerStarted(override val countMode: NonNullMutableLiveData<CountMode>,
                    override val selectedTimerOptionText: MutableStringLiveData,
                    override val timerOption: TimerOption,
                    private val timer: DebateTimer) : State() {
-    private val mutableRunning = MutableBooleanLiveData(false)
-    val running: BooleanLiveData = mutableRunning
-    
-    fun setRunning(value: Boolean) {
-        if (mutableRunning.value != value) {
-            if (value) {
-                timer.resume()
-            } else {
-                timer.pause()
-            }
-            mutableRunning.value = value
-        }
-    }
+    val running = timer.running
     
     override val inOvertime = timer.overtime
-    override val keepScreenOn = mutableRunning
+    override val keepScreenOn = running
     override val timerOptionsSelectable = map(running) {
         !it
     }

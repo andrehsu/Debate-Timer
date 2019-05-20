@@ -71,14 +71,14 @@ class MainModel(application: Application) : AndroidViewModel(application) {
                         state.timerOption,
                         timer
                 ).also {
-                    it.setRunning(true)
+                    it.running.value = (true)
                 }
             }
             is TimerStarted -> {
                 if (state.running.value) {
-                    state.setRunning(false)
+                    state.running.value = (false)
                 } else {
-                    state.setRunning(true)
+                    state.running.value = (true)
                 }
             }
         }
@@ -91,7 +91,7 @@ class MainModel(application: Application) : AndroidViewModel(application) {
     fun onTimeButtonSelect(buttonStr: String) {
         val state = state.value
         if (state is TimerStarted) {
-            state.setRunning(false)
+            state.running.value = (false)
         }
     
         this.state.value = WaitingToStart(
