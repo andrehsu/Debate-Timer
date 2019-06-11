@@ -2,22 +2,18 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
-
+    
     <data>
-
+        
         <import type="android.view.View" />
-
+        
         <import type="andre.debatetimer.CountMode" />
-
-        <variable
-            name="state"
-            type="andre.debatetimer.State" />
-
+        
         <variable
             name="viewModel"
             type="andre.debatetimer.MainModel" />
     </data>
-
+    
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/root_activity_main"
         android:layout_width="match_parent"
@@ -27,135 +23,134 @@
         android:layout_marginRight="16dp"
         android:layout_marginBottom="16dp"
         tools:context="andre.debatetimer.MainActivity">
-
+        
         <com.google.android.material.button.MaterialButton
             android:id="@+id/bt_debateBell"
             style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="@{() -> viewModel.onToggleDebateBells()}"
-            app:icon="@{ state.enableBells ? @drawable/ic_bells_active : @drawable/ic_bells_off }"
-            android:text="@{state.bellsText}"
+            android:onClick="@{ () -> viewModel.onToggleDebateBells() }"
+            android:text="@{ viewModel.bellsText }"
+            app:icon="@{ viewModel.enableBells ? @drawable/ic_bells_active : @drawable/ic_bells_off }"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
+        
         <com.google.android.material.button.MaterialButton
             android:id="@+id/bt_countMode"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="@{() -> viewModel.onToggleCountMode()}"
-            android:text="@{state.countMode == CountMode.CountUp ? @string/count_up : @string/count_down}"
+            android:onClick="@{ () -> viewModel.onToggleCountMode() }"
+            android:text="@{ viewModel.countMode == CountMode.CountUp ? @string/count_up : @string/count_down }"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
+        
         <TextView
             android:id="@+id/tv_overtime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{state.overtimeText}"
-            android:textColor="@{state.timerTextColor}"
+            android:text="@{ viewModel.overTimeText }"
+            android:textColor="@{ viewModel.timerTextColor }"
             android:textSize="20sp"
-            android:visibility="@{state.inOvertime ? View.VISIBLE : View.GONE}"
+            android:visibility="@{ viewModel.overTime ? View.VISIBLE : View.GONE }"
             app:layout_constraintBottom_toTopOf="@id/tv_timer_colon"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent" />
-
-
+        
+        
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             app:layout_constraintGuide_percent="0.43" />
-
+        
         <TextView
             android:id="@+id/tv_timer_colon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=":"
-            android:textColor="@{state.timerTextColor}"
+            android:textColor="@{ viewModel.timerTextColor }"
             android:textSize="@dimen/timer_text_size"
-            android:visibility='@{state.timerVisible ? View.VISIBLE : View.GONE}'
+            android:visibility='@{ viewModel.timerOption != null ? View.VISIBLE : View.GONE }'
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintRight_toLeftOf="@id/guideline"
             app:layout_constraintTop_toTopOf="parent"
             tools:ignore="HardcodedText,SpUsage" />
-
+        
         <TextView
             android:id="@+id/tv_timer_m"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text='@{String.valueOf(state.minutes)}'
+            android:text='@{ String.valueOf(viewModel.minutes) }'
             android:textAlignment="center"
-            android:textColor='@{state.timerTextColor}'
+            android:textColor='@{ viewModel.timerTextColor }'
             android:textSize="@dimen/timer_text_size"
-            android:visibility='@{state.timerVisible ? View.VISIBLE:View.GONE}'
+            android:visibility='@{ viewModel.timerOption != null ? View.VISIBLE:View.GONE }'
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintRight_toLeftOf="@id/tv_timer_colon"
             app:layout_constraintTop_toTopOf="parent"
             tools:ignore="HardcodedText,SpUsage"
             tools:text="0" />
-
+        
         <TextView
             android:id="@+id/tv_timer_s"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text='@{@string/padded_seconds(state.seconds)}'
+            android:text='@{ @string/padded_seconds(viewModel.seconds) }'
             android:textAlignment="center"
-            android:textColor="@{state.timerTextColor}"
+            android:textColor="@{ viewModel.timerTextColor }"
             android:textSize="@dimen/timer_text_size"
-            android:visibility='@{state.timerVisible ? View.VISIBLE:View.GONE}'
+            android:visibility='@{ viewModel.timerOption != null ? View.VISIBLE:View.GONE }'
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toRightOf="@id/tv_timer_colon"
             app:layout_constraintTop_toTopOf="parent"
             tools:ignore="HardcodedText,SpUsage"
             tools:text="00" />
-
+        
         <TextView
             android:id="@+id/tv_startingText"
             android:layout_width="wrap_content"
-            android:visibility="@{state.startingTextVisible ? View.VISIBLE : View.GONE}"
             android:layout_height="wrap_content"
             android:text="@string/starting_text"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:visibility="@{ viewModel.timerOption == null ? View.VISIBLE : View.GONE }"
             app:layout_constraintBottom_toTopOf="@+id/ll_timeButtons"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             tools:visibility="gone" />
-
+        
         <com.google.android.material.button.MaterialButton
             android:id="@+id/bt_startPause"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="@{() -> viewModel.onTimerControl()}"
-            android:text="@{state.timerControlButtonText}"
+            android:onClick="@{ () -> viewModel.onTimerControl() }"
+            android:text="@{ viewModel.timerControlButtonText }"
             android:textSize="42sp"
-            android:visibility="@{state.timerControlButtonVisible ? View.VISIBLE : View.GONE}"
+            android:visibility="@{ viewModel.timerOption != null ? View.VISIBLE : View.GONE }"
             app:layout_constraintBottom_toTopOf="@+id/ll_timeButtons"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintLeft_toRightOf="@+id/bt_resetTime"
             app:layout_constraintRight_toRightOf="parent" />
-
+        
         <com.google.android.material.button.MaterialButton
             android:id="@+id/bt_resetTime"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="@{() -> viewModel.onResetTime()}"
+            android:onClick="@{ () -> viewModel.onResetTime() }"
             android:text="@string/reset"
             android:textSize="24sp"
-            android:visibility="@{state.resetButtonVisible ? View.VISIBLE : View.GONE}"
+            android:visibility="@{ viewModel.running == null ? View.VISIBLE : View.GONE }"
             app:iconSize="24dp"
             app:layout_constraintBaseline_toBaselineOf="@id/bt_startPause"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toLeftOf="@id/bt_startPause" />
-
-
+        
         <LinearLayout
             android:id="@+id/ll_timeButtons"
             style="@style/Widget.AppCompat.ButtonBar"
@@ -166,7 +161,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent" />
-
-
+    
+    
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

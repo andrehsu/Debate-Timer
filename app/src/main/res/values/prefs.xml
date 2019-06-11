@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="pref_bell_enabled_key" translatable="false">bell_enabled</string>
-    <bool name="pref_bell_enabled_default">true</bool>
+    <string name="pref_enable_bells_key" translatable="false">bell_enabled</string>
+    <bool name="pref_enable_bells_default">true</bool>
+    
     <string name="pref_count_mode" translatable="false">count_mode</string>
     <string name="pref_count_mode_default" translatable="false">count_up</string>
-    <string name="pref_timers" translatable="false">pref_timers</string>
+    
+    <string name="pref_timers_key" translatable="false">pref_timers</string>
+    <string name="pref_timers_default" translatable="false">180;-1|240;-1|300;-1|360;-1|420;-1|480;-1</string>
 </resources>
