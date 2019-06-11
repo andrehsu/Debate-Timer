@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     
     /**
-     * Property that controls whether the timer option buttons are selectable
+     * Whether timer options should be selectable
      */
     private var timerOptionsSelectable: Boolean = true
         set(value) {
@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     /**
-     * Property that controls whether the screen is kept on
+     * Whether screen should be kept on
      */
     private var keepScreenOn: Boolean = false
         set(value) {
@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     
-    private var selectedTimerOptionString: String = ""
+    private var timerOptionTag: String = ""
         set(value) {
             field = value
             ll_timeButtons.forEach {
@@ -64,43 +64,46 @@ class MainActivity : AppCompatActivity() {
     
         binding.lifecycleOwner = this
         binding.viewModel = model
-        model.state.observe(this) { state ->
+    
+        model.timerOptionsSelectable.observe(this) {
+            timerOptionsSelectable = it
+        }
+    
+        model.timerOption.observe(this) {
+            timerOptionTag = it?.tag ?: "None"
+        }
+    
+        model.keepScreenOn.observe(this) {
+            keepScreenOn = it
+        }
+    
+        model.timerControlButtonText.observe(this) {
             TransitionManager.beginDelayedTransition(root_activity_main)
-            binding.state = state
-            state.keepScreenOn.observe(this) {
-                keepScreenOn = it
-            }
-            state.timerOptionsSelectable.observe(this) {
-                timerOptionsSelectable = it
-            }
-            state.selectedTimerOptionText.observe(this) {
-                selectedTimerOptionString = it
-            }
-            state.timerControlButtonText.observe(this) {
-                TransitionManager.beginDelayedTransition(root_activity_main)
-            }
-            state.enableBells.observe(this) {
-                TransitionManager.beginDelayedTransition(root_activity_main)
-            }
-            state.countMode.observe(this) {
-                TransitionManager.beginDelayedTransition(root_activity_main)
-            }
+        }
+    
+        model.enableBells.observe(this) {
+            TransitionManager.beginDelayedTransition(root_activity_main)
+        }
+    
+        model.countMode.observe(this) {
+            TransitionManager.beginDelayedTransition(root_activity_main)
+        }
+    
+        model.timerOption.observe(this) {
+            TransitionManager.beginDelayedTransition(root_activity_main)
         }
     
         //region Setup timer options
         val sp = defaultSharedPreferences
-        
-        val timersStr = sp.getStringSet(getString(R.string.pref_timers), mutableSetOf(
-                "180;-1",
-                "240;-1",
-                "300;-1",
-                "360;-1",
-                "420;-1",
-                "480;-1"))!!.sorted()
+    
+        val timersStr = sp.getString(
+                getString(R.string.pref_timers_key),
+                getString(R.string.pref_timers_default)
+        )!!
         
         val timerMaps = mutableMapOf<String, TimerOption>()
-        
-        timersStr.forEach { str ->
+    
+        timersStr.split('|').forEach { str ->
             val timerOption = TimerOption.parseTag(str)
             
             if (timerOption != null) {

@@ -1,7 +1,7 @@
 package andre.debatetimer.livedata
 
-import android.annotation.SuppressLint
 import android.content.SharedPreferences
+import androidx.lifecycle.LiveData
 
 abstract class SharedPreferenceLiveData<T>(
         private val sp: SharedPreferences,
@@ -9,22 +9,22 @@ abstract class SharedPreferenceLiveData<T>(
         private val default: String,
         private val spGetter: (sp: SharedPreferences, key: String, default: String) -> T,
         private val spSetter: (editor: SharedPreferences.Editor, key: String, value: T) -> SharedPreferences.Editor
-) : NonNullMutableLiveData<T>(spGetter(sp, key, default)), SharedPreferences.OnSharedPreferenceChangeListener {
+) : LiveData<T>(), SharedPreferences.OnSharedPreferenceChangeListener {
+    init {
+        value = spGetter(sp, key, default)
+    }
     
     override fun onSharedPreferenceChanged(sp: SharedPreferences, key: String) {
         if (key == this.key) {
-            super.setValue(spGetter(sp, key, default))
+            value = spGetter(sp, key, default)
         }
     }
     
-    @SuppressLint("ApplySharedPref")
-    override fun setValue(value: T) {
-        val editor = sp.edit()
-        spSetter(editor, key, value)
-        editor.commit()
+    override fun getValue(): T {
+        return super.getValue()!!
     }
     
-    override fun postValue(value: T) {
+    fun putValue(value: T) {
         val editor = sp.edit()
         spSetter(editor, key, value)
         editor.apply()

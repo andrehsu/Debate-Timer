@@ -16,3 +16,15 @@ enum class CountMode {
         }
     }
 }
+
+fun <R> CountMode.ifElse(ifCountUpFunc: () -> R, ifCountDownFunc: () -> R): R {
+    return when (this) {
+        CountMode.CountUp -> ifCountUpFunc()
+        CountMode.CountDown -> ifCountDownFunc()
+    }
+}
+
+fun CountMode.other(): CountMode = when (this) {
+    CountMode.CountUp -> CountMode.CountDown
+    CountMode.CountDown -> CountMode.CountUp
+}

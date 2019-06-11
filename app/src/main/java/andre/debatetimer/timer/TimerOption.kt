@@ -3,7 +3,7 @@ package andre.debatetimer.timer
 import andre.debatetimer.timer.DebateBell.Once
 import kotlin.math.absoluteValue
 
-class TimerOption(val totalSeconds: Int, bellsSinceStart: Map<Int, DebateBell>) {
+class TimerOption(val tag: String, val totalSeconds: Int, bellsSinceStart: Map<Int, DebateBell>) {
     companion object {
         private val cache = mutableMapOf<String, TimerOption>()
         
@@ -23,8 +23,8 @@ class TimerOption(val totalSeconds: Int, bellsSinceStart: Map<Int, DebateBell>) 
                         bellTokens.map { it.toInt() to Once }.toMap()
                     }
                 }
-                
-                val ret = TimerOption(seconds, bells)
+    
+                val ret = TimerOption(tag, seconds, bells)
                 
                 cache[tag] = ret
                 
@@ -34,7 +34,7 @@ class TimerOption(val totalSeconds: Int, bellsSinceStart: Map<Int, DebateBell>) 
             }
         }
     
-        val Default = TimerOption(0, mapOf())
+        val Default = TimerOption("Default", 0, mapOf())
     }
     
     val countUpBellsText: String
