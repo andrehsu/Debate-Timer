@@ -5,6 +5,7 @@ import andre.debatetimer.databinding.TimerButtonBinding
 import andre.debatetimer.extensions.defaultSharedPreferences
 import andre.debatetimer.livedata.observe
 import andre.debatetimer.timer.TimerOption
+import android.animation.LayoutTransition
 import android.app.Dialog
 import android.os.Bundle
 import android.view.WindowManager
@@ -14,6 +15,7 @@ import androidx.core.view.forEach
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProviders
+import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -59,6 +61,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         model = ViewModelProviders.of(this).get(MainModel::class.java)
+        
+        root_activity_main.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
     
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
     
@@ -135,7 +139,7 @@ class MainActivity : AppCompatActivity() {
                 return AlertDialog.Builder(this@MainActivity)
                         .setTitle(R.string.exit_question)
                         .setPositiveButton(android.R.string.yes) { _, _ -> this@MainActivity.finish() }
-                        .setNegativeButton(android.R.string.no) { _, _ -> dialog.cancel() }
+                        .setNegativeButton(android.R.string.no) { _, _ -> dialog!!.cancel() }
                         .create()
             }
         }
