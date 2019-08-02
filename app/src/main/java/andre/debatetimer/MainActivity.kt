@@ -62,10 +62,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         model = ViewModelProviders.of(this).get(MainModel::class.java)
         
-        root_activity_main.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
     
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
     
+        root_activity_main.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+        
         binding.lifecycleOwner = this
         binding.viewModel = model
     
