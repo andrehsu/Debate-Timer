@@ -1,8 +1,8 @@
 package andre.debatetimer.timer
 
 import andre.debatetimer.Res
-import andre.debatetimer.livedata.MutableLiveData
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import kotlin.math.absoluteValue
 
 abstract class DebateTimer(private val timerOption: TimerOption) {

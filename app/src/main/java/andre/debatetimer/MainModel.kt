@@ -1,9 +1,6 @@
 package andre.debatetimer
 
-import andre.debatetimer.livedata.MutableLiveData
 import andre.debatetimer.livedata.SharedPreferenceLiveData
-import andre.debatetimer.livedata.map
-import andre.debatetimer.livedata.switchMap
 import andre.debatetimer.timer.DebateBell
 import andre.debatetimer.timer.DebateTimer
 import andre.debatetimer.timer.TimerOption

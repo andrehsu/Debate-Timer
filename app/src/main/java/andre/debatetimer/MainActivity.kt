@@ -3,7 +3,6 @@ package andre.debatetimer
 import andre.debatetimer.databinding.ActivityMainBinding
 import andre.debatetimer.databinding.TimerButtonBinding
 import andre.debatetimer.extensions.defaultSharedPreferences
-import andre.debatetimer.livedata.observe
 import andre.debatetimer.timer.TimerOption
 import android.animation.LayoutTransition
 import android.app.Dialog
@@ -15,7 +14,7 @@ import androidx.core.view.forEach
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProviders
-import androidx.transition.Transition
+import androidx.lifecycle.observe
 import androidx.transition.TransitionManager
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -62,58 +61,58 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         model = ViewModelProviders.of(this).get(MainModel::class.java)
         
-    
+        
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-    
+        
         root_activity_main.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
         
         binding.lifecycleOwner = this
         binding.viewModel = model
-    
+        
         model.timerOptionsSelectable.observe(this) {
             timerOptionsSelectable = it
         }
-    
+        
         model.timerOption.observe(this) {
             timerOptionTag = it?.tag ?: "None"
         }
-    
+        
         model.keepScreenOn.observe(this) {
             keepScreenOn = it
         }
-    
+        
         model.timerControlButtonText.observe(this) {
             TransitionManager.beginDelayedTransition(root_activity_main)
         }
-    
+        
         model.enableBells.observe(this) {
             TransitionManager.beginDelayedTransition(root_activity_main)
         }
-    
+        
         model.countMode.observe(this) {
             TransitionManager.beginDelayedTransition(root_activity_main)
         }
-    
+        
         model.timerOption.observe(this) {
             TransitionManager.beginDelayedTransition(root_activity_main)
         }
-    
+        
         //region Setup timer options
         val sp = defaultSharedPreferences
-    
+        
         val timersStr = sp.getString(
                 getString(R.string.pref_timers_key),
                 getString(R.string.pref_timers_default)
         )!!
         
         val timerMaps = mutableMapOf<String, TimerOption>()
-    
+        
         timersStr.split('|').forEach { str ->
             val timerOption = TimerOption.parseTag(str)
             
             if (timerOption != null) {
                 val timerButtonBinding: TimerButtonBinding = DataBindingUtil.inflate(layoutInflater, R.layout.timer_button, ll_timeButtons, true)
-    
+                
                 timerButtonBinding.viewModel = model
                 
                 val buttonTextSb = StringBuilder()
@@ -126,7 +125,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 timerButtonBinding.text = buttonTextSb.toString()
-    
+                
                 timerMaps[timerButtonBinding.text!!] = timerOption
             }
         }
