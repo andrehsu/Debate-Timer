@@ -1,9 +1,9 @@
 package andre.debatetimer
 
-import andre.debatetimer.extensions.defaultSharedPreferences
 import andre.debatetimer.livedata.SharedPreferenceLiveData
 import android.content.Context
 import android.util.Log
+import androidx.preference.PreferenceManager
 
 object Prefs {
     private val LogTag = Prefs::class.java.simpleName
@@ -12,7 +12,7 @@ object Prefs {
     
     fun init(context: Context) {
         if (!initialized) {
-            val sp = context.defaultSharedPreferences
+            val sp = PreferenceManager.getDefaultSharedPreferences(context)
             enableBells = SharedPreferenceLiveData.ofBoolean(
                     sp,
                     context.getString(R.string.pref_enable_bells_key),

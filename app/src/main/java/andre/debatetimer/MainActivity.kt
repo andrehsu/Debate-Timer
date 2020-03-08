@@ -2,7 +2,6 @@ package andre.debatetimer
 
 import andre.debatetimer.databinding.ActivityMainBinding
 import andre.debatetimer.databinding.TimerButtonBinding
-import andre.debatetimer.extensions.defaultSharedPreferences
 import andre.debatetimer.timer.TimerOption
 import android.animation.LayoutTransition
 import android.app.Dialog
@@ -15,6 +14,7 @@ import androidx.core.view.forEach
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Observer
+import androidx.preference.PreferenceManager
 import androidx.transition.TransitionManager
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -99,7 +99,7 @@ class MainActivity : AppCompatActivity() {
         })
         
         //region Setup timer options
-        val sp = defaultSharedPreferences
+        val sp = PreferenceManager.getDefaultSharedPreferences(this)
         
         val timersStr = sp.getString(
                 getString(R.string.pref_timers_key),
