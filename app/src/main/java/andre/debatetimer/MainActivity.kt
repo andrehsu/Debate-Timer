@@ -135,7 +135,7 @@ class MainActivity : AppCompatActivity() {
                 return AlertDialog.Builder(this@MainActivity)
                         .setTitle(R.string.exit_question)
                         .setPositiveButton(android.R.string.yes) { _, _ -> this@MainActivity.finish() }
-                        .setNegativeButton(android.R.string.no) { _, _ -> dialog.cancel() }
+                        .setNegativeButton(android.R.string.no) { _, _ -> dialog!!.cancel() }
                         .create()
             }
         }
