@@ -8,19 +8,19 @@ import android.animation.LayoutTransition
 import android.app.Dialog
 import android.os.Bundle
 import android.view.WindowManager
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.forEach
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
-import androidx.lifecycle.ViewModelProviders
-import androidx.lifecycle.observe
+import androidx.lifecycle.Observer
 import androidx.transition.TransitionManager
 import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var model: MainModel
+    private val model: MainModel by viewModels()
     private lateinit var binding: ActivityMainBinding
     
     /**
@@ -33,6 +33,7 @@ class MainActivity : AppCompatActivity() {
                 DataBindingUtil.getBinding<TimerButtonBinding>(it)!!.selectable = value
             }
         }
+    
     /**
      * Whether screen should be kept on
      */
@@ -59,8 +60,6 @@ class MainActivity : AppCompatActivity() {
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        model = ViewModelProviders.of(this).get(MainModel::class.java)
-        
         
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         
@@ -68,34 +67,36 @@ class MainActivity : AppCompatActivity() {
         
         binding.lifecycleOwner = this
         binding.viewModel = model
-        
-        model.timerOptionsSelectable.observe(this) {
+    
+    
+        model.timerOptionsSelectable.observe(this, Observer {
             timerOptionsSelectable = it
-        }
-        
-        model.timerOption.observe(this) {
+        })
+    
+    
+        model.timerOption.observe(this, Observer {
             timerOptionTag = it?.tag ?: "None"
-        }
-        
-        model.keepScreenOn.observe(this) {
+        })
+    
+        model.keepScreenOn.observe(this, Observer {
             keepScreenOn = it
-        }
-        
-        model.timerControlButtonText.observe(this) {
+        })
+    
+        model.timerControlButtonText.observe(this, Observer {
             TransitionManager.beginDelayedTransition(root_activity_main)
-        }
-        
-        model.enableBells.observe(this) {
+        })
+    
+        model.enableBells.observe(this, Observer {
             TransitionManager.beginDelayedTransition(root_activity_main)
-        }
-        
-        model.countMode.observe(this) {
+        })
+    
+        model.countMode.observe(this, Observer {
             TransitionManager.beginDelayedTransition(root_activity_main)
-        }
-        
-        model.timerOption.observe(this) {
+        })
+    
+        model.timerOption.observe(this, Observer {
             TransitionManager.beginDelayedTransition(root_activity_main)
-        }
+        })
         
         //region Setup timer options
         val sp = defaultSharedPreferences
