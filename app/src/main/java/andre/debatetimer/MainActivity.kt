@@ -16,7 +16,6 @@ import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
 import androidx.transition.TransitionManager
-import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -29,7 +28,7 @@ class MainActivity : AppCompatActivity() {
     private var timerOptionsSelectable: Boolean = true
         set(value) {
             field = value
-            ll_timeButtons.forEach {
+            binding.llTimeButtons.forEach {
                 DataBindingUtil.getBinding<TimerButtonBinding>(it)!!.selectable = value
             }
         }
@@ -50,7 +49,7 @@ class MainActivity : AppCompatActivity() {
     private var timerOptionTag: String = ""
         set(value) {
             field = value
-            ll_timeButtons.forEach {
+            binding.llTimeButtons.forEach {
                 DataBindingUtil.getBinding<TimerButtonBinding>(it)!!.selectedBindingString = value
             }
         }
@@ -60,16 +59,16 @@ class MainActivity : AppCompatActivity() {
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+    
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        
-        root_activity_main.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
-        
+    
+        binding.rootActivityMain.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+    
         binding.lifecycleOwner = this
         binding.viewModel = model
     
     
-        model.timerOptionsSelectable.observe(this, Observer {
+        model.timerOptionsSelectable.observe(this, {
             timerOptionsSelectable = it
         })
     
@@ -83,19 +82,19 @@ class MainActivity : AppCompatActivity() {
         })
     
         model.timerControlButtonText.observe(this, Observer {
-            TransitionManager.beginDelayedTransition(root_activity_main)
+            TransitionManager.beginDelayedTransition(binding.rootActivityMain)
         })
     
         model.enableBells.observe(this, Observer {
-            TransitionManager.beginDelayedTransition(root_activity_main)
+            TransitionManager.beginDelayedTransition(binding.rootActivityMain)
         })
     
         model.countMode.observe(this, Observer {
-            TransitionManager.beginDelayedTransition(root_activity_main)
+            TransitionManager.beginDelayedTransition(binding.rootActivityMain)
         })
     
         model.timerOption.observe(this, Observer {
-            TransitionManager.beginDelayedTransition(root_activity_main)
+            TransitionManager.beginDelayedTransition(binding.rootActivityMain)
         })
         
         //region Setup timer options
@@ -112,7 +111,7 @@ class MainActivity : AppCompatActivity() {
             val timerOption = TimerOption.parseTag(str)
             
             if (timerOption != null) {
-                val timerButtonBinding: TimerButtonBinding = DataBindingUtil.inflate(layoutInflater, R.layout.timer_button, ll_timeButtons, true)
+                val timerButtonBinding: TimerButtonBinding = DataBindingUtil.inflate(layoutInflater, R.layout.timer_button, binding.llTimeButtons, true)
                 
                 timerButtonBinding.viewModel = model
                 
