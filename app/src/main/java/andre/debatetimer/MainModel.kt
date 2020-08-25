@@ -1,185 +1,256 @@
 package andre.debatetimer
 
-import andre.debatetimer.livedata.SharedPreferenceLiveData
+import andre.debatetimer.timer.BellRinger
 import andre.debatetimer.timer.DebateBell
 import andre.debatetimer.timer.DebateTimer
 import andre.debatetimer.timer.TimerOption
 import android.app.Application
-import android.media.AudioAttributes
-import android.media.SoundPool
 import androidx.lifecycle.*
 
-class MainModel(application: Application) : AndroidViewModel(application) {
-    lateinit var timerMaps: Map<String, TimerOption>
+class MainModel(app: Application) : AndroidViewModel(app) {
+    
+    private val trueLiveData: LiveData<Boolean>
+        get() = MutableLiveData(true)
+    private val falseLiveData: LiveData<Boolean>
+        get() = MutableLiveData(false)
+    private val zeroLiveData: LiveData<Int>
+        get() = MutableLiveData(0)
+    
+    private val prefs = AppPreference.getInstance(getApplication())
+    private val res = AppResources.getInstance(getApplication())
+    
+    val countMode: LiveData<CountMode> = prefs.countMode
+    val enableBells: LiveData<Boolean> = prefs.enableBells
+    val timersStr: LiveData<String> = prefs.timersStr
+    
+    val bellRinger = BellRinger(getApplication())
+    
+    val timerMaps: Map<String, TimerOption> = parseTimerMapsStr(timersStr.value!!)
+    private val _state: MutableLiveData<State> = MutableLiveData(Initial)
+    val state: LiveData<State> = _state
+    
+    val clockVisible: LiveData<Boolean> = state.switchMap { state ->
+        when (state) {
+            is Initial -> falseLiveData
+            is WaitingToStart -> trueLiveData
+            is TimerActive -> trueLiveData
+        }
+    }
     
     
-    init {
-        val context = application.applicationContext
+    val showOverTimeText: LiveData<Boolean> = state.switchMap { state ->
+        when (state) {
+            is Initial -> falseLiveData
+            is WaitingToStart -> falseLiveData
+            is TimerActive -> state.timer.overTime
+        }
+    }
+    
+    val keepScreenOn: LiveData<Boolean> = state.switchMap { state ->
+        when (state) {
+            is Initial -> falseLiveData
+            is WaitingToStart -> falseLiveData
+            is TimerActive -> state.timer.running
+        }
+    }
+    
+    val selectedTimerOptionTag: LiveData<String> = state.map { state ->
+        when (state) {
+            is Initial -> "None"
+            is WaitingToStart -> state.timerOption.tag
+            is TimerActive -> state.timerOption.tag
+        }
+    }
+    
+    
+    val timerOptionsClickable: LiveData<Boolean> = state.switchMap { state ->
+        when (state) {
+            is Initial -> trueLiveData
+            is WaitingToStart -> trueLiveData
+            is TimerActive -> state.running.map { running -> !running }
+        }
+    }
+    
+    val minutes = state.switchMap { state ->
+        when (state) {
+            is Initial -> zeroLiveData
+            is WaitingToStart -> {
+                val mediatorLiveData = MediatorLiveData<Int>()
+                fun updateValue() {
+                    mediatorLiveData.value = when (countMode.value!!) {
+                        CountMode.CountUp -> 0
+                        CountMode.CountDown -> state.timerOption.minutes
+                    }
+                }
+                mediatorLiveData.addSource(countMode) { updateValue() }
         
-        Res.init(context)
-        Prefs.init(context)
-    }
-    
-    private val _countMode: SharedPreferenceLiveData<CountMode> = Prefs.countMode
-    val countMode: LiveData<CountMode> = _countMode
-    private val _enableBells: SharedPreferenceLiveData<Boolean> = Prefs.enableBells
-    val enableBells: LiveData<Boolean> = _enableBells
-    
-    private val _timerOption: MutableLiveData<TimerOption?> = MutableLiveData(null)
-    val timerOption: LiveData<TimerOption?> = _timerOption
-    private val _timer: MutableLiveData<DebateTimer?> = MutableLiveData(null)
-    val running = _timer.switchMap { timer -> timer?.running ?: MutableLiveData() }
-    val overTime = _timer.switchMap { timer -> timer?.overTime ?: MutableLiveData() }
-    val keepScreenOn = running
-    val timerOptionsSelectable = running.map { !it }
-    val minutes = _timer.switchMap { timer ->
-        if (timer != null) {
-            MediatorLiveData<Int>().apply {
+                mediatorLiveData
+            }
+            is TimerActive -> {
+                val mediatorLiveData = MediatorLiveData<Int>()
                 fun updateValue() {
-                    this.value = when (countMode.value!!) {
-                        CountMode.CountUp -> timer.secondsCountUp.value
-                        CountMode.CountDown -> timer.secondsCountDown.value
+                    mediatorLiveData.value = when (countMode.value!!) {
+                        CountMode.CountUp -> state.timer.minutesCountUp.value
+                        CountMode.CountDown -> state.timer.minutesCountDown.value
                     }
                 }
-                
-                addSource(timer.secondsCountUp) { updateValue() }
-                addSource(countMode) { updateValue() }
+                mediatorLiveData.addSource(state.timer.minutesCountUp) { updateValue() }
+                mediatorLiveData.addSource(countMode) { updateValue() }
+        
+                mediatorLiveData
             }
-        } else {
-            MutableLiveData<Int>()
         }
     }
-    val seconds: LiveData<Int> = _timer.switchMap { timer ->
-        if (timer != null) {
-            MediatorLiveData<Int>().apply {
+    
+    val seconds = state.switchMap { state ->
+        when (state) {
+            is Initial -> zeroLiveData
+            is WaitingToStart -> {
+                val mediatorLiveData = MediatorLiveData<Int>()
                 fun updateValue() {
-                    this.value = when (countMode.value!!) {
-                        CountMode.CountUp -> timer.secondsCountUp.value
-                        CountMode.CountDown -> timer.secondsCountDown.value
+                    mediatorLiveData.value = when (countMode.value!!) {
+                        CountMode.CountUp -> 0
+                        CountMode.CountDown -> state.timerOption.seconds
                     }
                 }
-                
-                addSource(timer.secondsCountUp) { updateValue() }
-                addSource(countMode) { updateValue() }
+                mediatorLiveData.addSource(countMode) { updateValue() }
+        
+                mediatorLiveData
             }
-        } else {
-            MutableLiveData<Int>()
+            is TimerActive -> {
+                val mediatorLiveData = MediatorLiveData<Int>()
+                fun updateValue() {
+                    mediatorLiveData.value = when (countMode.value!!) {
+                        CountMode.CountUp -> state.timer.secondsCountUp.value
+                        CountMode.CountDown -> state.timer.secondsCountDown.value
+                    }
+                }
+                mediatorLiveData.addSource(state.timer.secondsCountUp) { updateValue() }
+                mediatorLiveData.addSource(countMode) { updateValue() }
+        
+                mediatorLiveData
+            }
         }
     }
-    val timerTextColor: LiveData<Int> = Transformations.switchMap(_timer) {
-        it?.textColor ?: MutableLiveData()
+    
+    val timerTextColor: LiveData<Int> = state.switchMap { state ->
+        when (state) {
+            is Initial -> zeroLiveData
+            is WaitingToStart -> MutableLiveData(res.color.timerStart)
+            is TimerActive -> state.timer.textColor
+        }
     }
-    val overTimeText: LiveData<String> = Transformations.switchMap(_timer) {
-        it?.overTimeText ?: MutableLiveData()
+    val overTimeText: LiveData<String> = state.switchMap { state ->
+        when (state) {
+            is Initial -> MutableLiveData("")
+            is WaitingToStart -> MutableLiveData("")
+            is TimerActive -> state.timer.overTimeText
+        }
     }
-    val bellsText: LiveData<String> = _timerOption.switchMap { timerOption ->
-        if (timerOption != null) {
-            MediatorLiveData<String>().apply {
-                fun updateValue() {
-                    this.value = if (enableBells.value!!) {
+    
+    val bellsText: LiveData<String> = state.switchMap { state ->
+        val mediatorLiveData = MediatorLiveData<String>()
+        fun updateValue() {
+            mediatorLiveData.value = when (state) {
+                is Initial -> if (enableBells.value!!) res.string.on else res.string.off
+                is WaitingToStart -> {
+                    if (enableBells.value!!) {
                         when (countMode.value!!) {
-                            CountMode.CountUp -> timerOption.countUpBellsText
-                            CountMode.CountDown -> timerOption.countDownBellsText
+                            CountMode.CountUp -> state.timerOption.countUpBellsText
+                            CountMode.CountDown -> state.timerOption.countDownBellsText
                         }
                     } else {
-                        Res.string.off
+                        res.string.off
                     }
                 }
-                addSource(countMode) { updateValue() }
-                addSource(enableBells) { updateValue() }
-            }
-        } else {
-            MutableLiveData<String>()
-        }
-    }
-    val timerControlButtonText: LiveData<String> = Transformations.switchMap(_timer) { timer ->
-        if (timer == null) {
-            MutableLiveData(Res.string.start)
-        } else {
-            MediatorLiveData<String>().apply {
-                fun updateValue() {
-                    this.value = if (timer.running.value!!) {
-                        Res.string.pause
+                is TimerActive -> {
+                    if (enableBells.value!!) {
+                        when (countMode.value!!) {
+                            CountMode.CountUp -> state.timerOption.countUpBellsText
+                            CountMode.CountDown -> state.timerOption.countDownBellsText
+                        }
                     } else {
-                        Res.string.resume
+                        res.string.off
                     }
                 }
-                addSource(timer.running) { updateValue() }
             }
+            
         }
         
+        mediatorLiveData.addSource(countMode) { updateValue() }
+        mediatorLiveData.addSource(enableBells) { updateValue() }
+        mediatorLiveData
     }
     
-    private var soundPool: SoundPool
-    private var debateBellOnce: Int = -1
-    private var debateBellTwice: Int = -1
     
-    init {
-        val context = application.applicationContext
-        
-        val attributes = AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_MEDIA)
-                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                .build()
-        soundPool = SoundPool.Builder()
-                .setMaxStreams(1)
-                .setAudioAttributes(attributes)
-                .build()
-        
-        debateBellOnce = soundPool.load(context, R.raw.debate_bell_one, 1)
-        debateBellTwice = soundPool.load(context, R.raw.debate_bell_two, 1)
+    val timerControlButtonText: LiveData<String> = state.switchMap { state ->
+        when (state) {
+            is Initial -> MutableLiveData("Gone")
+            is WaitingToStart -> MutableLiveData(res.string.start)
+            is TimerActive -> state.running.map { running -> if (running) res.string.pause else res.string.resume }
+        }
     }
     
     
     private fun newTimerInstance(timerOption: TimerOption): DebateTimer {
-        return object : DebateTimer(timerOption) {
+        return object : DebateTimer(getApplication(), timerOption) {
             override fun onBell(debateBell: DebateBell) {
-                if (Prefs.enableBells.value)
-                    soundPool.play(
-                            when (debateBell) {
-                                DebateBell.Once -> debateBellOnce
-                                DebateBell.Twice -> debateBellTwice
-                            },
-                            1f,
-                            1f,
-                            1,
-                            0,
-                            1f
-                    )
+                if (prefs.enableBells.value)
+                    bellRinger.playBell(debateBell)
             }
         }
     }
     
-    fun onTimerControl() {
-        val timer = _timer.value
-        if (timer == null) {
-            _timer.value = newTimerInstance(timerOption.value!!)
-        } else {
-            if (timer.started.value!!) {
-                timer.setRunning(!timer.running.value!!)
-            } else {
-                timer.setRunning(true)
+    fun onStartButtonClick() {
+        when (val state = state.value) {
+            is Initial -> throw RuntimeException("Invalid state. Button show not be visible.")
+            is WaitingToStart -> {
+                this._state.value = TimerActive(newTimerInstance(state.timerOption)).also { it.timer.setRunning(true) }
+        
+            }
+            is TimerActive -> {
+                state.running.value!!.let {
+                    state.timer.setRunning(!it)
+                }
             }
         }
     }
     
     fun onResetTime() {
-        timerOption.value?.let {
-            onTimeButtonSelect(it.tag)
+        val state = state.value
+        if (state is HasTimerOption) {
+            onTimeButtonSelect(state.timerOption.tag)
         }
     }
     
     fun onTimeButtonSelect(buttonTag: String) {
-        _timer.value?.setRunning(false)
-        
-        _timerOption.value = timerMaps.getValue(buttonTag)
+        val state = state.value
+        if (state is TimerActive) {
+            state.timer.setRunning(false)
+        }
+    
+        this._state.value = WaitingToStart(timerMaps.getValue(buttonTag))
     }
     
     fun onToggleCountMode() {
-        Prefs.countMode.putValue(Prefs.countMode.value.other())
+        prefs.countMode.putValue(prefs.countMode.value.other())
     }
     
     fun onToggleDebateBells() {
-        Prefs.enableBells.putValue(!Prefs.enableBells.value)
+        prefs.enableBells.putValue(!prefs.enableBells.value)
+    }
+    
+    private fun parseTimerMapsStr(str: String): Map<String, TimerOption> {
+        val timerMaps = mutableMapOf<String, TimerOption>()
+        
+        str.split('|').forEach { s ->
+            val timerOption = TimerOption.parseTag(s)
+            
+            if (timerOption != null) {
+                timerMaps[timerOption.tag] = timerOption
+            }
+        }
+        
+        return timerMaps
     }
 }

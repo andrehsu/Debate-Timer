@@ -3,17 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools">
     
     <data>
-        
         <variable
-            name="selectedBindingString"
+            name="text"
             type="String" />
         
         <variable
-            name="selectable"
-            type="boolean" />
-        
-        <variable
-            name="text"
+            name="tag"
             type="String" />
         
         <variable
@@ -27,12 +22,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight='1'
-        android:alpha="@{ selectable ? 1.0f : 0.38f }"
-        android:clickable="@{ selectable ? true : false}"
-        android:onClick="@{ () -> viewModel.onTimeButtonSelect(text) }"
+        android:alpha="@{ viewModel.timerOptionsClickable ? 1.0f : 0.38f }"
+        android:clickable="@{ viewModel.timerOptionsClickable ? true : false}"
+        android:onClick="@{ () -> viewModel.onTimeButtonSelect(tag) }"
         android:text="@{ text }"
         android:textAllCaps="false"
-        android:textColor="@{ selectedBindingString == text ? @color/buttonSelected : @color/buttonUnselected }"
+        android:tag="@{ tag }"
+        android:textColor="@{ viewModel.selectedTimerOptionTag == text ? @color/buttonSelected : @color/buttonUnselected }"
         tools:ignore="ObsoleteLayoutParam"
         tools:text='1m' />
 </layout>

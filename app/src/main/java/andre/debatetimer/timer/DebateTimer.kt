@@ -1,11 +1,14 @@
 package andre.debatetimer.timer
 
-import andre.debatetimer.Res
+import andre.debatetimer.AppResources
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import kotlin.math.absoluteValue
 
-abstract class DebateTimer(private val timerOption: TimerOption) {
+abstract class DebateTimer(context: Context, val timerOption: TimerOption) {
+    private val res = AppResources.getInstance(context)
+    
     private var countUpSeconds: Int = 0
     private var countDownSeconds: Int = timerOption.totalSeconds
     private var timer: Timer = newTimerInstance()
@@ -30,7 +33,7 @@ abstract class DebateTimer(private val timerOption: TimerOption) {
     private val _minutesCountUp = MutableLiveData(0)
     val minutesCountUp: LiveData<Int> = _minutesCountUp
     
-    private val _textColor = MutableLiveData(Res.color.timerStart)
+    private val _textColor = MutableLiveData(res.color.timerStart)
     val textColor: LiveData<Int> = _textColor
     
     private val _running = MutableLiveData(false)
@@ -87,15 +90,15 @@ abstract class DebateTimer(private val timerOption: TimerOption) {
         }
         
         if (countUpSeconds == 60 && countDownSeconds > 60) {
-            _textColor.value = Res.color.timerNormal
+            _textColor.value = res.color.timerNormal
         }
         
         if (countDownSeconds == 60) {
-            _textColor.value = Res.color.timerEnd
+            _textColor.value = res.color.timerEnd
         }
         
         if (countDownSeconds == -1) {
-            _textColor.value = Res.color.timerOvertime
+            _textColor.value = res.color.timerOvertime
             _overTime.value = true
         }
     
@@ -116,8 +119,4 @@ abstract class DebateTimer(private val timerOption: TimerOption) {
     }
     
     open fun onBell(debateBell: DebateBell) {}
-}
-
-enum class DebateBell {
-    Once, Twice
 }

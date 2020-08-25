@@ -53,7 +53,7 @@
             android:text="@{ viewModel.overTimeText }"
             android:textColor="@{ viewModel.timerTextColor }"
             android:textSize="20sp"
-            android:visibility="@{ viewModel.overTime ? View.VISIBLE : View.GONE }"
+            android:visibility="@{ viewModel.showOverTimeText ? View.VISIBLE : View.GONE }"
             app:layout_constraintBottom_toTopOf="@id/tv_timer_colon"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent" />
@@ -73,7 +73,7 @@
             android:text=":"
             android:textColor="@{ viewModel.timerTextColor }"
             android:textSize="@dimen/timer_text_size"
-            android:visibility='@{ viewModel.timerOption != null ? View.VISIBLE : View.GONE }'
+            android:visibility='@{ viewModel.clockVisible? View.VISIBLE : View.GONE }'
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintRight_toLeftOf="@id/guideline"
             app:layout_constraintTop_toTopOf="parent"
@@ -88,7 +88,7 @@
             android:textAlignment="center"
             android:textColor='@{ viewModel.timerTextColor }'
             android:textSize="@dimen/timer_text_size"
-            android:visibility='@{ viewModel.timerOption != null ? View.VISIBLE:View.GONE }'
+            android:visibility='@{ viewModel.clockVisible ? View.VISIBLE : View.GONE }'
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintRight_toLeftOf="@id/tv_timer_colon"
             app:layout_constraintTop_toTopOf="parent"
@@ -104,7 +104,7 @@
             android:textAlignment="center"
             android:textColor="@{ viewModel.timerTextColor }"
             android:textSize="@dimen/timer_text_size"
-            android:visibility='@{ viewModel.timerOption != null ? View.VISIBLE:View.GONE }'
+            android:visibility='@{ viewModel.clockVisible ? View.VISIBLE : View.GONE }'
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toRightOf="@id/tv_timer_colon"
             app:layout_constraintTop_toTopOf="parent"
@@ -117,7 +117,7 @@
             android:layout_height="wrap_content"
             android:text="@string/starting_text"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
-            android:visibility="@{ viewModel.timerOption == null ? View.VISIBLE : View.GONE }"
+            android:visibility="@{  !viewModel.clockVisible ? View.VISIBLE : View.GONE }"
             app:layout_constraintBottom_toTopOf="@+id/ll_time_buttons"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
@@ -128,10 +128,10 @@
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="@{ () -> viewModel.onTimerControl() }"
+            android:onClick="@{ () -> viewModel.onStartButtonClick() }"
             android:text="@{ viewModel.timerControlButtonText }"
             android:textSize="42sp"
-            android:visibility="@{ viewModel.timerOption != null ? View.VISIBLE : View.GONE }"
+            android:visibility="@{ viewModel.clockVisible ? View.VISIBLE : View.GONE }"
             app:layout_constraintBottom_toTopOf="@+id/ll_time_buttons"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintLeft_toRightOf="@+id/bt_reset_time"
@@ -145,7 +145,7 @@
             android:onClick="@{ () -> viewModel.onResetTime() }"
             android:text="@string/reset"
             android:textSize="24sp"
-            android:visibility="@{ viewModel.running == null ? View.VISIBLE : View.GONE }"
+            android:visibility="@{ viewModel.clockVisible ? View.VISIBLE : View.GONE }"
             app:iconSize="24dp"
             app:layout_constraintBaseline_toBaselineOf="@id/bt_start_pause"
             app:layout_constraintHorizontal_chainStyle="packed"
