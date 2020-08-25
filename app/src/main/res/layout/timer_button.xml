@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
+    
     <data>
-
+        
         <variable
             name="selectedBindingString"
             type="String" />
-
+        
         <variable
             name="selectable"
             type="boolean" />
-
+        
         <variable
             name="text"
             type="String" />
-
+        
         <variable
             name="viewModel"
             type="andre.debatetimer.MainModel" />
     </data>
-
+    
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/bt_timerButton"
+        android:id="@+id/bt_timer_button"
         style="@style/Widget.MaterialComponents.Button.TextButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
