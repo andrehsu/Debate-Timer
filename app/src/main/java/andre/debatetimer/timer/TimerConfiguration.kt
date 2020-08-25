@@ -3,11 +3,11 @@ package andre.debatetimer.timer
 import andre.debatetimer.timer.DebateBell.Once
 import kotlin.math.absoluteValue
 
-class TimerOption(val tag: String, val totalSeconds: Int, bellsSinceStart: Map<Int, DebateBell>) {
+class TimerConfiguration(val tag: String, val totalSeconds: Int, bellsSinceStart: Map<Int, DebateBell>) {
     companion object {
-        private val cache = mutableMapOf<String, TimerOption>()
+        private val cache = mutableMapOf<String, TimerConfiguration>()
         
-        fun parseTag(tag: String): TimerOption? {
+        fun parseTag(tag: String): TimerConfiguration? {
             @Suppress("NAME_SHADOWING")
             val tag = tag.filterNot { it == ' ' }
             val tokens = tag.split(';')
@@ -23,8 +23,8 @@ class TimerOption(val tag: String, val totalSeconds: Int, bellsSinceStart: Map<I
                         bellTokens.map { it.toInt() to Once }.toMap()
                     }
                 }
-    
-                val ret = TimerOption(tag, seconds, bells)
+                
+                val ret = TimerConfiguration(tag, seconds, bells)
                 
                 cache[tag] = ret
                 
@@ -33,8 +33,6 @@ class TimerOption(val tag: String, val totalSeconds: Int, bellsSinceStart: Map<I
                 null
             }
         }
-    
-        val Default = TimerOption("Default", 0, mapOf())
     }
     
     val countUpBellsText: String
@@ -44,7 +42,7 @@ class TimerOption(val tag: String, val totalSeconds: Int, bellsSinceStart: Map<I
     init {
         this.bellsSinceStart = bellsSinceStart.toSortedMap()
         val sorted = this.bellsSinceStart.filter { (_, v) -> v == Once }.map { it.key }
-    
+        
         countUpBellsText = sorted.joinToString { secondsToString(it) }
         countDownBellsText = sorted.joinToString { secondsToString(totalSeconds - it) }
     }
@@ -52,11 +50,25 @@ class TimerOption(val tag: String, val totalSeconds: Int, bellsSinceStart: Map<I
     val minutes = totalSeconds / 60
     val seconds = totalSeconds % 60
     
+    val text: String
+    
+    init {
+        val buttonTextSb = StringBuilder()
+        if (minutes != 0) {
+            buttonTextSb.append("${minutes}m")
+        }
+        if (seconds != 0) {
+            buttonTextSb.append("${seconds}s")
+        }
+        
+        text = buttonTextSb.toString()
+    }
+    
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
         
-        other as TimerOption
+        other as TimerConfiguration
         
         if (totalSeconds != other.totalSeconds) return false
         if (countUpBellsText != other.countUpBellsText) return false

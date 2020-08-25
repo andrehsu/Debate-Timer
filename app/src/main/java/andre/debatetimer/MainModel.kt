@@ -3,7 +3,7 @@ package andre.debatetimer
 import andre.debatetimer.timer.BellRinger
 import andre.debatetimer.timer.DebateBell
 import andre.debatetimer.timer.DebateTimer
-import andre.debatetimer.timer.TimerOption
+import andre.debatetimer.timer.TimerConfiguration
 import android.app.Application
 import androidx.lifecycle.*
 
@@ -25,7 +25,7 @@ class MainModel(app: Application) : AndroidViewModel(app) {
     
     val bellRinger = BellRinger(getApplication())
     
-    val timerMaps: Map<String, TimerOption> = parseTimerMapsStr(timersStr.value!!)
+    val timerMaps: Map<String, TimerConfiguration> = parseTimerMapsStr(timersStr.value!!)
     private val _state: MutableLiveData<State> = MutableLiveData(Initial)
     val state: LiveData<State> = _state
     
@@ -57,8 +57,8 @@ class MainModel(app: Application) : AndroidViewModel(app) {
     val selectedTimerOptionTag: LiveData<String> = state.map { state ->
         when (state) {
             is Initial -> "None"
-            is WaitingToStart -> state.timerOption.tag
-            is TimerActive -> state.timerOption.tag
+            is WaitingToStart -> state.timerConfig.tag
+            is TimerActive -> state.timerConfig.tag
         }
     }
     
@@ -79,7 +79,7 @@ class MainModel(app: Application) : AndroidViewModel(app) {
                 fun updateValue() {
                     mediatorLiveData.value = when (countMode.value!!) {
                         CountMode.CountUp -> 0
-                        CountMode.CountDown -> state.timerOption.minutes
+                        CountMode.CountDown -> state.timerConfig.minutes
                     }
                 }
                 mediatorLiveData.addSource(countMode) { updateValue() }
@@ -110,7 +110,7 @@ class MainModel(app: Application) : AndroidViewModel(app) {
                 fun updateValue() {
                     mediatorLiveData.value = when (countMode.value!!) {
                         CountMode.CountUp -> 0
-                        CountMode.CountDown -> state.timerOption.seconds
+                        CountMode.CountDown -> state.timerConfig.seconds
                     }
                 }
                 mediatorLiveData.addSource(countMode) { updateValue() }
@@ -156,8 +156,8 @@ class MainModel(app: Application) : AndroidViewModel(app) {
                 is WaitingToStart -> {
                     if (enableBells.value!!) {
                         when (countMode.value!!) {
-                            CountMode.CountUp -> state.timerOption.countUpBellsText
-                            CountMode.CountDown -> state.timerOption.countDownBellsText
+                            CountMode.CountUp -> state.timerConfig.countUpBellsText
+                            CountMode.CountDown -> state.timerConfig.countDownBellsText
                         }
                     } else {
                         res.string.off
@@ -166,8 +166,8 @@ class MainModel(app: Application) : AndroidViewModel(app) {
                 is TimerActive -> {
                     if (enableBells.value!!) {
                         when (countMode.value!!) {
-                            CountMode.CountUp -> state.timerOption.countUpBellsText
-                            CountMode.CountDown -> state.timerOption.countDownBellsText
+                            CountMode.CountUp -> state.timerConfig.countUpBellsText
+                            CountMode.CountDown -> state.timerConfig.countDownBellsText
                         }
                     } else {
                         res.string.off
@@ -192,8 +192,8 @@ class MainModel(app: Application) : AndroidViewModel(app) {
     }
     
     
-    private fun newTimerInstance(timerOption: TimerOption): DebateTimer {
-        return object : DebateTimer(getApplication(), timerOption) {
+    private fun newTimerInstance(timerConfig: TimerConfiguration): DebateTimer {
+        return object : DebateTimer(getApplication(), timerConfig) {
             override fun onBell(debateBell: DebateBell) {
                 if (prefs.enableBells.value)
                     bellRinger.playBell(debateBell)
@@ -205,7 +205,7 @@ class MainModel(app: Application) : AndroidViewModel(app) {
         when (val state = state.value) {
             is Initial -> throw RuntimeException("Invalid state. Button show not be visible.")
             is WaitingToStart -> {
-                this._state.value = TimerActive(newTimerInstance(state.timerOption)).also { it.timer.setRunning(true) }
+                this._state.value = TimerActive(newTimerInstance(state.timerConfig)).also { it.timer.setRunning(true) }
         
             }
             is TimerActive -> {
@@ -219,7 +219,7 @@ class MainModel(app: Application) : AndroidViewModel(app) {
     fun onResetTime() {
         val state = state.value
         if (state is HasTimerOption) {
-            onTimeButtonSelect(state.timerOption.tag)
+            onTimeButtonSelect(state.timerConfig.tag)
         }
     }
     
@@ -240,11 +240,25 @@ class MainModel(app: Application) : AndroidViewModel(app) {
         prefs.enableBells.putValue(!prefs.enableBells.value)
     }
     
-    private fun parseTimerMapsStr(str: String): Map<String, TimerOption> {
-        val timerMaps = mutableMapOf<String, TimerOption>()
+    fun onSkipForward() {
+        val state = state.value
+        if (state is TimerActive) {
+            state.timer.skipForward()
+        }
+    }
+    
+    fun onSkipBackward() {
+        val state = state.value
+        if (state is TimerActive) {
+            state.timer.skipBackward()
+        }
+    }
+    
+    private fun parseTimerMapsStr(str: String): Map<String, TimerConfiguration> {
+        val timerMaps = mutableMapOf<String, TimerConfiguration>()
         
         str.split('|').forEach { s ->
-            val timerOption = TimerOption.parseTag(s)
+            val timerOption = TimerConfiguration.parseTag(s)
             
             if (timerOption != null) {
                 timerMaps[timerOption.tag] = timerOption
