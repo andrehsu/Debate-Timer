@@ -3,11 +3,11 @@
     <color name="timerOvertime">#ff0000</color>
     <color name="timerNormal">#000000</color>
     <color name="timerStart">#007f00</color>
-    <color name="timerEnd">#ff0000</color>
-
-    <color name="buttonSelected">#0097A7</color>
+    <color name="timerEnd">#FF9800</color>
+    
+    <color name="buttonSelected">@color/colorPrimary</color>
     <color name="buttonUnselected">#000000</color>
-
+    
     <color name="colorPrimary">#00BCD4</color>
     <color name="colorPrimaryDark">#0097A7</color>
     <color name="colorAccent">#009688</color>

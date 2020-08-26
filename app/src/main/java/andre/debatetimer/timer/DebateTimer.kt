@@ -17,8 +17,8 @@ abstract class DebateTimer(context: Context, val timerConfig: TimerConfiguration
     
     private val bellsSinceStart = timerConfig.bellsSinceStart
     
-    private val _ended = MutableLiveData(false)
-    val ended: LiveData<Boolean> = _ended
+    //    private val _ended = MutableLiveData(false)
+//    val ended: LiveData<Boolean> = _ended
     private val _overTime = MutableLiveData(false)
     val overTime: LiveData<Boolean> = _overTime
     private val _overTimeText = MutableLiveData("")
@@ -53,13 +53,20 @@ abstract class DebateTimer(context: Context, val timerConfig: TimerConfiguration
     }
     
     fun skipForward() {
-        countUpSeconds += 10
+        val newSeconds = countUpSeconds + 10
+        countUpSeconds = newSeconds
         updateTime()
     }
     
-    fun skipBackward() {
-        countUpSeconds -= 10
+    fun skipBackward(): Boolean {
+        val newSeconds = countUpSeconds - 10
+        if (newSeconds < 0) {
+            return false
+        }
+        countUpSeconds = newSeconds
         updateTime()
+        
+        return true
     }
     
     private fun newTimerInstance() = object : Timer(100) {
@@ -73,16 +80,11 @@ abstract class DebateTimer(context: Context, val timerConfig: TimerConfiguration
     }
     
     private fun onSecondInternal() {
-        if (countDownSeconds <= -60) {
-            pause()
-            _ended.value = true
-            return
-        }
-    
-        if (!started.value!!) {
-            _started.value = true
-        }
-    
+//        if (countDownSeconds <= -60) {
+//            pause()
+//            _ended.value = true
+//            return
+//        }
         countUpSeconds++
     
         updateTime()
@@ -93,29 +95,27 @@ abstract class DebateTimer(context: Context, val timerConfig: TimerConfiguration
         
         _minutesCountDown.value = absVal / 60
         _secondsCountDown.value = absVal % 60
-        
+    
         _minutesCountUp.value = countUpSeconds / 60
         _secondsCountUp.value = countUpSeconds % 60
-        
+    
         bellsSinceStart[countUpSeconds]?.let { onBell(it) }
-        
+    
         if (countDownSeconds <= 0 && countDownSeconds % 15 == 0) {
             onBell(DebateBell.Twice)
         }
-        
-        if (countUpSeconds == 60 && countDownSeconds > 60) {
-            _textColor.value = res.color.timerNormal
+    
+        _textColor.value = when {
+            countUpSeconds < 60 -> res.color.timerStart
+            countDownSeconds < 0 -> res.color.timerOvertime
+            countDownSeconds <= 60 -> res.color.timerEnd
+            else -> res.color.timerNormal
         }
-        
-        if (countDownSeconds == 60) {
-            _textColor.value = res.color.timerEnd
-        }
-        
-        if (countDownSeconds == -1) {
-            _textColor.value = res.color.timerOvertime
+    
+        if (countDownSeconds < 0) {
             _overTime.value = true
         }
-        
+    
         if (_overTime.value == true) {
             val minutes = minutesCountUp.value!! - timerConfig.minutes
             val seconds = secondsCountUp.value!! - timerConfig.seconds
@@ -130,6 +130,9 @@ abstract class DebateTimer(context: Context, val timerConfig: TimerConfiguration
     
     private fun resume() {
         timer.start()
+        if (!started.value!!) {
+            _started.value = true
+        }
     }
     
     open fun onBell(debateBell: DebateBell) {}

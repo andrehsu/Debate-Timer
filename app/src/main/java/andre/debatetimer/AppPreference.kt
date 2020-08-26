@@ -4,7 +4,7 @@ import andre.debatetimer.livedata.SharedPreferenceLiveData
 import android.content.Context
 import androidx.preference.PreferenceManager
 
-class AppPreference(context: Context) {
+class AppPreference private constructor(context: Context) {
     val enableBells: SharedPreferenceLiveData<Boolean>
     val countMode: SharedPreferenceLiveData<CountMode>
     val timersStr: SharedPreferenceLiveData<String>

@@ -25,14 +25,13 @@ class MainModel(app: Application) : AndroidViewModel(app) {
     
     val bellRinger = BellRinger(getApplication())
     
-    val timerMaps: Map<String, TimerConfiguration> = parseTimerMapsStr(timersStr.value!!)
+    val timerConfigs: Map<String, TimerConfiguration> = parseTimerMapsStr(timersStr.value!!)
     private val _state: MutableLiveData<State> = MutableLiveData(Initial)
     val state: LiveData<State> = _state
     
     val clockVisible: LiveData<Boolean> = state.switchMap { state ->
         when (state) {
             is Initial -> falseLiveData
-            is WaitingToStart -> trueLiveData
             is TimerActive -> trueLiveData
         }
     }
@@ -41,7 +40,6 @@ class MainModel(app: Application) : AndroidViewModel(app) {
     val showOverTimeText: LiveData<Boolean> = state.switchMap { state ->
         when (state) {
             is Initial -> falseLiveData
-            is WaitingToStart -> falseLiveData
             is TimerActive -> state.timer.overTime
         }
     }
@@ -49,7 +47,6 @@ class MainModel(app: Application) : AndroidViewModel(app) {
     val keepScreenOn: LiveData<Boolean> = state.switchMap { state ->
         when (state) {
             is Initial -> falseLiveData
-            is WaitingToStart -> falseLiveData
             is TimerActive -> state.timer.running
         }
     }
@@ -57,7 +54,6 @@ class MainModel(app: Application) : AndroidViewModel(app) {
     val selectedTimerOptionTag: LiveData<String> = state.map { state ->
         when (state) {
             is Initial -> "None"
-            is WaitingToStart -> state.timerConfig.tag
             is TimerActive -> state.timerConfig.tag
         }
     }
@@ -66,7 +62,6 @@ class MainModel(app: Application) : AndroidViewModel(app) {
     val timerOptionsClickable: LiveData<Boolean> = state.switchMap { state ->
         when (state) {
             is Initial -> trueLiveData
-            is WaitingToStart -> trueLiveData
             is TimerActive -> state.running.map { running -> !running }
         }
     }
@@ -74,18 +69,7 @@ class MainModel(app: Application) : AndroidViewModel(app) {
     val minutes = state.switchMap { state ->
         when (state) {
             is Initial -> zeroLiveData
-            is WaitingToStart -> {
-                val mediatorLiveData = MediatorLiveData<Int>()
-                fun updateValue() {
-                    mediatorLiveData.value = when (countMode.value!!) {
-                        CountMode.CountUp -> 0
-                        CountMode.CountDown -> state.timerConfig.minutes
-                    }
-                }
-                mediatorLiveData.addSource(countMode) { updateValue() }
-        
-                mediatorLiveData
-            }
+    
             is TimerActive -> {
                 val mediatorLiveData = MediatorLiveData<Int>()
                 fun updateValue() {
@@ -105,18 +89,6 @@ class MainModel(app: Application) : AndroidViewModel(app) {
     val seconds = state.switchMap { state ->
         when (state) {
             is Initial -> zeroLiveData
-            is WaitingToStart -> {
-                val mediatorLiveData = MediatorLiveData<Int>()
-                fun updateValue() {
-                    mediatorLiveData.value = when (countMode.value!!) {
-                        CountMode.CountUp -> 0
-                        CountMode.CountDown -> state.timerConfig.seconds
-                    }
-                }
-                mediatorLiveData.addSource(countMode) { updateValue() }
-        
-                mediatorLiveData
-            }
             is TimerActive -> {
                 val mediatorLiveData = MediatorLiveData<Int>()
                 fun updateValue() {
@@ -136,15 +108,13 @@ class MainModel(app: Application) : AndroidViewModel(app) {
     val timerTextColor: LiveData<Int> = state.switchMap { state ->
         when (state) {
             is Initial -> zeroLiveData
-            is WaitingToStart -> MutableLiveData(res.color.timerStart)
             is TimerActive -> state.timer.textColor
         }
     }
     val overTimeText: LiveData<String> = state.switchMap { state ->
         when (state) {
             is Initial -> MutableLiveData("")
-            is WaitingToStart -> MutableLiveData("")
-            is TimerActive -> state.timer.overTimeText
+            is TimerActive -> state.timer.overTimeText.map { res.string.overtimeBy.format(it) }
         }
     }
     
@@ -153,16 +123,6 @@ class MainModel(app: Application) : AndroidViewModel(app) {
         fun updateValue() {
             mediatorLiveData.value = when (state) {
                 is Initial -> if (enableBells.value!!) res.string.on else res.string.off
-                is WaitingToStart -> {
-                    if (enableBells.value!!) {
-                        when (countMode.value!!) {
-                            CountMode.CountUp -> state.timerConfig.countUpBellsText
-                            CountMode.CountDown -> state.timerConfig.countDownBellsText
-                        }
-                    } else {
-                        res.string.off
-                    }
-                }
                 is TimerActive -> {
                     if (enableBells.value!!) {
                         when (countMode.value!!) {
@@ -186,8 +146,13 @@ class MainModel(app: Application) : AndroidViewModel(app) {
     val timerControlButtonText: LiveData<String> = state.switchMap { state ->
         when (state) {
             is Initial -> MutableLiveData("Gone")
-            is WaitingToStart -> MutableLiveData(res.string.start)
-            is TimerActive -> state.running.map { running -> if (running) res.string.pause else res.string.resume }
+            is TimerActive -> state.started.switchMap { started ->
+                if (!started) {
+                    MutableLiveData(res.string.start)
+                } else {
+                    state.running.map { running -> if (running) res.string.pause else res.string.resume }
+                }
+            }
         }
     }
     
@@ -204,10 +169,6 @@ class MainModel(app: Application) : AndroidViewModel(app) {
     fun onStartButtonClick() {
         when (val state = state.value) {
             is Initial -> throw RuntimeException("Invalid state. Button show not be visible.")
-            is WaitingToStart -> {
-                this._state.value = TimerActive(newTimerInstance(state.timerConfig)).also { it.timer.setRunning(true) }
-        
-            }
             is TimerActive -> {
                 state.running.value!!.let {
                     state.timer.setRunning(!it)
@@ -218,7 +179,7 @@ class MainModel(app: Application) : AndroidViewModel(app) {
     
     fun onResetTime() {
         val state = state.value
-        if (state is HasTimerOption) {
+        if (state is TimerActive) {
             onTimeButtonSelect(state.timerConfig.tag)
         }
     }
@@ -229,7 +190,7 @@ class MainModel(app: Application) : AndroidViewModel(app) {
             state.timer.setRunning(false)
         }
     
-        this._state.value = WaitingToStart(timerMaps.getValue(buttonTag))
+        this._state.value = TimerActive(newTimerInstance(timerConfigs.getValue(buttonTag)))
     }
     
     fun onToggleCountMode() {
@@ -247,11 +208,12 @@ class MainModel(app: Application) : AndroidViewModel(app) {
         }
     }
     
-    fun onSkipBackward() {
+    fun onSkipBackward(): Boolean {
         val state = state.value
         if (state is TimerActive) {
-            state.timer.skipBackward()
+            return state.timer.skipBackward()
         }
+        return false
     }
     
     private fun parseTimerMapsStr(str: String): Map<String, TimerConfiguration> {

@@ -27,9 +27,10 @@ class StringResources(context: Context) {
     val resume: String = context.getString(R.string.resume)
     
     val overtimeBy: String = context.getString(R.string.overtime)
+    val backwardSkipError: String = context.getString(R.string.backward_skip_error)
 }
 
-class AppResources(context: Context) {
+class AppResources private constructor(context: Context) {
     val color: ColorResources = ColorResources(context)
     val string: StringResources = StringResources(context)
     

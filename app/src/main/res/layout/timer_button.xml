@@ -1,19 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    >
     
     <data>
+        
         <variable
             name="text"
-            type="String" />
+            type="String"
+            />
         
         <variable
             name="tag"
-            type="String" />
+            type="String"
+            />
         
         <variable
             name="viewModel"
-            type="andre.debatetimer.MainModel" />
+            type="andre.debatetimer.MainModel"
+            />
     </data>
     
     <com.google.android.material.button.MaterialButton
@@ -25,10 +30,11 @@
         android:alpha="@{ viewModel.timerOptionsClickable ? 1.0f : 0.38f }"
         android:clickable="@{ viewModel.timerOptionsClickable ? true : false}"
         android:onClick="@{ () -> viewModel.onTimeButtonSelect(tag) }"
+        android:tag="@{ tag }"
         android:text="@{ text }"
         android:textAllCaps="false"
-        android:tag="@{ tag }"
-        android:textColor="@{ viewModel.selectedTimerOptionTag == text ? @color/buttonSelected : @color/buttonUnselected }"
+        android:textColor="@{ viewModel.selectedTimerOptionTag == tag ? @color/buttonSelected : @color/buttonUnselected }"
         tools:ignore="ObsoleteLayoutParam"
-        tools:text='1m' />
+        tools:text='1m'
+        />
 </layout>
