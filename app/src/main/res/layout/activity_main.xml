@@ -42,6 +42,7 @@
             app:iconPadding="0dp"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            android:visibility="gone"
             />
         
         <com.google.android.material.button.MaterialButton
@@ -62,7 +63,7 @@
             />
         
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/bt_back"
+            android:id="@+id/bt_minus_10"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -71,17 +72,15 @@
             android:minWidth="0dp"
             android:onClick="onSkipBackward"
             android:padding="8dp"
-            android:text="10"
+            android:text="@{ viewModel.countMode == CountMode.CountUp ? @string/minus_10 : @string/plus_10 }"
             android:visibility="@{ viewModel.clockVisible ? View.VISIBLE : View.GONE }"
-            app:icon="@drawable/ic_baseline_arrow_back_24"
-            app:iconGravity="textStart"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/bt_settings"
-            tools:ignore="HardcodedText"
+            app:layout_constraintTop_toBottomOf="@id/bt_debate_bell"
+            tools:text="-10"
             />
         
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/bt_forward"
+            android:id="@+id/bt_plus_10"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -90,13 +89,11 @@
             android:minWidth="0dp"
             android:onClick="@{ () -> viewModel.onSkipForward() }"
             android:padding="8dp"
-            android:text="10"
+            android:text="@{ viewModel.countMode == CountMode.CountUp ? @string/plus_10 : @string/minus_10 }"
             android:visibility="@{ viewModel.clockVisible ? View.VISIBLE : View.GONE }"
-            app:icon="@drawable/ic_baseline_arrow_forward_24"
-            app:iconGravity="textEnd"
-            app:layout_constraintBaseline_toBaselineOf="@id/bt_back"
-            app:layout_constraintLeft_toRightOf="@id/bt_back"
-            tools:ignore="HardcodedText"
+            app:layout_constraintBaseline_toBaselineOf="@id/bt_minus_10"
+            app:layout_constraintLeft_toRightOf="@id/bt_minus_10"
+            tools:text="+10"
             />
         
         

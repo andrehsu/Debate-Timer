@@ -55,7 +55,7 @@ abstract class DebateTimer(context: Context, val timerConfig: TimerConfiguration
     fun skipForward() {
         val newSeconds = countUpSeconds + 10
         countUpSeconds = newSeconds
-        updateTime()
+        updateTime(false)
     }
     
     fun skipBackward(): Boolean {
@@ -64,7 +64,7 @@ abstract class DebateTimer(context: Context, val timerConfig: TimerConfiguration
             return false
         }
         countUpSeconds = newSeconds
-        updateTime()
+        updateTime(false)
         
         return true
     }
@@ -90,32 +90,34 @@ abstract class DebateTimer(context: Context, val timerConfig: TimerConfiguration
         updateTime()
     }
     
-    private fun updateTime() {
+    private fun updateTime(ringBell: Boolean = true) {
         val absVal = countDownSeconds.absoluteValue
         
         _minutesCountDown.value = absVal / 60
         _secondsCountDown.value = absVal % 60
-    
+        
         _minutesCountUp.value = countUpSeconds / 60
         _secondsCountUp.value = countUpSeconds % 60
-    
-        bellsSinceStart[countUpSeconds]?.let { onBell(it) }
-    
-        if (countDownSeconds <= 0 && countDownSeconds % 15 == 0) {
-            onBell(DebateBell.Twice)
+        
+        if (ringBell) {
+            bellsSinceStart[countUpSeconds]?.let { onBell(it) }
+            
+            if (countDownSeconds <= 0 && countDownSeconds % 15 == 0) {
+                onBell(DebateBell.Twice)
+            }
         }
-    
+        
         _textColor.value = when {
             countUpSeconds < 60 -> res.color.timerStart
             countDownSeconds < 0 -> res.color.timerOvertime
             countDownSeconds <= 60 -> res.color.timerEnd
             else -> res.color.timerNormal
         }
-    
+        
         if (countDownSeconds < 0) {
             _overTime.value = true
         }
-    
+        
         if (_overTime.value == true) {
             val minutes = minutesCountUp.value!! - timerConfig.minutes
             val seconds = secondsCountUp.value!! - timerConfig.seconds

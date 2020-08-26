@@ -6,12 +6,13 @@
     <string name="resume">Resume</string>
     <string name="starting_text">Select a time to begin</string>
     <string name="exit_question">Are you sure you want to exit?</string>
-    <string name="count_down">Count Down</string>
-    <string name="count_up">Count up</string>
+    <string name="count_down">Counting down</string>
+    <string name="count_up">Counting up</string>
     <string name="padded_seconds">%02d</string>
     <string name="overtime">Overtime by %s</string>
     <string name="on">On</string>
     <string name="off">Off</string>
-    
+    <string name="plus_10">+10</string>
+    <string name="minus_10">-10</string>
     <string name="backward_skip_error">Cannot skip backward before the start</string>
 </resources>

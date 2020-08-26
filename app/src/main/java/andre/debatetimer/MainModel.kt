@@ -16,7 +16,7 @@ class MainModel(app: Application) : AndroidViewModel(app) {
     private val zeroLiveData: LiveData<Int>
         get() = MutableLiveData(0)
     
-    private val prefs = AppPreference.getInstance(getApplication())
+    private val prefs = AppPreferences.getInstance(getApplication())
     private val res = AppResources.getInstance(getApplication())
     
     val countMode: LiveData<CountMode> = prefs.countMode
@@ -221,10 +221,8 @@ class MainModel(app: Application) : AndroidViewModel(app) {
         
         str.split('|').forEach { s ->
             val timerOption = TimerConfiguration.parseTag(s)
-            
-            if (timerOption != null) {
-                timerMaps[timerOption.tag] = timerOption
-            }
+    
+            timerMaps[timerOption.tag] = timerOption
         }
         
         return timerMaps
