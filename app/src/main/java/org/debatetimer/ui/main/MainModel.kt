@@ -120,10 +120,10 @@ class TimerActive private constructor(private val model: MainModel, val timer: D
 }
 
 class MainModel(app: Application) : AndroidViewModel(app) {
+    private val state: MutableLiveData<MainModelState> = MutableLiveData(newInitialState())
     
     val prefs = AppPreferences.getInstance(getApplication())
     val res = AppResources.getInstance(getApplication())
-    
     
     val countMode: LiveData<CountMode> = prefs.countMode
     val enableBells: LiveData<Boolean> = prefs.enableBells
@@ -132,15 +132,23 @@ class MainModel(app: Application) : AndroidViewModel(app) {
     private val bellRinger = BellRinger(getApplication())
     
     val timerConfigs: Map<String, TimerConfiguration> = parseTimerMapsStr(timersStr.value!!)
-    private val _state: MutableLiveData<MainModelState> = MutableLiveData(newInitialState())
-    val state: LiveData<MainModelState> = _state
     
     val keepScreenOn: LiveData<Boolean> = state.switchMap { it.keepScreenOn }
+    val bellsText: LiveData<String> = state.switchMap { it.bellsText }
+    val isClockVisible: LiveData<Boolean> = state.map { it.isClockVisible }
+    val overTimeText: LiveData<String> = state.switchMap { it.overTimeText }
+    val isOvertimeTextVisible: LiveData<Boolean> = state.switchMap { it.isOvertimeTextVisible }
+    val timerTextColor: LiveData<Int> = state.switchMap { it.timerTextColor }
+    val minutes: LiveData<Int> = state.switchMap { it.minutes }
+    val seconds: LiveData<Int> = state.switchMap { it.seconds }
+    val timerControlButtonText: LiveData<String> = state.switchMap { it.timerControlButtonText }
+    val timerOptionsClickable: LiveData<Boolean> = state.switchMap { it.timerOptionsClickable }
+    val selectedTimerConfigTag: LiveData<String> = state.map { it.selectedTimerConfigTag }
     
     init {
         val tag = prefs.selectedTimerConfigTag.value
         if (tag != res.string.prefSelectedTimerConfigDefault) {
-            _state.value = newTimerActiveState(newTimerInstance(timerConfigs.getValue(tag)))
+            state.value = newTimerActiveState(newTimerInstance(timerConfigs.getValue(tag)))
         }
         
         state.observeForever { state ->
@@ -182,7 +190,7 @@ class MainModel(app: Application) : AndroidViewModel(app) {
             state.timer.setRunning(false)
         }
     
-        this._state.value = newTimerActiveState(newTimerInstance(timerConfigs.getValue(buttonTag)))
+        this.state.value = newTimerActiveState(newTimerInstance(timerConfigs.getValue(buttonTag)))
     }
     
     fun onToggleCountMode() {
