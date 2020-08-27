@@ -3,11 +3,13 @@ package org.debatetimer
 import android.content.Context
 import androidx.preference.PreferenceManager
 import org.debatetimer.livedata.SharedPreferenceLiveData
+import org.debatetimer.timer.TimerConfiguration
+
 
 class AppPreferences private constructor(context: Context) {
     val enableBells: SharedPreferenceLiveData<Boolean>
     val countMode: SharedPreferenceLiveData<CountMode>
-    val timersStr: SharedPreferenceLiveData<String>
+    val timerConfigs: SharedPreferenceLiveData<Map<String, TimerConfiguration>>
     val selectedTimerConfigTag: SharedPreferenceLiveData<String>
     
     init {
@@ -24,9 +26,17 @@ class AppPreferences private constructor(context: Context) {
                 { CountMode.fromString(it) },
                 { it.toString() }
         )
-        timersStr = SharedPreferenceLiveData.ofString(
+        timerConfigs = SharedPreferenceLiveData.ofObject(
                 sp,
-                context.getString(R.string.pref_timers_key), context.getString(R.string.pref_timers_default)
+                context.getString(R.string.pref_timers_key), context.getString(R.string.pref_timers_default),
+                {
+                    it.split('|').map { s ->
+                        val timerOption = TimerConfiguration.parseTag(s)
+                
+                        timerOption.tag to timerOption
+                    }.toMap()
+                },
+                { it.map { it.value.toString() }.joinToString("|") }
         )
         selectedTimerConfigTag = SharedPreferenceLiveData.ofString(
                 sp,

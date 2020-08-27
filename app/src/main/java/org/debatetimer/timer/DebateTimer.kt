@@ -1,13 +1,11 @@
 package org.debatetimer.timer
 
-import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import org.debatetimer.AppResources
 import kotlin.math.absoluteValue
 
-abstract class DebateTimer(context: Context, val config: TimerConfiguration) {
-    private val res = AppResources.getInstance(context)
+abstract class DebateTimer(val res: AppResources, val config: TimerConfiguration) {
     
     private var countUpSeconds: Int = 0
     private val countDownSeconds: Int

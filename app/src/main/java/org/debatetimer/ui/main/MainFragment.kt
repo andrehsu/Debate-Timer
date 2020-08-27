@@ -13,6 +13,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.snackbar.Snackbar
+import org.debatetimer.AppPreferences
 import org.debatetimer.AppResources
 import org.debatetimer.R
 import org.debatetimer.databinding.MainFragmentBinding
@@ -21,14 +22,20 @@ import org.debatetimer.databinding.TimerButtonBinding
 
 class MainFragment : Fragment() {
     private val model: MainModel by viewModels()
-    private lateinit var binding: MainFragmentBinding
+    
     private lateinit var res: AppResources
-    private lateinit var callback: OnBackPressedCallback
+    private lateinit var prefs: AppPreferences
+    private lateinit var onBackPressedCallback: OnBackPressedCallback
+    
+    private lateinit var binding: MainFragmentBinding
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        callback = object : OnBackPressedCallback(false) {
+        res = AppResources.getInstance(requireContext())
+        prefs = AppPreferences.getInstance(requireContext())
+        
+        onBackPressedCallback = object : OnBackPressedCallback(false) {
             override fun handleOnBackPressed() {
                 class ExitDialogFragment : DialogFragment() {
                     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -44,14 +51,13 @@ class MainFragment : Fragment() {
             }
         }
         
-        requireActivity().onBackPressedDispatcher.addCallback(this, callback)
+        requireActivity().onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
     }
     
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         binding = MainFragmentBinding.inflate(layoutInflater)
-        res = AppResources.getInstance(requireContext())
         
         binding.rootActivityMain.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
         
@@ -60,15 +66,15 @@ class MainFragment : Fragment() {
         
         model.keepScreenOn.observe(viewLifecycleOwner, {
             if (it) {
-                callback.isEnabled = true
+                onBackPressedCallback.isEnabled = true
                 activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             } else {
-                callback.isEnabled = false
+                onBackPressedCallback.isEnabled = false
                 activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             }
         })
     
-        for (timerOptions in model.timerConfigs.values) {
+        for (timerOptions in prefs.timerConfigs.value.values) {
             val timerButtonBinding = TimerButtonBinding.inflate(layoutInflater, binding.llTimeButtons, true)
         
             timerButtonBinding.lifecycleOwner = this

@@ -7,7 +7,7 @@
     <string name="pref_count_mode_default" translatable="false">count_up</string>
     
     <string name="pref_timers_key" translatable="false">timers</string>
-    <string name="pref_timers_default" translatable="false">180;-1|240;-1|300;-1|360;-1|420;-1|480;-1</string>
+    <string name="pref_timers_default" translatable="false">180|240|300|360|420|480</string>
     
     <string name="pref_selected_timer_config_key">selected_timer_config</string>
     <string name="pref_selected_timer_config_default">none</string>

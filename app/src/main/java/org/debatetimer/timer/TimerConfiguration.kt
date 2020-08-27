@@ -10,20 +10,9 @@ class TimerConfiguration(val tag: String, val totalSeconds: Int, bellsSinceStart
         private val cache = mutableMapOf<String, TimerConfiguration>()
         
         fun parseTag(tag: String): TimerConfiguration {
-            @Suppress("NAME_SHADOWING")
-            val tag = tag.filterNot { it == ' ' }
-            val tokens = tag.split(';')
-            
-            val seconds = tokens[0].toInt()
-            
-            val bells = when {
-                tokens[1].isEmpty() -> mapOf()
-                tokens[1].toIntOrNull() == -1 -> mapOf(60 to Once, seconds - 60 to Once)
-                else -> {
-                    val bellTokens = tokens[1].split(',')
-                    bellTokens.map { it.toInt() to Once }.toMap()
-                }
-            }
+            val seconds = tag.toInt()
+    
+            val bells = mapOf(60 to Once, seconds - 60 to Once)
             
             val ret = TimerConfiguration(tag, seconds, bells)
             
@@ -89,7 +78,7 @@ class TimerConfiguration(val tag: String, val totalSeconds: Int, bellsSinceStart
     }
     
     override fun toString(): String {
-        return "TimerOption(totalSeconds=$totalSeconds, countUpBellsText='$countUpBellsText', countDownBellsText='$countDownBellsText', bellsSinceStart=$bellsSinceStart, minutes=$minutes, seconds=$seconds)"
+        return "$seconds"
     }
 }
 
