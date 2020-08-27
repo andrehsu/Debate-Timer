@@ -1,7 +1,6 @@
 package andre.debatetimer
 
 import andre.debatetimer.livedata.SharedPreferenceLiveData
-import andre.debatetimer.timer.TimerConfiguration
 import android.content.Context
 import androidx.preference.PreferenceManager
 
@@ -9,7 +8,7 @@ class AppPreferences private constructor(context: Context) {
     val enableBells: SharedPreferenceLiveData<Boolean>
     val countMode: SharedPreferenceLiveData<CountMode>
     val timersStr: SharedPreferenceLiveData<String>
-    val selectedTimerConfig: SharedPreferenceLiveData<TimerConfiguration>
+    val selectedTimerConfigTag: SharedPreferenceLiveData<String>
     
     init {
         val sp = PreferenceManager.getDefaultSharedPreferences(context)
@@ -18,7 +17,7 @@ class AppPreferences private constructor(context: Context) {
                 context.getString(R.string.pref_enable_bells_key),
                 context.resources.getBoolean(R.bool.pref_enable_bells_default).toString()
         )
-        countMode = SharedPreferenceLiveData.ofString(
+        countMode = SharedPreferenceLiveData.ofObject(
                 sp,
                 context.getString(R.string.pref_count_mode_key),
                 context.getString(R.string.pref_count_mode_default),
@@ -27,14 +26,12 @@ class AppPreferences private constructor(context: Context) {
         )
         timersStr = SharedPreferenceLiveData.ofString(
                 sp,
-                context.getString(R.string.pref_timers_key), context.getString(R.string.pref_timers_default), { it }, { it }
+                context.getString(R.string.pref_timers_key), context.getString(R.string.pref_timers_default)
         )
-        selectedTimerConfig = SharedPreferenceLiveData.ofString(
+        selectedTimerConfigTag = SharedPreferenceLiveData.ofString(
                 sp,
                 context.getString(R.string.pref_selected_timer_config_key),
-                context.getString(R.string.pref_selected_timer_config_default),
-                { TimerConfiguration.parseTag(it) },
-                { it.tag }
+                context.getString(R.string.pref_selected_timer_config_default)
         )
     }
     

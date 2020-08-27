@@ -35,6 +35,6 @@
         android:textAllCaps="false"
         android:textColor="@{ viewModel.selectedTimerOptionTag == tag ? @color/buttonSelected : @color/buttonUnselected }"
         tools:ignore="ObsoleteLayoutParam"
-        tools:text='1m'
+        tools:text='3m'
         />
 </layout>

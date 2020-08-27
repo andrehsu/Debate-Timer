@@ -53,8 +53,21 @@ abstract class SharedPreferenceLiveData<T>(
             ) {}
         }
     
+        fun ofString(
+                sp: SharedPreferences,
+                key: String,
+                default: String
+        ): SharedPreferenceLiveData<String> {
+            return object : SharedPreferenceLiveData<String>(
+                    sp,
+                    key,
+                    default,
+                    { sp, key, default -> sp.getString(key, default)!! },
+                    { editor, key, value -> editor.putString(key, value) }
+            ) {}
+        }
     
-        fun <T> ofString(
+        fun <T> ofObject(
                 sp: SharedPreferences,
                 key: String,
                 default: String,

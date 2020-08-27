@@ -53,7 +53,7 @@ class MainModel(app: Application) : AndroidViewModel(app) {
     
     val selectedTimerOptionTag: LiveData<String> = state.map { state ->
         when (state) {
-            is Initial -> "None"
+            is Initial -> "none"
             is TimerActive -> state.timerConfig.tag
         }
     }
@@ -153,6 +153,18 @@ class MainModel(app: Application) : AndroidViewModel(app) {
                     state.running.map { running -> if (running) res.string.pause else res.string.resume }
                 }
             }
+        }
+    }
+    
+    init {
+        val tag = prefs.selectedTimerConfigTag.value
+        if (tag != res.string.prefSelectedTimerConfigDefault) {
+            _state.value = TimerActive(newTimerInstance(timerConfigs.getValue(tag)))
+        }
+        
+        state.observeForever { state ->
+            prefs.selectedTimerConfigTag.putValue(if (state is TimerActive) state.timer.timerConfig.tag else res.string.prefSelectedTimerConfigDefault)
+            
         }
     }
     

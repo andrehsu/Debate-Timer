@@ -37,12 +37,12 @@
             android:layout_marginRight="8dp"
             android:minWidth="0dp"
             android:padding="8dp"
+            android:visibility="gone"
             app:icon="@drawable/ic_baseline_settings_24"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:visibility="gone"
             />
         
         <com.google.android.material.button.MaterialButton
@@ -208,26 +208,35 @@
             android:visibility="@{ viewModel.clockVisible ? View.VISIBLE : View.GONE }"
             app:layout_constraintBottom_toTopOf="@+id/ll_time_buttons"
             app:layout_constraintHorizontal_chainStyle="packed"
-            app:layout_constraintLeft_toRightOf="@+id/bt_reset_time"
+            app:layout_constraintLeft_toRightOf="@+id/bt_reset"
             app:layout_constraintRight_toRightOf="parent"
+            tools:text='Start'
             />
-        
+    
+    
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/bt_reset_time"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:id="@+id/bt_reset"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:minWidth="0dp"
             android:onClick="@{ () -> viewModel.onResetTime() }"
-            android:text="@string/reset"
-            android:textSize="24sp"
+            android:padding="8dp"
             android:visibility="@{ viewModel.clockVisible ? View.VISIBLE : View.GONE }"
-            app:iconSize="24dp"
-            app:layout_constraintBaseline_toBaselineOf="@id/bt_start_pause"
+            app:icon="@drawable/ic_baseline_refresh_24"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconSize="32dp"
+            app:layout_constraintBottom_toBottomOf="@id/bt_start_pause"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toLeftOf="@id/bt_start_pause"
+            app:layout_constraintTop_toTopOf="@id/bt_start_pause"
             />
-        
+    
+    
         <LinearLayout
             android:id="@id/ll_time_buttons"
             style="@style/Widget.AppCompat.ButtonBar"

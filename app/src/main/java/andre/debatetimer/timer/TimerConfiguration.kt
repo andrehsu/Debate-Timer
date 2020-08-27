@@ -5,15 +5,17 @@ import kotlin.math.absoluteValue
 
 class TimerConfiguration(val tag: String, val totalSeconds: Int, bellsSinceStart: Map<Int, DebateBell>) {
     companion object {
+        val default = TimerConfiguration("default", 180, mapOf())
+    
         private val cache = mutableMapOf<String, TimerConfiguration>()
-        
+    
         fun parseTag(tag: String): TimerConfiguration {
             @Suppress("NAME_SHADOWING")
             val tag = tag.filterNot { it == ' ' }
             val tokens = tag.split(';')
-    
+        
             val seconds = tokens[0].toInt()
-    
+        
             val bells = when {
                 tokens[1].isEmpty() -> mapOf()
                 tokens[1].toIntOrNull() == -1 -> mapOf(60 to Once, seconds - 60 to Once)

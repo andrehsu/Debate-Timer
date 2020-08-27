@@ -5,7 +5,6 @@ import andre.debatetimer.timer.TimerConfiguration
 
 sealed class State
 
-
 object Initial : State()
 
 class TimerActive(val timer: DebateTimer) : State() {
@@ -13,5 +12,4 @@ class TimerActive(val timer: DebateTimer) : State() {
     val timerConfig: TimerConfiguration
         get() = timer.timerConfig
     val running = timer.running
-    val overTime = timer.overTime
 }
