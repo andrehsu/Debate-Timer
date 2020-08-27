@@ -145,7 +145,6 @@ class MainModel(app: Application) : AndroidViewModel(app) {
         
         state.observeForever { state ->
             prefs.selectedTimerConfigTag.putValue(if (state is TimerActive) state.timer.config.tag else res.string.prefSelectedTimerConfigDefault)
-            
         }
     }
     
