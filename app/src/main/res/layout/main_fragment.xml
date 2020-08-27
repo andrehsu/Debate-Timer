@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    
     xmlns:tools="http://schemas.android.com/tools"
     >
     
@@ -8,11 +9,11 @@
         
         <import type="android.view.View" />
         
-        <import type="andre.debatetimer.CountMode" />
+        <import type="org.debatetimer.CountMode" />
         
         <variable
             name="viewModel"
-            type="andre.debatetimer.MainModel"
+            type="org.debatetimer.MainModel"
             />
     </data>
     
@@ -20,12 +21,9 @@
         android:id="@+id/root_activity_main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginBottom="16dp"
         android:animateLayoutChanges="true"
-        tools:context="andre.debatetimer.MainActivity"
+        android:padding="16dp"
+        tools:context=".MainFragment"
         >
         
         <com.google.android.material.button.MaterialButton
@@ -212,8 +210,8 @@
             app:layout_constraintRight_toRightOf="parent"
             tools:text='Start'
             />
-    
-    
+        
+        
         <com.google.android.material.button.MaterialButton
             android:id="@+id/bt_reset"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
@@ -235,8 +233,8 @@
             app:layout_constraintRight_toLeftOf="@id/bt_start_pause"
             app:layout_constraintTop_toTopOf="@id/bt_start_pause"
             />
-    
-    
+        
+        
         <LinearLayout
             android:id="@id/ll_time_buttons"
             style="@style/Widget.AppCompat.ButtonBar"

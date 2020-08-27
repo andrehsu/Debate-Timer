@@ -1,4 +1,4 @@
-package andre.debatetimer.livedata
+package org.debatetimer.livedata
 
 import android.content.SharedPreferences
 import androidx.lifecycle.LiveData
@@ -52,7 +52,7 @@ abstract class SharedPreferenceLiveData<T>(
                     { editor, key, value -> editor.putBoolean(key, value) }
             ) {}
         }
-    
+        
         fun ofString(
                 sp: SharedPreferences,
                 key: String,
@@ -66,7 +66,7 @@ abstract class SharedPreferenceLiveData<T>(
                     { editor, key, value -> editor.putString(key, value) }
             ) {}
         }
-    
+        
         fun <T> ofObject(
                 sp: SharedPreferences,
                 key: String,

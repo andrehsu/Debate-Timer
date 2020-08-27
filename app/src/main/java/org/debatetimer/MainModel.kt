@@ -1,11 +1,11 @@
-package andre.debatetimer
+package org.debatetimer
 
-import andre.debatetimer.timer.BellRinger
-import andre.debatetimer.timer.DebateBell
-import andre.debatetimer.timer.DebateTimer
-import andre.debatetimer.timer.TimerConfiguration
 import android.app.Application
 import androidx.lifecycle.*
+import org.debatetimer.timer.BellRinger
+import org.debatetimer.timer.DebateBell
+import org.debatetimer.timer.DebateTimer
+import org.debatetimer.timer.TimerConfiguration
 
 class MainModel(app: Application) : AndroidViewModel(app) {
     
@@ -201,7 +201,7 @@ class MainModel(app: Application) : AndroidViewModel(app) {
         if (state is TimerActive) {
             state.timer.setRunning(false)
         }
-    
+        
         this._state.value = TimerActive(newTimerInstance(timerConfigs.getValue(buttonTag)))
     }
     
@@ -233,7 +233,7 @@ class MainModel(app: Application) : AndroidViewModel(app) {
         
         str.split('|').forEach { s ->
             val timerOption = TimerConfiguration.parseTag(s)
-    
+            
             timerMaps[timerOption.tag] = timerOption
         }
         

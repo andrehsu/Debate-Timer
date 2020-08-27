@@ -1,9 +1,9 @@
-package andre.debatetimer.timer
+package org.debatetimer.timer
 
-import andre.debatetimer.R
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.SoundPool
+import org.debatetimer.R
 
 class BellRinger(context: Context) {
     private var soundPool: SoundPool

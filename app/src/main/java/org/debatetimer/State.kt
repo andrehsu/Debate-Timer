@@ -1,7 +1,7 @@
-package andre.debatetimer
+package org.debatetimer
 
-import andre.debatetimer.timer.DebateTimer
-import andre.debatetimer.timer.TimerConfiguration
+import org.debatetimer.timer.DebateTimer
+import org.debatetimer.timer.TimerConfiguration
 
 sealed class State
 

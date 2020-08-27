@@ -1,4 +1,4 @@
-package andre.debatetimer
+package org.debatetimer
 
 import android.content.Context
 import androidx.annotation.ColorInt

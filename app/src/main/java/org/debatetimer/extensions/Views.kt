@@ -1,6 +1,6 @@
 @file:Suppress("NOTHING_TO_INLINE", "unused")
 
-package andre.debatetimer.extensions
+package org.debatetimer.extensions
 
 import android.view.View
 

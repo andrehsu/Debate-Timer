@@ -1,4 +1,4 @@
-package andre.debatetimer
+package org.debatetimer
 
 enum class CountMode {
     CountUp, CountDown;

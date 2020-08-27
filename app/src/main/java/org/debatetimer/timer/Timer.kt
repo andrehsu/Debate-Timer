@@ -1,4 +1,4 @@
-package andre.debatetimer.timer
+package org.debatetimer.timer
 
 import android.annotation.SuppressLint
 import android.os.Handler
@@ -8,6 +8,7 @@ import android.os.SystemClock
 abstract class Timer
 constructor(private val timerInterval: Long) {
     private var cancelled = false
+    
     @Synchronized
     fun cancel() {
         cancelled = true

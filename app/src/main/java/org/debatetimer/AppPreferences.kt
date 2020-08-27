@@ -1,8 +1,8 @@
-package andre.debatetimer
+package org.debatetimer
 
-import andre.debatetimer.livedata.SharedPreferenceLiveData
 import android.content.Context
 import androidx.preference.PreferenceManager
+import org.debatetimer.livedata.SharedPreferenceLiveData
 
 class AppPreferences private constructor(context: Context) {
     val enableBells: SharedPreferenceLiveData<Boolean>

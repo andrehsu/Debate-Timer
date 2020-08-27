@@ -1,9 +1,9 @@
-package andre.debatetimer.timer
+package org.debatetimer.timer
 
-import andre.debatetimer.AppResources
 import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import org.debatetimer.AppResources
 import kotlin.math.absoluteValue
 
 abstract class DebateTimer(context: Context, val timerConfig: TimerConfiguration) {
@@ -86,7 +86,7 @@ abstract class DebateTimer(context: Context, val timerConfig: TimerConfiguration
 //            return
 //        }
         countUpSeconds++
-    
+        
         updateTime()
     }
     
