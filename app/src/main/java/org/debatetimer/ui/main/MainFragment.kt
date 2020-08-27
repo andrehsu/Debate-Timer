@@ -67,14 +67,21 @@ class MainFragment : Fragment() {
                 activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             }
         })
-        
+    
         for (timerOptions in model.timerConfigs.values) {
             val timerButtonBinding = TimerButtonBinding.inflate(layoutInflater, binding.llTimeButtons, true)
-            
+        
             timerButtonBinding.lifecycleOwner = this
             timerButtonBinding.viewModel = model
             timerButtonBinding.text = timerOptions.text
             timerButtonBinding.tag = timerOptions.tag
+        }
+    
+        binding.btMinus10.setOnClickListener {
+            val skipped = model.onSkipBackward()
+            if (!skipped) {
+                Snackbar.make(binding.rootActivityMain, res.string.backwardSkipError, Snackbar.LENGTH_SHORT).show()
+            }
         }
 
 //        model.timerControlButtonText.observe(this, {
@@ -97,13 +104,4 @@ class MainFragment : Fragment() {
         
         return binding.root
     }
-    
-    
-    fun onSkipBackward(@Suppress("UNUSED_PARAMETER") view: View) {
-        val skipped = model.onSkipBackward()
-        if (!skipped) {
-            Snackbar.make(binding.rootActivityMain, res.string.backwardSkipError, Snackbar.LENGTH_SHORT).show()
-        }
-    }
-    
 }

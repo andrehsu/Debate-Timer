@@ -23,7 +23,6 @@
         android:layout_height="match_parent"
         android:animateLayoutChanges="true"
         android:padding="16dp"
-        tools:context=".ui.main.MainFragment"
         >
         
         <com.google.android.material.button.MaterialButton
@@ -68,7 +67,6 @@
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
             android:minWidth="0dp"
-            android:onClick="onSkipBackward"
             android:padding="8dp"
             android:text="@{ viewModel.countMode == CountMode.CountUp ? @string/minus_10 : @string/plus_10 }"
             android:visibility="@{ viewModel.clockVisible ? View.VISIBLE : View.GONE }"
