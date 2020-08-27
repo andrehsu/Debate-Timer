@@ -1,4 +1,4 @@
-package org.debatetimer
+package org.debatetimer.ui.main
 
 import org.debatetimer.timer.DebateTimer
 import org.debatetimer.timer.TimerConfiguration

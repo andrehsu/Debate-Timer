@@ -1,7 +1,11 @@
-package org.debatetimer
+package org.debatetimer.ui.main
 
 import android.app.Application
 import androidx.lifecycle.*
+import org.debatetimer.AppPreferences
+import org.debatetimer.AppResources
+import org.debatetimer.CountMode
+import org.debatetimer.other
 import org.debatetimer.timer.BellRinger
 import org.debatetimer.timer.DebateBell
 import org.debatetimer.timer.DebateTimer

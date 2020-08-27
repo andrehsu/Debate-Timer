@@ -1,4 +1,4 @@
-package org.debatetimer
+package org.debatetimer.ui.main
 
 import android.animation.LayoutTransition
 import android.os.Bundle
@@ -9,6 +9,7 @@ import android.view.WindowManager
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.snackbar.Snackbar
+import org.debatetimer.AppResources
 import org.debatetimer.databinding.MainFragmentBinding
 import org.debatetimer.databinding.TimerButtonBinding
 

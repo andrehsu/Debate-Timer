@@ -17,7 +17,7 @@
         
         <variable
             name="viewModel"
-            type="org.debatetimer.MainModel"
+            type="org.debatetimer.ui.main.MainModel"
             />
     </data>
     

@@ -13,7 +13,7 @@
         
         <variable
             name="viewModel"
-            type="org.debatetimer.MainModel"
+            type="org.debatetimer.ui.main.MainModel"
             />
     </data>
     
@@ -23,7 +23,7 @@
         android:layout_height="match_parent"
         android:animateLayoutChanges="true"
         android:padding="16dp"
-        tools:context=".MainFragment"
+        tools:context=".ui.main.MainFragment"
         >
         
         <com.google.android.material.button.MaterialButton

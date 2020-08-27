@@ -6,6 +6,6 @@
     
     <fragment
         android:id="@+id/mainFragment"
-        android:name="org.debatetimer.MainFragment"
+        android:name="org.debatetimer.ui.main.MainFragment"
         android:label="MainFragment" />
 </navigation>
