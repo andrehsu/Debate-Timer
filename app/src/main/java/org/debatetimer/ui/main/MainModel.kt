@@ -10,164 +10,141 @@ import org.debatetimer.timer.BellRinger
 import org.debatetimer.timer.DebateBell
 import org.debatetimer.timer.DebateTimer
 import org.debatetimer.timer.TimerConfiguration
+import org.debatetimer.ui.main.Initial.Companion.newInitialState
+import org.debatetimer.ui.main.TimerActive.Companion.newTimerActiveState
 
-class MainModel(app: Application) : AndroidViewModel(app) {
-    
-    private val trueLiveData: LiveData<Boolean>
-        get() = MutableLiveData(true)
-    private val falseLiveData: LiveData<Boolean>
-        get() = MutableLiveData(false)
-    private val zeroLiveData: LiveData<Int>
-        get() = MutableLiveData(0)
-    
-    private val prefs = AppPreferences.getInstance(getApplication())
-    private val res = AppResources.getInstance(getApplication())
-    
-    val countMode: LiveData<CountMode> = prefs.countMode
-    val enableBells: LiveData<Boolean> = prefs.enableBells
-    val timersStr: LiveData<String> = prefs.timersStr
-    
-    val bellRinger = BellRinger(getApplication())
-    
-    val timerConfigs: Map<String, TimerConfiguration> = parseTimerMapsStr(timersStr.value!!)
-    private val _state: MutableLiveData<MainModelState> = MutableLiveData(Initial)
-    val state: LiveData<MainModelState> = _state
-    
-    val clockVisible: LiveData<Boolean> = state.switchMap { state ->
-        when (state) {
-            is Initial -> falseLiveData
-            is TimerActive -> trueLiveData
+private val trueLiveData: LiveData<Boolean>
+    get() = MutableLiveData(true)
+private val falseLiveData: LiveData<Boolean>
+    get() = MutableLiveData(false)
+private val zeroLiveData: LiveData<Int>
+    get() = MutableLiveData(0)
+
+
+sealed class MainModelState() {
+    abstract val isClockVisible: Boolean
+    abstract val isOvertimeTextVisible: LiveData<Boolean>
+    abstract val selectedTimerConfigTag: String
+    abstract val keepScreenOn: LiveData<Boolean>
+    abstract val timerOptionsClickable: LiveData<Boolean>
+    abstract val minutes: LiveData<Int>
+    abstract val seconds: LiveData<Int>
+    abstract val timerTextColor: LiveData<Int>
+    abstract val overTimeText: LiveData<String>
+    abstract val bellsText: LiveData<String>
+    abstract val timerControlButtonText: LiveData<String>
+}
+
+class Initial private constructor(private val model: MainModel) : MainModelState() {
+    companion object {
+        fun MainModel.newInitialState(): Initial {
+            return Initial(this)
         }
     }
     
-    
-    val showOverTimeText: LiveData<Boolean> = state.switchMap { state ->
-        when (state) {
-            is Initial -> falseLiveData
-            is TimerActive -> state.timer.overTime
+    override val isClockVisible: Boolean = false
+    override val isOvertimeTextVisible: LiveData<Boolean> = falseLiveData
+    override val selectedTimerConfigTag: String = "none"
+    override val keepScreenOn: LiveData<Boolean> = falseLiveData
+    override val timerOptionsClickable: LiveData<Boolean> = trueLiveData
+    override val minutes: LiveData<Int> = zeroLiveData
+    override val seconds: LiveData<Int> = zeroLiveData
+    override val timerTextColor: LiveData<Int> = zeroLiveData
+    override val overTimeText: LiveData<String> = MutableLiveData("")
+    override val bellsText: LiveData<String> = model.enableBells.map { if (it) model.res.string.on else model.res.string.off }
+    override val timerControlButtonText: LiveData<String> = MutableLiveData("")
+}
+
+class TimerActive private constructor(private val model: MainModel, val timer: DebateTimer) : MainModelState() {
+    companion object {
+        fun MainModel.newTimerActiveState(timer: DebateTimer): TimerActive {
+            return TimerActive(this, timer)
         }
     }
     
-    val keepScreenOn: LiveData<Boolean> = state.switchMap { state ->
-        when (state) {
-            is Initial -> falseLiveData
-            is TimerActive -> state.timer.running
-        }
-    }
-    
-    val selectedTimerOptionTag: LiveData<String> = state.map { state ->
-        when (state) {
-            is Initial -> "none"
-            is TimerActive -> state.timerConfig.tag
-        }
-    }
-    
-    
-    val timerOptionsClickable: LiveData<Boolean> = state.switchMap { state ->
-        when (state) {
-            is Initial -> trueLiveData
-            is TimerActive -> state.running.map { running -> !running }
-        }
-    }
-    
-    val minutes = state.switchMap { state ->
-        when (state) {
-            is Initial -> zeroLiveData
-    
-            is TimerActive -> {
-                val mediatorLiveData = MediatorLiveData<Int>()
-                fun updateValue() {
-                    mediatorLiveData.value = when (countMode.value!!) {
-                        CountMode.CountUp -> state.timer.minutesCountUp.value
-                        CountMode.CountDown -> state.timer.minutesCountDown.value
-                    }
-                }
-                mediatorLiveData.addSource(state.timer.minutesCountUp) { updateValue() }
-                mediatorLiveData.addSource(countMode) { updateValue() }
-        
-                mediatorLiveData
-            }
-        }
-    }
-    
-    val seconds = state.switchMap { state ->
-        when (state) {
-            is Initial -> zeroLiveData
-            is TimerActive -> {
-                val mediatorLiveData = MediatorLiveData<Int>()
-                fun updateValue() {
-                    mediatorLiveData.value = when (countMode.value!!) {
-                        CountMode.CountUp -> state.timer.secondsCountUp.value
-                        CountMode.CountDown -> state.timer.secondsCountDown.value
-                    }
-                }
-                mediatorLiveData.addSource(state.timer.secondsCountUp) { updateValue() }
-                mediatorLiveData.addSource(countMode) { updateValue() }
-        
-                mediatorLiveData
-            }
-        }
-    }
-    
-    val timerTextColor: LiveData<Int> = state.switchMap { state ->
-        when (state) {
-            is Initial -> zeroLiveData
-            is TimerActive -> state.timer.textColor
-        }
-    }
-    val overTimeText: LiveData<String> = state.switchMap { state ->
-        when (state) {
-            is Initial -> MutableLiveData("")
-            is TimerActive -> state.timer.overTimeText.map { res.string.overtimeBy.format(it) }
-        }
-    }
-    
-    val bellsText: LiveData<String> = state.switchMap { state ->
-        val mediatorLiveData = MediatorLiveData<String>()
+    override val isClockVisible: Boolean = true
+    override val isOvertimeTextVisible: LiveData<Boolean> = timer.overTime
+    override val selectedTimerConfigTag: String = timer.config.tag
+    override val keepScreenOn: LiveData<Boolean> = timer.running
+    override val timerOptionsClickable: LiveData<Boolean> = timer.running.map { !it }
+    override val minutes: LiveData<Int> = MediatorLiveData<Int>().apply {
         fun updateValue() {
-            mediatorLiveData.value = when (state) {
-                is Initial -> if (enableBells.value!!) res.string.on else res.string.off
-                is TimerActive -> {
-                    if (enableBells.value!!) {
-                        when (countMode.value!!) {
-                            CountMode.CountUp -> state.timerConfig.countUpBellsText
-                            CountMode.CountDown -> state.timerConfig.countDownBellsText
+            value = when (model.countMode.value!!) {
+                CountMode.CountUp -> timer.minutesCountUp.value
+                CountMode.CountDown -> timer.minutesCountDown.value
+            }
+        }
+        addSource(timer.minutesCountUp) { updateValue() }
+        addSource(model.countMode) { updateValue() }
+    }
+    override val seconds: LiveData<Int> = MediatorLiveData<Int>().apply {
+        fun updateValue() {
+            value = when (model.countMode.value!!) {
+                CountMode.CountUp -> timer.secondsCountUp.value
+                CountMode.CountDown -> timer.secondsCountDown.value
+            }
+        }
+        addSource(timer.secondsCountUp) { updateValue() }
+        addSource(model.countMode) { updateValue() }
+    }
+    override val timerTextColor: LiveData<Int> = timer.textColor
+    override val overTimeText: LiveData<String> = timer.overTimeText.map { model.res.string.overtimeBy.format(it) }
+    override val bellsText: LiveData<String> = MediatorLiveData<String>().apply {
+        fun updateValue() {
+            value =
+                    
+                    if (model.enableBells.value!!) {
+                        when (model.countMode.value!!) {
+                            CountMode.CountUp -> timer.config.countUpBellsText
+                            CountMode.CountDown -> timer.config.countDownBellsText
                         }
                     } else {
-                        res.string.off
+                        model.res.string.off
                     }
-                }
-            }
             
         }
         
-        mediatorLiveData.addSource(countMode) { updateValue() }
-        mediatorLiveData.addSource(enableBells) { updateValue() }
-        mediatorLiveData
+        addSource(model.countMode) { updateValue() }
+        addSource(model.enableBells) { updateValue() }
+        
     }
     
     
-    val timerControlButtonText: LiveData<String> = state.switchMap { state ->
-        when (state) {
-            is Initial -> MutableLiveData("Gone")
-            is TimerActive -> state.started.switchMap { started ->
-                if (!started) {
-                    MutableLiveData(res.string.start)
-                } else {
-                    state.running.map { running -> if (running) res.string.pause else res.string.resume }
-                }
-            }
+    override val timerControlButtonText: LiveData<String> = timer.started.switchMap { started ->
+        if (!started) {
+            MutableLiveData(model.res.string.start)
+        } else {
+            timer.running.map { running -> if (running) model.res.string.pause else model.res.string.resume }
         }
     }
+}
+
+class MainModel(app: Application) : AndroidViewModel(app) {
+    
+    val prefs = AppPreferences.getInstance(getApplication())
+    val res = AppResources.getInstance(getApplication())
+    
+    
+    val countMode: LiveData<CountMode> = prefs.countMode
+    val enableBells: LiveData<Boolean> = prefs.enableBells
+    private val timersStr: LiveData<String> = prefs.timersStr
+    
+    private val bellRinger = BellRinger(getApplication())
+    
+    val timerConfigs: Map<String, TimerConfiguration> = parseTimerMapsStr(timersStr.value!!)
+    private val _state: MutableLiveData<MainModelState> = MutableLiveData(newInitialState())
+    val state: LiveData<MainModelState> = _state
+    
+    val keepScreenOn: LiveData<Boolean> = state.switchMap { it.keepScreenOn }
     
     init {
         val tag = prefs.selectedTimerConfigTag.value
         if (tag != res.string.prefSelectedTimerConfigDefault) {
-            _state.value = TimerActive(newTimerInstance(timerConfigs.getValue(tag)))
+            _state.value = newTimerActiveState(newTimerInstance(timerConfigs.getValue(tag)))
         }
         
         state.observeForever { state ->
-            prefs.selectedTimerConfigTag.putValue(if (state is TimerActive) state.timer.timerConfig.tag else res.string.prefSelectedTimerConfigDefault)
+            prefs.selectedTimerConfigTag.putValue(if (state is TimerActive) state.timer.config.tag else res.string.prefSelectedTimerConfigDefault)
             
         }
     }
@@ -186,7 +163,7 @@ class MainModel(app: Application) : AndroidViewModel(app) {
         when (val state = state.value) {
             is Initial -> throw RuntimeException("Invalid state. Button show not be visible.")
             is TimerActive -> {
-                state.running.value!!.let {
+                state.timer.running.value!!.let {
                     state.timer.setRunning(!it)
                 }
             }
@@ -196,7 +173,7 @@ class MainModel(app: Application) : AndroidViewModel(app) {
     fun onResetTime() {
         val state = state.value
         if (state is TimerActive) {
-            onTimeButtonSelect(state.timerConfig.tag)
+            onTimeButtonSelect(state.timer.config.tag)
         }
     }
     
@@ -205,8 +182,8 @@ class MainModel(app: Application) : AndroidViewModel(app) {
         if (state is TimerActive) {
             state.timer.setRunning(false)
         }
-        
-        this._state.value = TimerActive(newTimerInstance(timerConfigs.getValue(buttonTag)))
+    
+        this._state.value = newTimerActiveState(newTimerInstance(timerConfigs.getValue(buttonTag)))
     }
     
     fun onToggleCountMode() {
@@ -243,4 +220,6 @@ class MainModel(app: Application) : AndroidViewModel(app) {
         
         return timerMaps
     }
+    
+    
 }

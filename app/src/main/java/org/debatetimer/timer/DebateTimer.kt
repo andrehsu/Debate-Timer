@@ -6,16 +6,16 @@ import androidx.lifecycle.MutableLiveData
 import org.debatetimer.AppResources
 import kotlin.math.absoluteValue
 
-abstract class DebateTimer(context: Context, val timerConfig: TimerConfiguration) {
+abstract class DebateTimer(context: Context, val config: TimerConfiguration) {
     private val res = AppResources.getInstance(context)
     
     private var countUpSeconds: Int = 0
     private val countDownSeconds: Int
-        get() = timerConfig.totalSeconds - countUpSeconds
+        get() = config.totalSeconds - countUpSeconds
     private var timer: Timer = newTimerInstance()
     private var deciseconds: Int = 0
     
-    private val bellsSinceStart = timerConfig.bellsSinceStart
+    private val bellsSinceStart = config.bellsSinceStart
     
     //    private val _ended = MutableLiveData(false)
 //    val ended: LiveData<Boolean> = _ended
@@ -24,9 +24,9 @@ abstract class DebateTimer(context: Context, val timerConfig: TimerConfiguration
     private val _overTimeText = MutableLiveData("")
     val overTimeText: LiveData<String> = _overTimeText
     
-    private val _secondsCountDown = MutableLiveData(timerConfig.seconds)
+    private val _secondsCountDown = MutableLiveData(config.seconds)
     val secondsCountDown: LiveData<Int> = _secondsCountDown
-    private val _minutesCountDown = MutableLiveData(timerConfig.minutes)
+    private val _minutesCountDown = MutableLiveData(config.minutes)
     val minutesCountDown: LiveData<Int> = _minutesCountDown
     
     private val _secondsCountUp = MutableLiveData(0)
@@ -119,8 +119,8 @@ abstract class DebateTimer(context: Context, val timerConfig: TimerConfiguration
         }
         
         if (_overTime.value == true) {
-            val minutes = minutesCountUp.value!! - timerConfig.minutes
-            val seconds = secondsCountUp.value!! - timerConfig.seconds
+            val minutes = minutesCountUp.value!! - config.minutes
+            val seconds = secondsCountUp.value!! - config.seconds
             _overTimeText.value = "%d:%02d".format(minutes, seconds)
         }
     }

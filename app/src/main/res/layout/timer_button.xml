@@ -27,13 +27,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight='1'
-        android:alpha="@{ viewModel.timerOptionsClickable ? 1.0f : 0.38f }"
-        android:clickable="@{ viewModel.timerOptionsClickable ? true : false}"
+        android:alpha="@{ viewModel.state.timerOptionsClickable ? 1.0f : 0.38f }"
+        android:clickable="@{ viewModel.state.timerOptionsClickable ? true : false}"
         android:onClick="@{ () -> viewModel.onTimeButtonSelect(tag) }"
         android:tag="@{ tag }"
         android:text="@{ text }"
         android:textAllCaps="false"
-        android:textColor="@{ viewModel.selectedTimerOptionTag == tag ? @color/buttonSelected : @color/buttonUnselected }"
+        android:textColor="@{ viewModel.state.selectedTimerConfigTag == tag ? @color/buttonSelected : @color/buttonUnselected }"
         tools:ignore="ObsoleteLayoutParam"
         tools:text='3m'
         />

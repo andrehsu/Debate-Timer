@@ -52,7 +52,7 @@
             android:minWidth="0dp"
             android:onClick="@{ () -> viewModel.onToggleDebateBells() }"
             android:padding="8dp"
-            android:text="@{ viewModel.bellsText }"
+            android:text="@{ viewModel.state.bellsText }"
             app:icon="@{ viewModel.enableBells ? @drawable/ic_bells_active : @drawable/ic_bells_off }"
             app:layout_constraintLeft_toRightOf="@id/bt_settings"
             app:layout_constraintTop_toTopOf="parent"
@@ -69,7 +69,7 @@
             android:minWidth="0dp"
             android:padding="8dp"
             android:text="@{ viewModel.countMode == CountMode.CountUp ? @string/minus_10 : @string/plus_10 }"
-            android:visibility="@{ viewModel.clockVisible ? View.VISIBLE : View.GONE }"
+            android:visibility="@{ viewModel.state.isClockVisible ? View.VISIBLE : View.GONE }"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@id/bt_debate_bell"
             tools:text="-10"
@@ -86,7 +86,7 @@
             android:onClick="@{ () -> viewModel.onSkipForward() }"
             android:padding="8dp"
             android:text="@{ viewModel.countMode == CountMode.CountUp ? @string/plus_10 : @string/minus_10 }"
-            android:visibility="@{ viewModel.clockVisible ? View.VISIBLE : View.GONE }"
+            android:visibility="@{ viewModel.state.isClockVisible() ? View.VISIBLE : View.GONE }"
             app:layout_constraintBaseline_toBaselineOf="@id/bt_minus_10"
             app:layout_constraintLeft_toRightOf="@id/bt_minus_10"
             tools:text="+10"
@@ -108,16 +108,16 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:text="COUNT UP"
             />
-        
-        
+    
+    
         <TextView
             android:id="@+id/tv_overtime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{ viewModel.overTimeText }"
-            android:textColor="@{ viewModel.timerTextColor }"
+            android:text="@{ viewModel.state.overTimeText }"
+            android:textColor="@{ viewModel.state.timerTextColor }"
             android:textSize="20sp"
-            android:visibility="@{ viewModel.showOverTimeText ? View.VISIBLE : View.GONE }"
+            android:visibility="@{ viewModel.state.isOvertimeTextVisible ? View.VISIBLE : View.GONE }"
             app:layout_constraintBottom_toTopOf="@id/tv_timer_colon"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
@@ -137,9 +137,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=":"
-            android:textColor="@{ viewModel.timerTextColor }"
+            android:textColor="@{ viewModel.state.timerTextColor }"
             android:textSize="@dimen/timer_text_size"
-            android:visibility='@{ viewModel.clockVisible? View.VISIBLE : View.GONE }'
+            android:visibility='@{ viewModel.state.isClockVisible ? View.VISIBLE : View.GONE }'
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintRight_toLeftOf="@id/guideline"
             app:layout_constraintTop_toTopOf="parent"
@@ -151,11 +151,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text='@{ String.valueOf(viewModel.minutes) }'
+            android:text='@{ String.valueOf(viewModel.state.minutes) }'
             android:textAlignment="center"
-            android:textColor='@{ viewModel.timerTextColor }'
+            android:textColor='@{ viewModel.state.timerTextColor }'
             android:textSize="@dimen/timer_text_size"
-            android:visibility='@{ viewModel.clockVisible ? View.VISIBLE : View.GONE }'
+            android:visibility='@{ viewModel.state.isClockVisible ? View.VISIBLE : View.GONE }'
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintRight_toLeftOf="@id/tv_timer_colon"
             app:layout_constraintTop_toTopOf="parent"
@@ -168,11 +168,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text='@{ @string/padded_seconds(viewModel.seconds) }'
+            android:text='@{ @string/padded_seconds(viewModel.state.seconds) }'
             android:textAlignment="center"
-            android:textColor="@{ viewModel.timerTextColor }"
+            android:textColor="@{ viewModel.state.timerTextColor }"
             android:textSize="@dimen/timer_text_size"
-            android:visibility='@{ viewModel.clockVisible ? View.VISIBLE : View.GONE }'
+            android:visibility='@{ viewModel.state.isClockVisible ? View.VISIBLE : View.GONE }'
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toRightOf="@id/tv_timer_colon"
             app:layout_constraintTop_toTopOf="parent"
@@ -186,7 +186,7 @@
             android:layout_height="wrap_content"
             android:text="@string/starting_text"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
-            android:visibility="@{  !viewModel.clockVisible ? View.VISIBLE : View.GONE }"
+            android:visibility="@{  !viewModel.state.isClockVisible ? View.VISIBLE : View.GONE }"
             app:layout_constraintBottom_toTopOf="@+id/ll_time_buttons"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
@@ -199,9 +199,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="@{ () -> viewModel.onStartButtonClick() }"
-            android:text="@{ viewModel.timerControlButtonText }"
+            android:text="@{ viewModel.state.timerControlButtonText }"
             android:textSize="42sp"
-            android:visibility="@{ viewModel.clockVisible ? View.VISIBLE : View.GONE }"
+            android:visibility="@{ viewModel.state.isClockVisible ? View.VISIBLE : View.GONE }"
             app:layout_constraintBottom_toTopOf="@+id/ll_time_buttons"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintLeft_toRightOf="@+id/bt_reset"
@@ -220,7 +220,7 @@
             android:minWidth="0dp"
             android:onClick="@{ () -> viewModel.onResetTime() }"
             android:padding="8dp"
-            android:visibility="@{ viewModel.clockVisible ? View.VISIBLE : View.GONE }"
+            android:visibility="@{ viewModel.state.isClockVisible ? View.VISIBLE : View.GONE }"
             app:icon="@drawable/ic_baseline_refresh_24"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
