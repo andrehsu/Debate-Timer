@@ -5,7 +5,7 @@
     <string name="pause">Pause</string>
     <string name="resume">Resume</string>
     <string name="starting_text">Select a time to begin</string>
-    <string name="exit_question">Are you sure you want to exit?</string>
+    <string name="exit_question">Are you sure you want to exit the running timer?</string>
     <string name="count_down">Counting down</string>
     <string name="count_up">Counting up</string>
     <string name="padded_seconds">%02d</string>
