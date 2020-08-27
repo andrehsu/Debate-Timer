@@ -110,7 +110,6 @@ class TimerActive(context: Context, changeState: ChangeStateFunction, timerConfi
         }
     }
     override val isClockVisible: Boolean = true
-    override val isOvertimeTextVisible: LiveData<Boolean> = timer.overTime
     override val selectedTimerConfigTag: String = timerConfig.tag
     override val keepScreenOn: LiveData<Boolean> = timer.running
     override val timerOptionsClickable: LiveData<Boolean> = timer.running.map { !it }
@@ -171,6 +170,15 @@ class TimerActive(context: Context, changeState: ChangeStateFunction, timerConfi
         addSource(countMode) { updateValue() }
         addSource(timer.overTime) { updateValue() }
     }
+    override val isOvertimeTextVisible: LiveData<Boolean> = MediatorLiveData<Boolean>().apply {
+        fun updateValue() {
+            value = countMode.value!! == CountMode.CountUp && timer.overTime.value!!
+        }
+        
+        addSource(countMode) { updateValue() }
+        addSource(timer.overTime) { updateValue() }
+    }
+    
     
     override fun onTimerConfigSelect(tag: String) {
         prefs.selectedTimerConfigTag.putValue(tag)
