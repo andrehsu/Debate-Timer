@@ -3,22 +3,16 @@ package org.debatetimer.timer
 import org.debatetimer.timer.DebateBell.Once
 import kotlin.math.absoluteValue
 
-class TimerConfiguration(val tag: String, val totalSeconds: Int, bellsSinceStart: Map<Int, DebateBell>) {
+class TimerConfiguration(val tag: String, val totalSeconds: Int, bellsCountingUp: Map<Int, DebateBell>) {
     companion object {
         val default = TimerConfiguration("default", 180, mapOf())
         
-        private val cache = mutableMapOf<String, TimerConfiguration>()
-        
         fun parseTag(tag: String): TimerConfiguration {
             val seconds = tag.toInt()
-    
+            
             val bells = mapOf(60 to Once, seconds - 60 to Once)
             
-            val ret = TimerConfiguration(tag, seconds, bells)
-            
-            cache[tag] = ret
-            
-            return ret
+            return TimerConfiguration(tag, seconds, bells)
         }
     }
     
@@ -27,7 +21,7 @@ class TimerConfiguration(val tag: String, val totalSeconds: Int, bellsSinceStart
     val bellsSinceStart: Map<Int, DebateBell>
     
     init {
-        this.bellsSinceStart = bellsSinceStart.toSortedMap()
+        this.bellsSinceStart = bellsCountingUp.toSortedMap()
         val sorted = this.bellsSinceStart.filter { (_, v) -> v == Once }.map { it.key }
         
         countUpBellsText = sorted.joinToString { secondsToString(it) }
@@ -51,44 +45,13 @@ class TimerConfiguration(val tag: String, val totalSeconds: Int, bellsSinceStart
         text = buttonTextSb.toString()
     }
     
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-        
-        other as TimerConfiguration
-        
-        if (totalSeconds != other.totalSeconds) return false
-        if (countUpBellsText != other.countUpBellsText) return false
-        if (countDownBellsText != other.countDownBellsText) return false
-        if (bellsSinceStart != other.bellsSinceStart) return false
-        if (minutes != other.minutes) return false
-        if (seconds != other.seconds) return false
-        
-        return true
-    }
-    
-    override fun hashCode(): Int {
-        var result = totalSeconds
-        result = 31 * result + countUpBellsText.hashCode()
-        result = 31 * result + countDownBellsText.hashCode()
-        result = 31 * result + bellsSinceStart.hashCode()
-        result = 31 * result + minutes
-        result = 31 * result + seconds
-        return result
-    }
-    
     override fun toString(): String {
         return "$seconds"
     }
 }
 
-private fun secondsToString(seconds: Int): String {
-    val abs = seconds.absoluteValue
-    val minutes = abs / 60
-    val secondsOnly = abs % 60
-    return if (seconds >= 0) {
-        ""
-    } else {
-        "-"
-    } + "$minutes:${secondsOnly.toString().padStart(2, '0')}"
+private fun secondsToString(totalSeconds: Int): String {
+    val minutes = totalSeconds / 60
+    val seconds = totalSeconds.absoluteValue % 60
+    return "%d:%02d".format(minutes, seconds)
 }

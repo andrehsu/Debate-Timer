@@ -137,17 +137,15 @@ class TimerActive(context: Context, changeState: ChangeStateFunction, timerConfi
     override val overTimeText: LiveData<String> = timer.overTimeText.map { res.string.overtimeBy.format(it) }
     override val bellsText: LiveData<String> = MediatorLiveData<String>().apply {
         fun updateValue() {
-            value =
-                    
-                    if (enableBells.value!!) {
-                        when (countMode.value!!) {
-                            CountMode.CountUp -> timerConfig.countUpBellsText
-                            CountMode.CountDown -> timerConfig.countDownBellsText
-                        }
-                    } else {
-                        res.string.off
-                    }
-            
+            value = if (enableBells.value!!) {
+                when (countMode.value!!) {
+                    CountMode.CountUp -> timerConfig.countUpBellsText
+                    CountMode.CountDown -> timerConfig.countDownBellsText
+                }
+            } else {
+                res.string.off
+            }
+    
         }
         
         addSource(countMode) { updateValue() }
