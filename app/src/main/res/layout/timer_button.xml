@@ -29,7 +29,7 @@
         android:layout_weight='1'
         android:alpha="@{ viewModel.timerOptionsClickable ? 1.0f : 0.38f }"
         android:clickable="@{ viewModel.timerOptionsClickable ? true : false}"
-        android:onClick="@{ () -> viewModel.onTimeButtonSelect(tag) }"
+        android:onClick="@{ () -> viewModel.onTimeConfigSelect(tag) }"
         android:tag="@{ tag }"
         android:text="@{ text }"
         android:textAllCaps="false"

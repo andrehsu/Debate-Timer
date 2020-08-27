@@ -218,7 +218,7 @@
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
             android:minWidth="0dp"
-            android:onClick="@{ () -> viewModel.onTimeButtonSelect(viewModel.selectedTimerConfigTag) }"
+            android:onClick="@{ () -> viewModel.onTimeConfigSelect(viewModel.selectedTimerConfigTag) }"
             android:padding="8dp"
             android:visibility="@{ viewModel.isClockVisible ? View.VISIBLE : View.GONE }"
             app:icon="@drawable/ic_baseline_refresh_24"
