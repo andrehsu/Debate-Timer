@@ -116,21 +116,22 @@ class TimerActive(context: Context, changeState: ChangeStateFunction, timerConfi
     override val minutes: LiveData<Int> = MediatorLiveData<Int>().apply {
         fun updateValue() {
             value = when (countMode.value!!) {
-                CountMode.CountUp -> timer.minutesCountUp.value
-                CountMode.CountDown -> timer.minutesCountDown.value
+                CountMode.CountUp -> timer.minutesCountUp
+                CountMode.CountDown -> timer.minutesCountDown
             }
         }
-        addSource(timer.minutesCountUp) { updateValue() }
+    
+        addSource(timer.countUpTotalSecondsLD) { updateValue() }
         addSource(countMode) { updateValue() }
     }
     override val seconds: LiveData<Int> = MediatorLiveData<Int>().apply {
         fun updateValue() {
             value = when (countMode.value!!) {
-                CountMode.CountUp -> timer.secondsCountUp.value
-                CountMode.CountDown -> timer.secondsCountDown.value
+                CountMode.CountUp -> timer.secondsCountUp
+                CountMode.CountDown -> timer.secondsCountDown
             }
         }
-        addSource(timer.secondsCountUp) { updateValue() }
+        addSource(timer.countUpTotalSecondsLD) { updateValue() }
         addSource(countMode) { updateValue() }
     }
     override val timerTextColor: LiveData<Int> = timer.textColor

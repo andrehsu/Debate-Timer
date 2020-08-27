@@ -50,7 +50,7 @@ class MainFragment : Fragment() {
                 ExitDialogFragment().show(parentFragmentManager, null)
             }
         }
-        
+    
         requireActivity().onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
     }
     
@@ -59,9 +59,12 @@ class MainFragment : Fragment() {
                               savedInstanceState: Bundle?): View? {
         binding = MainFragmentBinding.inflate(layoutInflater)
         
+        return binding.root
+    }
+    
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.rootActivityMain.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
-        
-        binding.lifecycleOwner = this
+        binding.lifecycleOwner = viewLifecycleOwner
         binding.viewModel = model
         
         model.keepScreenOn.observe(viewLifecycleOwner, {
@@ -73,41 +76,21 @@ class MainFragment : Fragment() {
                 activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             }
         })
-    
+        
         for (timerOptions in prefs.timerConfigs.value.values) {
             val timerButtonBinding = TimerButtonBinding.inflate(layoutInflater, binding.llTimeButtons, true)
-        
-            timerButtonBinding.lifecycleOwner = this
+            
+            timerButtonBinding.lifecycleOwner = viewLifecycleOwner
             timerButtonBinding.viewModel = model
             timerButtonBinding.text = timerOptions.text
             timerButtonBinding.tag = timerOptions.tag
         }
-    
+        
         binding.btMinus10.setOnClickListener {
             val skipped = model.onSkipBackward()
             if (!skipped) {
                 Snackbar.make(binding.rootActivityMain, res.string.backwardSkipError, Snackbar.LENGTH_SHORT).show()
             }
         }
-
-//        model.timerControlButtonText.observe(this, {
-//            TransitionManager.beginDelayedTransition(binding.rootActivityMain)
-//        })
-//
-//        model.enableBells.observe(this, {
-//            TransitionManager.beginDelayedTransition(binding.rootActivityMain)
-//        })
-//
-//        model.countMode.observe(this, {
-//            TransitionManager.beginDelayedTransition(binding.rootActivityMain)
-//        })
-//
-//        model.timerOption.observe(this, {
-//            TransitionManager.beginDelayedTransition(binding.rootActivityMain)
-//        })
-        
-        //endregion
-        
-        return binding.root
     }
 }

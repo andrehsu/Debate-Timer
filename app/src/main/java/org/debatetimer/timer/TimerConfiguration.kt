@@ -1,32 +1,20 @@
 package org.debatetimer.timer
 
-import org.debatetimer.timer.DebateBell.Once
 import kotlin.math.absoluteValue
 
-class TimerConfiguration(val tag: String, val totalSeconds: Int, bellsCountingUp: Map<Int, DebateBell>) {
+class TimerConfiguration(val totalSeconds: Int) {
     companion object {
-        val default = TimerConfiguration("default", 180, mapOf())
-        
         fun parseTag(tag: String): TimerConfiguration {
             val seconds = tag.toInt()
             
-            val bells = mapOf(60 to Once, seconds - 60 to Once)
-            
-            return TimerConfiguration(tag, seconds, bells)
+            return TimerConfiguration(seconds)
         }
     }
     
-    val countUpBellsText: String
-    val countDownBellsText: String
-    val bellsSinceStart: Map<Int, DebateBell>
-    
-    init {
-        this.bellsSinceStart = bellsCountingUp.toSortedMap()
-        val sorted = this.bellsSinceStart.filter { (_, v) -> v == Once }.map { it.key }
-        
-        countUpBellsText = sorted.joinToString { secondsToString(it) }
-        countDownBellsText = sorted.joinToString { secondsToString(totalSeconds - it) }
-    }
+    val bellsCountingUp = sortedSetOf(60, totalSeconds - 60)
+    val countUpBellsText: String = bellsCountingUp.joinToString { secondsToString(it) }
+    val countDownBellsText: String = bellsCountingUp.joinToString { secondsToString(totalSeconds - it) }
+    val tag: String = toString()
     
     val minutes = totalSeconds / 60
     val seconds = totalSeconds % 60
@@ -46,7 +34,7 @@ class TimerConfiguration(val tag: String, val totalSeconds: Int, bellsCountingUp
     }
     
     override fun toString(): String {
-        return "$seconds"
+        return "$totalSeconds"
     }
 }
 

@@ -1,36 +1,37 @@
 package org.debatetimer.timer
 
+import android.os.CountDownTimer
+import android.os.SystemClock
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import org.debatetimer.AppResources
 import kotlin.math.absoluteValue
 
 abstract class DebateTimer(val res: AppResources, private val config: TimerConfiguration) {
+    private var lastStartTimeMillis: Long = 0
     
-    private var countUpSeconds: Int = 0
-    private val countDownSeconds: Int
-        get() = config.totalSeconds - countUpSeconds
-    private var timer: Timer = newTimerInstance()
-    private var deciseconds: Int = 0
+    private var countUpTotalSeconds: Int = 0
+    private val countDownTotalSeconds: Int
+        get() = config.totalSeconds - countUpTotalSeconds
+    private var timer: CountDownTimer = newTimerInstance()
+    val countUpTotalSecondsLD: MutableLiveData<Int> = MutableLiveData(0)
     
-    private val bellsSinceStart = config.bellsSinceStart
-    
-    //    private val _ended = MutableLiveData(false)
-//    val ended: LiveData<Boolean> = _ended
     private val _overTime = MutableLiveData(false)
     val overTime: LiveData<Boolean> = _overTime
     private val _overTimeText = MutableLiveData("")
     val overTimeText: LiveData<String> = _overTimeText
     
-    private val _secondsCountDown = MutableLiveData(config.seconds)
-    val secondsCountDown: LiveData<Int> = _secondsCountDown
-    private val _minutesCountDown = MutableLiveData(config.minutes)
-    val minutesCountDown: LiveData<Int> = _minutesCountDown
     
-    private val _secondsCountUp = MutableLiveData(0)
-    val secondsCountUp: LiveData<Int> = _secondsCountUp
-    private val _minutesCountUp = MutableLiveData(0)
-    val minutesCountUp: LiveData<Int> = _minutesCountUp
+    val secondsCountUp: Int
+        get() = countUpTotalSeconds % 60
+    val minutesCountUp: Int
+        get() = countUpTotalSeconds / 60
+    
+    val secondsCountDown: Int
+        get() = countDownTotalSeconds.absoluteValue % 60
+    val minutesCountDown: Int
+        get() = countDownTotalSeconds.absoluteValue / 60
     
     private val _textColor = MutableLiveData(res.color.timerStart)
     val textColor: LiveData<Int> = _textColor
@@ -51,29 +52,29 @@ abstract class DebateTimer(val res: AppResources, private val config: TimerConfi
     }
     
     fun skipForward() {
-        val newSeconds = countUpSeconds + 10
-        countUpSeconds = newSeconds
+        val newSeconds = this.countUpTotalSeconds + 10
+        this.countUpTotalSeconds = newSeconds
         updateTime(false)
     }
     
     fun skipBackward(): Boolean {
-        val newSeconds = countUpSeconds - 10
+        val newSeconds = this.countUpTotalSeconds - 10
         if (newSeconds < 0) {
             return false
         }
-        countUpSeconds = newSeconds
+        this.countUpTotalSeconds = newSeconds
         updateTime(false)
-        
+    
         return true
     }
     
-    private fun newTimerInstance() = object : Timer(100) {
-        override fun onTick() {
-            deciseconds++
-            if (deciseconds == 10) {
-                deciseconds = 0
-                onSecondInternal()
-            }
+    private fun newTimerInstance() = object : CountDownTimer(10000000L, 1000) {
+        override fun onTick(millisUntilFinished: Long) {
+            onSecondInternal()
+        }
+        
+        override fun onFinish() {
+        
         }
     }
     
@@ -83,40 +84,36 @@ abstract class DebateTimer(val res: AppResources, private val config: TimerConfi
 //            _ended.value = true
 //            return
 //        }
-        countUpSeconds++
-        
+        this.countUpTotalSeconds += 1
+        countUpTotalSecondsLD.value = countUpTotalSeconds
+        Log.d("timer", (SystemClock.elapsedRealtime() % 1000).toString())
         updateTime()
     }
     
     private fun updateTime(ringBell: Boolean = true) {
-        val absVal = countDownSeconds.absoluteValue
-        
-        _minutesCountDown.value = absVal / 60
-        _secondsCountDown.value = absVal % 60
-        
-        _minutesCountUp.value = countUpSeconds / 60
-        _secondsCountUp.value = countUpSeconds % 60
         
         if (ringBell) {
-            bellsSinceStart[countUpSeconds]?.let { onBell(it) }
-            
-            if (countDownSeconds <= 0 && countDownSeconds % 15 == 0) {
+            if (countUpTotalSeconds in config.bellsCountingUp) {
+                onBell(DebateBell.Once)
+            }
+    
+            if (countDownTotalSeconds <= 0 && countDownTotalSeconds % 15 == 0) {
                 onBell(DebateBell.Twice)
             }
         }
     
         _textColor.value = when {
-            countUpSeconds < 60 -> res.color.timerStart
-            countDownSeconds < 0 -> res.color.timerOvertime
-            countDownSeconds <= 60 -> res.color.timerEnd
+            countUpTotalSeconds < 60 -> res.color.timerStart
+            countDownTotalSeconds < 0 -> res.color.timerOvertime
+            countDownTotalSeconds <= 60 -> res.color.timerEnd
             else -> res.color.timerNormal
         }
     
-        _overTime.value = countDownSeconds < 0
+        _overTime.value = countDownTotalSeconds < 0
     
         if (_overTime.value == true) {
-            val minutes = minutesCountUp.value!! - config.minutes
-            val seconds = secondsCountUp.value!! - config.seconds
+            val minutes = minutesCountUp - config.minutes
+            val seconds = secondsCountUp - config.seconds
             _overTimeText.value = "%d:%02d".format(minutes, seconds)
         }
     }
@@ -128,6 +125,9 @@ abstract class DebateTimer(val res: AppResources, private val config: TimerConfi
     
     private fun resume() {
         timer.start()
+        lastStartTimeMillis = System.currentTimeMillis()
+    
+        countUpTotalSeconds -= 1
         if (!started.value!!) {
             _started.value = true
         }
