@@ -104,18 +104,16 @@ abstract class DebateTimer(val res: AppResources, private val config: TimerConfi
                 onBell(DebateBell.Twice)
             }
         }
-        
+    
         _textColor.value = when {
             countUpSeconds < 60 -> res.color.timerStart
             countDownSeconds < 0 -> res.color.timerOvertime
             countDownSeconds <= 60 -> res.color.timerEnd
             else -> res.color.timerNormal
         }
-        
-        if (countDownSeconds < 0) {
-            _overTime.value = true
-        }
-        
+    
+        _overTime.value = countDownSeconds < 0
+    
         if (_overTime.value == true) {
             val minutes = minutesCountUp.value!! - config.minutes
             val seconds = secondsCountUp.value!! - config.seconds

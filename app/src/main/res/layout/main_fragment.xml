@@ -22,7 +22,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:animateLayoutChanges="true"
-        android:padding="16dp"
         >
         
         <com.google.android.material.button.MaterialButton
@@ -121,6 +120,8 @@
             app:layout_constraintBottom_toTopOf="@id/tv_timer_colon"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
+            tools:text="Overtime by 1:00"
+            tools:visibility="visible"
             />
         
         
@@ -131,34 +132,56 @@
             android:orientation="vertical"
             app:layout_constraintGuide_percent="0.43"
             />
-        
+    
         <TextView
             android:id="@+id/tv_timer_colon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:includeFontPadding="false"
             android:text=":"
             android:textColor="@{ viewModel.timerTextColor }"
             android:textSize="@dimen/timer_text_size"
             android:visibility='@{ viewModel.isClockVisible ? View.VISIBLE : View.GONE }'
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintRight_toLeftOf="@id/guideline"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintLeft_toRightOf="@id/tv_timer_m"
+            app:layout_constraintRight_toLeftOf="@id/tv_timer_s"
             app:layout_constraintTop_toTopOf="parent"
             tools:ignore="HardcodedText,SpUsage"
             />
-        
+    
+        <TextView
+            android:id="@+id/tv_negative"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:text="-"
+            android:textColor="@{ viewModel.timerTextColor }"
+            android:textSize="@dimen/timer_text_size"
+            android:visibility='@{ viewModel.isNegativeSignVisible ? View.VISIBLE : View.GONE }'
+            app:layout_constraintBaseline_toBaselineOf="@id/tv_timer_colon"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@id/tv_timer_m"
+            tools:ignore="HardcodedText,SpUsage"
+            tools:visibility="gone"
+            />
+    
         <TextView
             android:id="@+id/tv_timer_m"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
+            android:includeFontPadding="false"
             android:text='@{ String.valueOf(viewModel.minutes) }'
             android:textAlignment="center"
             android:textColor='@{ viewModel.timerTextColor }'
             android:textSize="@dimen/timer_text_size"
             android:visibility='@{ viewModel.isClockVisible ? View.VISIBLE : View.GONE }'
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBaseline_toBaselineOf="@id/tv_timer_colon"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintLeft_toRightOf="@id/tv_negative"
             app:layout_constraintRight_toLeftOf="@id/tv_timer_colon"
-            app:layout_constraintTop_toTopOf="parent"
             tools:ignore="HardcodedText,SpUsage"
             tools:text="0"
             />
@@ -168,14 +191,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
+            android:includeFontPadding="false"
             android:text='@{ @string/padded_seconds(viewModel.seconds) }'
             android:textAlignment="center"
             android:textColor="@{ viewModel.timerTextColor }"
             android:textSize="@dimen/timer_text_size"
             android:visibility='@{ viewModel.isClockVisible ? View.VISIBLE : View.GONE }'
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBaseline_toBaselineOf="@id/tv_timer_colon"
+            app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintLeft_toRightOf="@id/tv_timer_colon"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
             tools:ignore="HardcodedText,SpUsage"
             tools:text="00"
             />
@@ -192,12 +217,14 @@
             app:layout_constraintRight_toRightOf="parent"
             tools:visibility="gone"
             />
-        
+    
         <com.google.android.material.button.MaterialButton
             android:id="@+id/bt_start_pause"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
             android:onClick="@{ () -> viewModel.onTimerControlButtonClick() }"
             android:text="@{ viewModel.timerControlButtonText }"
             android:textSize="42sp"

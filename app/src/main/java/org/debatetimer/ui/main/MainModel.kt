@@ -51,6 +51,7 @@ sealed class MainModelState(protected val context: Context, protected val change
     abstract val overTimeText: LiveData<String>
     abstract val bellsText: LiveData<String>
     abstract val timerControlButtonText: LiveData<String>
+    abstract val isNegativeSignVisible: LiveData<Boolean>
     
     abstract fun onTimerConfigSelect(tag: String)
     abstract fun onSkipBackward(): Boolean
@@ -78,6 +79,7 @@ class Initial(context: Context, changeState: ChangeStateFunction) : MainModelSta
     override val overTimeText: LiveData<String> = MutableLiveData("")
     override val bellsText: LiveData<String> = enableBells.map { if (it) res.string.on else res.string.off }
     override val timerControlButtonText: LiveData<String> = MutableLiveData("")
+    override val isNegativeSignVisible: LiveData<Boolean> = falseLiveData
     
     override fun onTimerConfigSelect(tag: String) {
         prefs.selectedTimerConfigTag.putValue(tag)
@@ -161,6 +163,15 @@ class TimerActive(context: Context, changeState: ChangeStateFunction, timerConfi
         }
     }
     
+    override val isNegativeSignVisible: LiveData<Boolean> = MediatorLiveData<Boolean>().apply {
+        fun updateValue() {
+            value = countMode.value!! == CountMode.CountDown && timer.overTime.value!!
+        }
+        
+        addSource(countMode) { updateValue() }
+        addSource(timer.overTime) { updateValue() }
+    }
+    
     override fun onTimerConfigSelect(tag: String) {
         prefs.selectedTimerConfigTag.putValue(tag)
         timer.setRunning(false)
@@ -203,6 +214,7 @@ class MainModel(app: Application) : AndroidViewModel(app) {
     val selectedTimerConfigTag: LiveData<String> = state.map { it.selectedTimerConfigTag }
     val enableBells: LiveData<Boolean> = state.switchMap { it.enableBells }
     val countMode: LiveData<CountMode> = state.switchMap { it.countMode }
+    val isNegativeSignVisible: LiveData<Boolean> = state.switchMap { it.isNegativeSignVisible }
     
     fun onTimeConfigSelect(tag: String) = state.value!!.onTimerConfigSelect(tag)
     
