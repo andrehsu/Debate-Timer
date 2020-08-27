@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import org.debatetimer.AppResources
 import kotlin.math.absoluteValue
 
-abstract class DebateTimer(val res: AppResources, val config: TimerConfiguration) {
+abstract class DebateTimer(val res: AppResources, private val config: TimerConfiguration) {
     
     private var countUpSeconds: Int = 0
     private val countDownSeconds: Int

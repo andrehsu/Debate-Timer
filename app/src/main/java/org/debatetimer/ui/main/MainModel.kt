@@ -1,6 +1,7 @@
 package org.debatetimer.ui.main
 
 import android.app.Application
+import android.content.Context
 import androidx.lifecycle.*
 import org.debatetimer.AppPreferences
 import org.debatetimer.AppResources
@@ -9,9 +10,6 @@ import org.debatetimer.other
 import org.debatetimer.timer.BellRinger
 import org.debatetimer.timer.DebateBell
 import org.debatetimer.timer.DebateTimer
-import org.debatetimer.timer.TimerConfiguration
-import org.debatetimer.ui.main.Initial.Companion.newInitialState
-import org.debatetimer.ui.main.TimerActive.Companion.newTimerActiveState
 
 private val trueLiveData: LiveData<Boolean>
     get() = MutableLiveData(true)
@@ -20,10 +18,24 @@ private val falseLiveData: LiveData<Boolean>
 private val zeroLiveData: LiveData<Int>
     get() = MutableLiveData(0)
 
+typealias ChangeStateFunction = (MainModelState) -> Unit
 
-sealed class MainModelState(model: MainModel) {
-    protected val prefs = AppPreferences.getInstance(model.getApplication())
-    protected val res = AppResources.getInstance(model.getApplication())
+
+sealed class MainModelState(protected val context: Context, protected val changeState: ChangeStateFunction) {
+    companion object {
+        fun initialize(context: Context, changeState: ChangeStateFunction): MainModelState {
+            val state = Initial(context, changeState)
+            val tag = state.prefs.selectedTimerConfigTag.value
+            if (tag in state.prefs.timerConfigs.value) {
+                return TimerActive(context, changeState, tag)
+            }
+            
+            return state
+        }
+    }
+    
+    protected val prefs = AppPreferences.getInstance(context)
+    protected val res = AppResources.getInstance(context)
     
     val countMode: LiveData<CountMode> = prefs.countMode
     val enableBells: LiveData<Boolean> = prefs.enableBells
@@ -40,7 +52,7 @@ sealed class MainModelState(model: MainModel) {
     abstract val bellsText: LiveData<String>
     abstract val timerControlButtonText: LiveData<String>
     
-    abstract fun onTimerConfigSelect()
+    abstract fun onTimerConfigSelect(tag: String)
     abstract fun onSkipBackward(): Boolean
     abstract fun onSkipForward()
     abstract fun onTimerControlButtonClick()
@@ -54,13 +66,7 @@ sealed class MainModelState(model: MainModel) {
     }
 }
 
-class Initial private constructor(model: MainModel) : MainModelState(model) {
-    companion object {
-        fun MainModel.newInitialState(): Initial {
-            return Initial(this)
-        }
-    }
-    
+class Initial(context: Context, changeState: ChangeStateFunction) : MainModelState(context, changeState) {
     override val isClockVisible: Boolean = false
     override val isOvertimeTextVisible: LiveData<Boolean> = falseLiveData
     override val selectedTimerConfigTag: String = "none"
@@ -73,7 +79,11 @@ class Initial private constructor(model: MainModel) : MainModelState(model) {
     override val bellsText: LiveData<String> = enableBells.map { if (it) res.string.on else res.string.off }
     override val timerControlButtonText: LiveData<String> = MutableLiveData("")
     
-    override fun onTimerConfigSelect() {}
+    override fun onTimerConfigSelect(tag: String) {
+        prefs.selectedTimerConfigTag.putValue(tag)
+        changeState(TimerActive(context, changeState, tag))
+    }
+    
     override fun onSkipBackward(): Boolean {
         throw IllegalStateException("Button should not be visible")
     }
@@ -87,17 +97,11 @@ class Initial private constructor(model: MainModel) : MainModelState(model) {
     }
 }
 
-class TimerActive private constructor(model: MainModel, val timerConfig: TimerConfiguration) : MainModelState(model) {
-    companion object {
-        fun MainModel.newTimerActiveState(timerConfig: TimerConfiguration): TimerActive {
-            return TimerActive(this, timerConfig)
-        }
-    }
+class TimerActive(context: Context, changeState: ChangeStateFunction, timerConfigTag: String) : MainModelState(context, changeState) {
+    private val bellRinger = BellRinger(context)
     
-    private val bellRinger = BellRinger(model.getApplication())
-    
-    
-    val timer: DebateTimer = object : DebateTimer(res, timerConfig) {
+    val timerConfig = prefs.timerConfigs.value.getValue(timerConfigTag)
+    private val timer: DebateTimer = object : DebateTimer(res, timerConfig) {
         override fun onBell(debateBell: DebateBell) {
             if (prefs.enableBells.value)
                 bellRinger.playBell(debateBell)
@@ -105,7 +109,7 @@ class TimerActive private constructor(model: MainModel, val timerConfig: TimerCo
     }
     override val isClockVisible: Boolean = true
     override val isOvertimeTextVisible: LiveData<Boolean> = timer.overTime
-    override val selectedTimerConfigTag: String = timer.config.tag
+    override val selectedTimerConfigTag: String = timerConfig.tag
     override val keepScreenOn: LiveData<Boolean> = timer.running
     override val timerOptionsClickable: LiveData<Boolean> = timer.running.map { !it }
     override val minutes: LiveData<Int> = MediatorLiveData<Int>().apply {
@@ -136,8 +140,8 @@ class TimerActive private constructor(model: MainModel, val timerConfig: TimerCo
                     
                     if (enableBells.value!!) {
                         when (countMode.value!!) {
-                            CountMode.CountUp -> timer.config.countUpBellsText
-                            CountMode.CountDown -> timer.config.countDownBellsText
+                            CountMode.CountUp -> timerConfig.countUpBellsText
+                            CountMode.CountDown -> timerConfig.countDownBellsText
                         }
                     } else {
                         res.string.off
@@ -147,7 +151,7 @@ class TimerActive private constructor(model: MainModel, val timerConfig: TimerCo
         
         addSource(countMode) { updateValue() }
         addSource(enableBells) { updateValue() }
-        
+    
     }
     override val timerControlButtonText: LiveData<String> = timer.started.switchMap { started ->
         if (!started) {
@@ -157,8 +161,11 @@ class TimerActive private constructor(model: MainModel, val timerConfig: TimerCo
         }
     }
     
-    override fun onTimerConfigSelect() {
+    override fun onTimerConfigSelect(tag: String) {
+        prefs.selectedTimerConfigTag.putValue(tag)
         timer.setRunning(false)
+        
+        changeState(TimerActive(context, changeState, tag))
     }
     
     override fun onSkipBackward(): Boolean {
@@ -175,10 +182,13 @@ class TimerActive private constructor(model: MainModel, val timerConfig: TimerCo
 }
 
 class MainModel(app: Application) : AndroidViewModel(app) {
-    private val state: MutableLiveData<MainModelState> = MutableLiveData(newInitialState())
+    private fun changeState(state: MainModelState) {
+        this.state.value = state
+    }
     
-    val prefs = AppPreferences.getInstance(getApplication())
-    val res = AppResources.getInstance(getApplication())
+    private val state: MutableLiveData<MainModelState> = MutableLiveData(MainModelState.initialize(getApplication(), this::changeState))
+    
+    private val prefs = AppPreferences.getInstance(getApplication())
     
     val keepScreenOn: LiveData<Boolean> = state.switchMap { it.keepScreenOn }
     val bellsText: LiveData<String> = state.switchMap { it.bellsText }
@@ -194,26 +204,7 @@ class MainModel(app: Application) : AndroidViewModel(app) {
     val enableBells: LiveData<Boolean> = state.switchMap { it.enableBells }
     val countMode: LiveData<CountMode> = state.switchMap { it.countMode }
     
-    
-    init {
-        val tag = prefs.selectedTimerConfigTag.value
-        if (tag != res.string.prefSelectedTimerConfigDefault) {
-            state.value = newTimerActiveState(prefs.timerConfigs.value.getValue(tag))
-        }
-        
-        state.observeForever { state ->
-            prefs.selectedTimerConfigTag.putValue(if (state is TimerActive) state.timer.config.tag else res.string.prefSelectedTimerConfigDefault)
-        }
-    }
-    
-    
-    fun onTimeButtonSelect(tag: String) {
-        state.value!!.onTimerConfigSelect()
-        
-        
-        this.state.value = newTimerActiveState(prefs.timerConfigs.value.getValue(tag))
-    }
-    
+    fun onTimeConfigSelect(tag: String) = state.value!!.onTimerConfigSelect(tag)
     
     fun onTimerControlButtonClick() = state.value!!.onTimerControlButtonClick()
     
