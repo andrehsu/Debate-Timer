@@ -30,8 +30,8 @@ class MainModel(app: Application) : AndroidViewModel(app) {
     val bellRinger = BellRinger(getApplication())
     
     val timerConfigs: Map<String, TimerConfiguration> = parseTimerMapsStr(timersStr.value!!)
-    private val _state: MutableLiveData<State> = MutableLiveData(Initial)
-    val state: LiveData<State> = _state
+    private val _state: MutableLiveData<MainModelState> = MutableLiveData(Initial)
+    val state: LiveData<MainModelState> = _state
     
     val clockVisible: LiveData<Boolean> = state.switchMap { state ->
         when (state) {
