@@ -1,16 +1,12 @@
 package org.debatetimer.timer
 
 import android.os.CountDownTimer
-import android.os.SystemClock
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import org.debatetimer.AppResources
 import kotlin.math.absoluteValue
 
 abstract class DebateTimer(val res: AppResources, private val config: TimerConfiguration) {
-    private var lastStartTimeMillis: Long = 0
-    
     private var countUpTotalSeconds: Int = 0
     private val countDownTotalSeconds: Int
         get() = config.totalSeconds - countUpTotalSeconds
@@ -85,18 +81,17 @@ abstract class DebateTimer(val res: AppResources, private val config: TimerConfi
 //            return
 //        }
         this.countUpTotalSeconds += 1
-        countUpTotalSecondsLD.value = countUpTotalSeconds
-        Log.d("timer", (SystemClock.elapsedRealtime() % 1000).toString())
         updateTime()
     }
     
     private fun updateTime(ringBell: Boolean = true) {
-        
+        countUpTotalSecondsLD.value = countUpTotalSeconds
+    
         if (ringBell) {
             if (countUpTotalSeconds in config.bellsCountingUp) {
                 onBell(DebateBell.Once)
             }
-    
+        
             if (countDownTotalSeconds <= 0 && countDownTotalSeconds % 15 == 0) {
                 onBell(DebateBell.Twice)
             }
@@ -125,7 +120,6 @@ abstract class DebateTimer(val res: AppResources, private val config: TimerConfi
     
     private fun resume() {
         timer.start()
-        lastStartTimeMillis = System.currentTimeMillis()
     
         countUpTotalSeconds -= 1
         if (!started.value!!) {
