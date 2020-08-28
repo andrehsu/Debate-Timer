@@ -59,11 +59,11 @@ sealed class MainModelState(protected val context: Context, protected val change
     abstract fun onTimerControlButtonClick()
     
     fun onToggleCountMode() {
-        prefs.countMode.putValue(prefs.countMode.value.other())
+        prefs.countMode.value = prefs.countMode.value.other()
     }
     
     fun onToggleDebateBells() {
-        prefs.enableBells.putValue(!prefs.enableBells.value)
+        prefs.enableBells.value = !prefs.enableBells.value
     }
 }
 
@@ -82,7 +82,7 @@ class Initial(context: Context, changeState: ChangeStateFunction) : MainModelSta
     override val isNegativeSignVisible: LiveData<Boolean> = falseLiveData
     
     override fun onTimerConfigSelect(tag: String) {
-        prefs.selectedTimerConfigTag.putValue(tag)
+        prefs.selectedTimerConfigTag.value = tag
         changeState(TimerActive(context, changeState, tag))
     }
     
@@ -180,7 +180,7 @@ class TimerActive(context: Context, changeState: ChangeStateFunction, timerConfi
     
     
     override fun onTimerConfigSelect(tag: String) {
-        prefs.selectedTimerConfigTag.putValue(tag)
+        prefs.selectedTimerConfigTag.value = tag
         timer.setRunning(false)
         
         changeState(TimerActive(context, changeState, tag))
@@ -205,8 +205,6 @@ class MainModel(app: Application) : AndroidViewModel(app) {
     }
     
     private val state: MutableLiveData<MainModelState> = MutableLiveData(MainModelState.initialize(getApplication(), this::changeState))
-    
-    private val prefs = AppPreferences.getInstance(getApplication())
     
     val keepScreenOn: LiveData<Boolean> = state.switchMap { it.keepScreenOn }
     val bellsText: LiveData<String> = state.switchMap { it.bellsText }

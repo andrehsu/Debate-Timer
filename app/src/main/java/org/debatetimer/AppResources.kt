@@ -28,8 +28,6 @@ class StringResources(context: Context) {
     
     val overtimeBy: String = context.getString(R.string.overtime)
     val backwardSkipError: String = context.getString(R.string.backward_skip_error)
-    
-    val prefSelectedTimerConfigDefault: String = context.getString(R.string.pref_selected_timer_config_default)
 }
 
 class AppResources private constructor(context: Context) {
