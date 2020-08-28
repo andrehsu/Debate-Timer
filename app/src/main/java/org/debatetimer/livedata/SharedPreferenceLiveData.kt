@@ -1,7 +1,7 @@
 package org.debatetimer.livedata
 
 import android.content.SharedPreferences
-import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 
 fun SharedPreferences.getBooleanLiveData(key: String, default: Boolean): SharedPreferenceLiveData<Boolean> {
     return SharedPreferenceLiveData(
@@ -35,17 +35,14 @@ class SharedPreferenceLiveData<T>(
         private val key: String,
         private val get: SharedPreferences.() -> T,
         private val put: SharedPreferences.Editor.(value: T) -> Unit
-) : LiveData<T>(), SharedPreferences.OnSharedPreferenceChangeListener {
+) : MutableLiveData<T>(sp.get()), SharedPreferences.OnSharedPreferenceChangeListener {
     init {
-        super.setValue(sp.get())
-        super.setValue(sp.get())
         sp.registerOnSharedPreferenceChangeListener(this)
     }
     
-    
     override fun onSharedPreferenceChanged(sp: SharedPreferences, key: String) {
         if (key == this.key) {
-            super.setValue(get(sp))
+            super.setValue(sp.get())
         }
     }
     
@@ -53,7 +50,7 @@ class SharedPreferenceLiveData<T>(
         return super.getValue()!!
     }
     
-    public override fun setValue(value: T) {
+    override fun setValue(value: T) {
         val editor = sp.edit()
         editor.put(value)
         editor.apply()
