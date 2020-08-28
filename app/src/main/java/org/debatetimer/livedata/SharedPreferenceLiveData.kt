@@ -7,7 +7,6 @@ fun SharedPreferences.getBooleanLiveData(key: String, default: Boolean): SharedP
     return SharedPreferenceLiveData(
             this,
             key,
-            default,
             { getBoolean(key, default) },
             { putBoolean(key, it) }
     )
@@ -17,7 +16,6 @@ fun SharedPreferences.getStringLiveData(key: String, default: String): SharedPre
     return SharedPreferenceLiveData(
             this,
             key,
-            default,
             { getString(key, default)!! },
             { putString(key, it) }
     )
@@ -27,7 +25,6 @@ fun <T> SharedPreferences.getObjectLiveData(key: String, defaultObjectAsString: 
     return SharedPreferenceLiveData(
             this,
             key,
-            objectFromString(defaultObjectAsString),
             { objectFromString(getString(key, defaultObjectAsString)!!) },
             { putString(key, objectToString(it)) }
     )
@@ -36,7 +33,6 @@ fun <T> SharedPreferences.getObjectLiveData(key: String, defaultObjectAsString: 
 class SharedPreferenceLiveData<T>(
         private val sp: SharedPreferences,
         private val key: String,
-        private val default: T,
         private val get: SharedPreferences.() -> T,
         private val put: SharedPreferences.Editor.(value: T) -> Unit
 ) : LiveData<T>(), SharedPreferences.OnSharedPreferenceChangeListener {
