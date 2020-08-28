@@ -66,22 +66,13 @@ abstract class DebateTimer(val res: AppResources, private val config: TimerConfi
     
     private fun newTimerInstance() = object : CountDownTimer(10000000L, 1000) {
         override fun onTick(millisUntilFinished: Long) {
-            onSecondInternal()
+            countUpTotalSeconds += 1
+            updateTime()
         }
         
         override fun onFinish() {
         
         }
-    }
-    
-    private fun onSecondInternal() {
-//        if (countDownSeconds <= -60) {
-//            pause()
-//            _ended.value = true
-//            return
-//        }
-        this.countUpTotalSeconds += 1
-        updateTime()
     }
     
     private fun updateTime(ringBell: Boolean = true) {
